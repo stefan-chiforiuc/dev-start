@@ -1,0 +1,12 @@
+name: {{name}}
+metadata:
+  template: dev-start@0.1.0
+
+services:
+  api:
+    project: src/{{Name}}.Api
+    language: dotnet
+    host: containerapp
+    docker:
+      path: ../../Dockerfile
+      context: ../../

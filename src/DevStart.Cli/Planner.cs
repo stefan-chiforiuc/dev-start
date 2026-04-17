@@ -41,8 +41,20 @@ public sealed class Planner
         {
             resolved.Add("gateway");
         }
+        var deployCap = DeployCapabilityName(deployTarget);
+        if (deployCap is not null && !resolved.Contains(deployCap, StringComparer.Ordinal))
+        {
+            resolved.Add(deployCap);
+        }
         Capabilities = resolved;
     }
+
+    private static string? DeployCapabilityName(string target) => target?.ToLowerInvariant() switch
+    {
+        "fly" or "flyio" or "fly.io" => "deploy-fly",
+        "aca" or "azure" or "azurecontainerapps" => "deploy-aca",
+        _ => null,
+    };
 
     public async Task RunAsync()
     {

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "deploy-aca",
+  "version": "0.1.0",
+  "description": "Azure Container Apps deploy recipe: Bicep + azd config + deploy workflow. Installed automatically when `--deploy aca` is selected.",
+  "dependsOn": ["base"],
+  "conflictsWith": ["deploy-fly"],
+  "addsServices": [],
+  "envAdditions": [
+    { "key": "AZURE_SUBSCRIPTION_ID", "example": "<GitHub secret>" },
+    { "key": "AZURE_TENANT_ID", "example": "<GitHub secret>" },
+    { "key": "AZURE_CLIENT_ID", "example": "<GitHub secret, OIDC federated>" }
+  ],
+  "postInstall": [
+    "az login",
+    "azd up  # first time only"
+  ],
+  "doctor": [
+    { "check": "file", "path": "azure.yaml" }
+  ]
+}
