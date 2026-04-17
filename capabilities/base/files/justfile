@@ -6,7 +6,7 @@ default:
 
 # Boot everything.
 up *flags:
-    docker compose --profile "*" up -d {{flags}}
+    docker compose up -d {{flags}}
     @echo "Dashboard: http://localhost:4000"
 
 down:
@@ -47,7 +47,12 @@ fmt:
 doctor:
     @dev-start doctor || echo "Install dev-start: dotnet tool install -g DevStart"
 
+# Install local dotnet global tools (dotnet-ef) if missing.
+tools-install:
+    @dotnet tool list -g | grep -q dotnet-ef || dotnet tool install -g dotnet-ef
+
 bootstrap:
+    just tools-install
     just up
     @echo "Waiting for postgres..."
     @until docker compose exec -T postgres pg_isready -U dev -d app >/dev/null 2>&1; do sleep 1; done
