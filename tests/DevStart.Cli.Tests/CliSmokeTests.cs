@@ -11,6 +11,7 @@ namespace DevStart.Tests;
 /// --help renders without throwing. Catches broken wiring at test time
 /// instead of first user invocation.
 /// </summary>
+[Collection("SandboxCwd")]
 public class CliSmokeTests
 {
     private static RootCommand BuildRoot()
