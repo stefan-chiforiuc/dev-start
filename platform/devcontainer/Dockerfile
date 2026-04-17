@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 # Pre-warmed devcontainer for dev-start-generated projects.
 
-FROM mcr.microsoft.com/devcontainers/dotnet:1-8.0-bookworm
+FROM mcr.microsoft.com/devcontainers/dotnet:9.0-bookworm
 
 # just — cross-platform task runner.
 RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh \
