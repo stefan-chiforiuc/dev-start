@@ -57,7 +57,11 @@ public sealed class Planner
             CapabilityInstaller.Install(cap, target, Tokens);
         }
 
-        if (IncludeClaude) CopyPlatformBundle("platform/claude/", Path.Combine(target, ".claude"));
+        if (IncludeClaude)
+        {
+            CopyPlatformBundle("platform/claude/", Path.Combine(target, ".claude"));
+            RenderClaudeBriefing(target);
+        }
         CopyPlatformBundle("platform/compose/", target);
         CopyPlatformBundle("platform/devcontainer/", Path.Combine(target, ".devcontainer"));
 
@@ -101,6 +105,52 @@ public sealed class Planner
                 File.WriteAllBytes(dest, bytes);
             }
         }
+    }
+
+    private void RenderClaudeBriefing(string target)
+    {
+        var templatePath = Path.Combine(target, ".claude", "CLAUDE.md.template");
+        if (!File.Exists(templatePath)) return;
+
+        var content = File.ReadAllText(templatePath);
+
+        var caps = string.Join(Environment.NewLine, Capabilities.Select(c =>
+        {
+            try
+            {
+                var info = Capability.LoadEmbedded(c);
+                return $"- **{info.Name}** — {info.Description}";
+            }
+            catch
+            {
+                return $"- **{c}**";
+            }
+        }));
+
+        var adrs = string.Join(Environment.NewLine,
+        [
+            "- ADR 0001 — Record architecture decisions",
+            "- ADR 0002 — Minimal APIs (not controllers)",
+            "- ADR 0003 — EF Core + Npgsql",
+            "- ADR 0004 — Serilog + OpenTelemetry",
+            "- ADR 0005 — CQRS with MediatR + outbox",
+            "- ADR 0006 — Capabilities, not monolithic templates",
+        ]);
+
+        var extras = new List<string>();
+        if (Capabilities.Contains("queue", StringComparer.Ordinal))
+            extras.Add("- RabbitMQ: `localhost:5672` (management UI at :15672)");
+        if (Capabilities.Contains("cache", StringComparer.Ordinal))
+            extras.Add("- Redis: `localhost:6379`");
+
+        content = content
+            .Replace("{{ProjectName}}", Tokens.Name, StringComparison.Ordinal)
+            .Replace("{{CapabilitiesList}}", caps, StringComparison.Ordinal)
+            .Replace("{{AdrList}}", adrs, StringComparison.Ordinal)
+            .Replace("{{ConditionalServices}}", string.Join(Environment.NewLine, extras), StringComparison.Ordinal);
+
+        File.WriteAllText(Path.Combine(target, ".claude", "CLAUDE.md"), content);
+        File.Delete(templatePath);
     }
 
     private void WriteManifest(string target)

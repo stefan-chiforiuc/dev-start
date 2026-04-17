@@ -49,7 +49,11 @@ public class PlannerTests : IDisposable
         // Platform bundles copied.
         File.Exists(Path.Combine(root, "docker-compose.yml")).Should().BeTrue();
         File.Exists(Path.Combine(root, ".devcontainer/devcontainer.json")).Should().BeTrue();
-        File.Exists(Path.Combine(root, ".claude/CLAUDE.md.template")).Should().BeTrue();
+        File.Exists(Path.Combine(root, ".claude/CLAUDE.md")).Should().BeTrue();
+        File.Exists(Path.Combine(root, ".claude/CLAUDE.md.template")).Should().BeFalse();
+
+        var claudeMd = File.ReadAllText(Path.Combine(root, ".claude/CLAUDE.md"));
+        claudeMd.Should().Contain("MyApp").And.Contain("postgres").And.Contain("ADR");
         File.Exists(Path.Combine(root, ".claude/skills/add-endpoint.md")).Should().BeTrue();
 
         // postgres capability contributed files.

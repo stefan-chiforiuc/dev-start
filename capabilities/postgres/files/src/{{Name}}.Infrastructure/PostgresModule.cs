@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using {{Name}}.Application.Persistence;
 using {{Name}}.Infrastructure.Persistence;
 using {{Name}}.Infrastructure.Persistence.Interceptors;
+using {{Name}}.Infrastructure.Persistence.Seeding;
 
 namespace {{Name}}.Infrastructure;
 
@@ -26,6 +27,7 @@ internal static class PostgresModule
         });
 
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+        services.AddHostedService<OrderSeeder>();
 
         services.AddHealthChecks()
             .AddNpgSql(
