@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  build-test:
+    uses: stefan-chiforiuc/dev-start/.github/workflows/dotnet-ci.yml@main
+    with:
+      solution: {{Name}}.sln
+      openapi-spec: src/{{Name}}.Api/openapi.json
+    secrets: inherit

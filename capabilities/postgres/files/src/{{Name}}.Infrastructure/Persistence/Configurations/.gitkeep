@@ -1,0 +1,2 @@
+Per-aggregate IEntityTypeConfiguration<T> classes live here.
+One file per aggregate.

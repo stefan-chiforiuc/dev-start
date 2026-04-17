@@ -1,0 +1,34 @@
+{
+  "injectors": [
+    {
+      "file": "src/{{Name}}.Api/{{Name}}.Api.csproj",
+      "anchor": "</Project>",
+      "placement": "before",
+      "fragment": "api.csproj.fragment"
+    },
+    {
+      "file": "src/{{Name}}.Api/DependencyInjection.cs",
+      "marker": "// devstart:api-services",
+      "placement": "after",
+      "fragment": "api-services.cs.fragment"
+    },
+    {
+      "file": "src/{{Name}}.Api/DependencyInjection.cs",
+      "marker": "// devstart:api-endpoints",
+      "placement": "after",
+      "fragment": "api-endpoints.cs.fragment"
+    },
+    {
+      "file": "src/{{Name}}.Api/Program.cs",
+      "marker": "// devstart:program-before-middleware",
+      "placement": "after",
+      "fragment": "program-middleware.cs.fragment"
+    },
+    {
+      "file": "src/{{Name}}.Api/appsettings.json",
+      "anchor": "\"AllowedHosts\": \"*\"",
+      "placement": "before",
+      "fragment": "appsettings-auth.json.fragment"
+    }
+  ]
+}

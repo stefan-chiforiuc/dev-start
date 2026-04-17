@@ -1,0 +1,16 @@
+{
+  "injectors": [
+    {
+      "file": "src/{{Name}}.Api/{{Name}}.Api.csproj",
+      "anchor": "</Project>",
+      "placement": "before",
+      "fragment": "api.csproj.fragment"
+    },
+    {
+      "file": "src/{{Name}}.Api/DependencyInjection.cs",
+      "marker": "// devstart:api-services",
+      "placement": "after",
+      "fragment": "api-services.cs.fragment"
+    }
+  ]
+}

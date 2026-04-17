@@ -1,75 +1,55 @@
-# dev-start justfile — copied into generated projects.
-# Cross-platform task runner; Windows-friendly.
-
 set shell := ["bash", "-cu"]
 set dotenv-load
 
 default:
     @just --list
 
-# Boot everything (postgres, keycloak, seq, jaeger, mailhog, minio, dashboard).
+# Boot everything.
 up *flags:
     docker compose --profile "*" up -d {{flags}}
     @echo "Dashboard: http://localhost:4000"
 
-# Stop everything.
 down:
     docker compose down
 
-# Stop everything and delete volumes. Destructive.
 nuke:
     docker compose down -v
 
-# Tail logs from every service.
 logs *services:
     docker compose logs -f {{services}}
 
-# Open a psql shell on the dev database.
 psql:
     docker compose exec postgres psql -U dev -d app
 
-# Reset the dev database (drop, recreate, migrate, seed).
 db-reset:
     docker compose exec postgres psql -U dev -d postgres -c "drop database if exists app;"
     docker compose exec postgres psql -U dev -d postgres -c "create database app;"
     just db-migrate
 
-# Apply EF migrations.
 db-migrate:
     dotnet ef database update --project src/*.Infrastructure --startup-project src/*.Api
 
-# Add an EF migration.
 db-migrate-add name:
-    dotnet ef migrations add {{name}} --project src/*.Infrastructure --startup-project src/*.Api
+    dotnet ef migrations add {{ name }} --project src/*.Infrastructure --startup-project src/*.Api
 
-# Build the solution.
 build:
-    dotnet build --configuration Release
+    dotnet build --configuration Debug
 
-# Run tests.
 test *filter:
-    dotnet test --configuration Release {{filter}}
+    dotnet test --configuration Debug {{filter}}
 
-# Format + lint.
 lint:
     dotnet format --verify-no-changes
 
-# Fix formatting.
 fmt:
     dotnet format
 
-# Install git hooks (pre-commit: gitleaks, format, markdownlint).
-install-hooks:
-    @./scripts/install-hooks.sh
-
-# Run the dev-start doctor (generated projects only).
 doctor:
     @dev-start doctor || echo "Install dev-start: dotnet tool install -g DevStart"
 
-# Bootstrap: boot stack, migrate, seed, run tests. Idempotent.
 bootstrap:
     just up
     @echo "Waiting for postgres..."
     @until docker compose exec -T postgres pg_isready -U dev -d app >/dev/null 2>&1; do sleep 1; done
-    just db-migrate
+    -just db-migrate
     just test

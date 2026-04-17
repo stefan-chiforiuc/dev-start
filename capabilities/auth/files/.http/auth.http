@@ -1,0 +1,16 @@
+@authority = http://localhost:8080/realms/devstart
+@client_id = devstart-api
+@client_secret = dev-only-not-for-production
+@username = dev
+@password = dev
+
+### Fetch a token from Keycloak (dev realm)
+# @name token
+POST {{authority}}/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&client_id={{client_id}}&client_secret={{client_secret}}&username={{username}}&password={{password}}
+
+### Who am I?
+GET http://localhost:5000/me
+Authorization: Bearer {{token.response.body.access_token}}

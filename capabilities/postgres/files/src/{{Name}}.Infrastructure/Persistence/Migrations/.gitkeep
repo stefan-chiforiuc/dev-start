@@ -1,0 +1,2 @@
+EF migrations live here. Generate new ones with:
+    just db-migrate-add <VerbNoun>

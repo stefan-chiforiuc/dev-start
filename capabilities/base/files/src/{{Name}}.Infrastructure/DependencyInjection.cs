@@ -7,7 +7,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration config)
     {
-        // Capabilities (postgres, auth, otel, queue, ...) extend this via patches.
+        // devstart:infrastructure-services
         return services;
     }
 }
