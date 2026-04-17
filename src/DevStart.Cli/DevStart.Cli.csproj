@@ -36,8 +36,7 @@
     Note: resource names use %(RecursiveDir), which on Linux produces forward
     slashes and on Windows produces backslashes. CI runs on Linux, so the
     packed tool ships resources with '/' separators. Windows contributors
-    building locally may see mismatched resource lookups; run on WSL until
-    the cross-OS normalization lands (issue #TODO).
+    building locally should use WSL2 until the cross-OS normalization lands.
   -->
   <ItemGroup>
     <EmbeddedResource Include="..\..\capabilities\**\*"

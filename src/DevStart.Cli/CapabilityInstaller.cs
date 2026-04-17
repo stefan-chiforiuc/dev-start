@@ -35,15 +35,30 @@ public static class CapabilityInstaller
             var dest = Path.Combine(targetRoot, tokens.Apply(rel));
             Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
 
+            byte[] content;
             if (IsText(rel))
             {
                 var text = System.Text.Encoding.UTF8.GetString(bytes);
-                File.WriteAllText(dest, tokens.Apply(text));
+                content = System.Text.Encoding.UTF8.GetBytes(tokens.Apply(text));
             }
             else
             {
-                File.WriteAllBytes(dest, bytes);
+                content = bytes;
             }
+
+            if (File.Exists(dest))
+            {
+                var existing = File.ReadAllBytes(dest);
+                if (existing.AsSpan().SequenceEqual(content))
+                {
+                    continue; // already identical — no-op, preserves mtime
+                }
+                AnsiConsole.MarkupLine(
+                    $"  [yellow]skip[/] {rel.EscapeMarkup()} — already exists and differs; remove it first to re-install");
+                continue;
+            }
+
+            File.WriteAllBytes(dest, content);
         }
     }
 
