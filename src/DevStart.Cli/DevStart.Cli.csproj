@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>DevStart</RootNamespace>
+    <AssemblyName>dev-start</AssemblyName>
+
+    <!-- Pack as a .NET global tool. -->
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>dev-start</ToolCommandName>
+    <PackageId>DevStart</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>dev-start contributors</Authors>
+    <Description>Opinionated scaffolder + day-to-day companion for .NET services. See https://github.com/stefan-chiforiuc/dev-start.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/stefan-chiforiuc/dev-start</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    <PackageReference Include="Spectre.Console" Version="0.49.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Capabilities are embedded so the tool is self-contained. -->
+    <EmbeddedResource Include="..\..\capabilities\**\*.*">
+      <Link>capabilities\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <LogicalName>capabilities/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\platform\compose\**\*.*">
+      <Link>platform\compose\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <LogicalName>platform/compose/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\platform\claude\**\*.*">
+      <Link>platform\claude\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <LogicalName>platform/claude/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\platform\devcontainer\**\*.*">
+      <Link>platform\devcontainer\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <LogicalName>platform/devcontainer/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

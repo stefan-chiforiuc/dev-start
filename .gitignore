@@ -1,0 +1,48 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+*.nupkg
+*.snupkg
+artifacts/
+
+# Rider / Fleet / Visual Studio
+.idea/
+.fleet/
+
+# VS Code (keep shared tasks/launch/extensions)
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/settings.shared.json
+
+# Node (for SDK capability + docs tooling)
+node_modules/
+*.log
+npm-debug.log*
+yarn-error.log
+
+# Python (for helper scripts)
+__pycache__/
+*.pyc
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local env
+.env
+.env.local
+*.pem
+*.key
+
+# dev-start state (never ship local state)
+.devstart.state.json

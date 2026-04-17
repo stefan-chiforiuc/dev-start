@@ -1,0 +1,29 @@
+# Tiltfile — used for multi-service mode (hot reload + unified UI).
+# `tilt up` in a multi-service project.
+
+# Backing services via docker compose.
+docker_compose('./docker-compose.yml')
+
+# Per-service live updates are injected by the gateway/service capabilities.
+# Example (multi-service mode will add these when generated):
+#
+# docker_build(
+#     'users-api',
+#     context='./services/users',
+#     dockerfile='./services/users/Dockerfile.dev',
+#     live_update=[
+#         sync('./services/users/src', '/app/src'),
+#         run('dotnet restore', trigger=['./services/users/*.csproj']),
+#     ],
+# )
+# k8s_yaml(...)  # not used in compose mode
+
+# Group services in the Tilt UI.
+config.define_string_list("services")
+cfg = config.parse()
+if cfg.get("services"):
+    for s in cfg["services"]:
+        dc_resource(s, labels=['app'])
+
+for backing in ['postgres', 'keycloak', 'seq', 'jaeger', 'mailhog', 'minio', 'dashboard']:
+    dc_resource(backing, labels=['platform'])

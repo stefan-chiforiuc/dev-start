@@ -1,0 +1,20 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "s3",
+  "version": "0.1.0",
+  "description": "S3-compatible object storage via MinIO in dev, any S3 in prod. Signed-URL helper.",
+  "dependsOn": ["base"],
+  "conflictsWith": [],
+  "addsServices": ["minio"],
+  "envAdditions": [
+    { "key": "Storage__Endpoint", "example": "http://localhost:9000" },
+    { "key": "Storage__AccessKey", "example": "devuser" },
+    { "key": "Storage__SecretKey", "example": "devsecret" },
+    { "key": "Storage__Bucket", "example": "app" }
+  ],
+  "postInstall": ["dotnet restore"],
+  "doctor": [
+    { "check": "service", "name": "minio", "port": 9000 },
+    { "check": "env", "name": "Storage__Endpoint" }
+  ]
+}

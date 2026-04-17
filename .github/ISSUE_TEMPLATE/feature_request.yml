@@ -1,0 +1,50 @@
+name: Feature request
+description: Propose a change or new capability.
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Before filing:** if you want to change an existing default, the
+        disagreement likely belongs in an ADR. See the
+        [`docs/adr/`](../docs/adr/) folder and this project's opinions-first
+        stance in `CONTRIBUTING.md`.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What pain are you trying to remove?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - New capability module
+        - Change to existing capability
+        - CLI command / UX
+        - Docs / ADR
+        - Infrastructure / CI
+      multiple: false
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-filing checks
+      options:
+        - label: I have read `CONTRIBUTING.md` and the relevant ADR.
+          required: true
+        - label: I'm not asking for a new language/framework stack before v1.2.
+          required: true

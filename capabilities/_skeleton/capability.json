@@ -1,0 +1,12 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "TODO",
+  "version": "0.1.0",
+  "description": "TODO: one sentence describing what this capability wires.",
+  "dependsOn": ["base"],
+  "conflictsWith": [],
+  "addsServices": [],
+  "envAdditions": [],
+  "postInstall": [],
+  "doctor": []
+}

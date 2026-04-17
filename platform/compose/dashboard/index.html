@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>dev-start dashboard</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font: 15px/1.5 system-ui, sans-serif; margin: 0; padding: 2rem; max-width: 720px; }
+    h1 { font-size: 1.3rem; margin: 0 0 .5rem; }
+    p.note { color: #888; margin-top: 0; }
+    ul { list-style: none; padding: 0; }
+    li { display: flex; justify-content: space-between; padding: .5rem .75rem; border: 1px solid #8883; border-radius: .5rem; margin-bottom: .5rem; }
+    a { text-decoration: none; color: inherit; font-weight: 500; }
+    a:hover { text-decoration: underline; }
+    code { font: 13px ui-monospace, monospace; color: #888; }
+  </style>
+</head>
+<body>
+  <h1>dev-start — local services</h1>
+  <p class="note">Edit <code>platform/compose/dashboard/index.html</code> to change this page.</p>
+  <ul>
+    <li><a href="http://localhost:5000/docs">API (Scalar docs)</a><code>:5000/docs</code></li>
+    <li><a href="http://localhost:5341">Seq — structured logs</a><code>:5341</code></li>
+    <li><a href="http://localhost:16686">Jaeger — traces</a><code>:16686</code></li>
+    <li><a href="http://localhost:8025">Mailhog — dev email</a><code>:8025</code></li>
+    <li><a href="http://localhost:8080">Keycloak — admin</a><code>:8080</code></li>
+    <li><a href="http://localhost:9001">MinIO — S3 console</a><code>:9001</code></li>
+    <li><a href="http://localhost:15672">RabbitMQ (queue)</a><code>:15672</code></li>
+  </ul>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "_comment": "MCP server that exposes Seq logs from the local compose stack. Read-only.",
+  "mcpServers": {
+    "seq-logs": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@dev-start/mcp-seq",
+        "--endpoint",
+        "http://localhost:5341",
+        "--read-only"
+      ]
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK generated from the API's OpenAPI spec. Published as an npm workspace package or to your registry.",
+  "dependsOn": ["base"],
+  "conflictsWith": [],
+  "addsServices": [],
+  "envAdditions": [],
+  "postInstall": [
+    "npm --prefix sdk install",
+    "npm --prefix sdk run generate"
+  ],
+  "doctor": [
+    { "check": "file", "path": "src/{{Name}}.Api/openapi.json" },
+    { "check": "file", "path": "sdk/package.json" }
+  ]
+}

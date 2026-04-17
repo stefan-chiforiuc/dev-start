@@ -1,0 +1,111 @@
+# Reusable CI workflow for generated projects.
+# Called from a thin wrapper in <project>/.github/workflows/ci.yml:
+#
+#   jobs:
+#     build:
+#       uses: stefan-chiforiuc/dev-start/.github/workflows/dotnet-ci.yml@v1
+#       with:
+#         solution: MySolution.sln
+#       secrets: inherit
+
+name: dev-start / .NET CI
+
+on:
+  workflow_call:
+    inputs:
+      solution:
+        required: true
+        type: string
+      dotnet-version:
+        required: false
+        type: string
+        default: "8.0.x"
+      run-perf-smoke:
+        required: false
+        type: boolean
+        default: true
+      openapi-spec:
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: dev
+          POSTGRES_PASSWORD: dev
+          POSTGRES_DB: app
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U dev -d app"
+          --health-interval 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
+
+      - name: Restore
+        run: dotnet restore ${{ inputs.solution }}
+
+      - name: Format check
+        run: dotnet format ${{ inputs.solution }} --verify-no-changes
+
+      - name: Build
+        run: dotnet build ${{ inputs.solution }} --no-restore -c Release
+
+      - name: Test (unit + architecture + integration)
+        env:
+          ConnectionStrings__Default: Host=localhost;Database=app;Username=dev;Password=dev
+        run: dotnet test ${{ inputs.solution }} --no-build -c Release --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: "**/TestResults/*.trx"
+
+  api-diff:
+    runs-on: ubuntu-latest
+    if: inputs.openapi-spec != ''
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oasdiff/oasdiff-action/diff@main
+        with:
+          base: "git@main:${{ inputs.openapi-spec }}"
+          revision: ${{ inputs.openapi-spec }}
+          fail-on-diff: breaking
+
+  perf-smoke:
+    runs-on: ubuntu-latest
+    if: ${{ inputs.run-perf-smoke }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+      - name: Smoke
+        run: k6 run tests/perf/smoke.js
+
+  codeql:
+    uses: ./.github/workflows/codeql.yml
+
+  trivy:
+    uses: ./.github/workflows/trivy.yml

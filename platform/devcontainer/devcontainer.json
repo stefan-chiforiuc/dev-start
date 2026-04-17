@@ -1,0 +1,53 @@
+{
+  "name": "dev-start",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:1-8.0-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": true
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    },
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true
+    },
+    "ghcr.io/guiyomh/features/just:0": {},
+    "ghcr.io/jsburckhardt/devcontainer-features/mise:1": {}
+  },
+  "forwardPorts": [5000, 4000, 5341, 16686, 8080, 8025, 9001, 15672],
+  "portsAttributes": {
+    "5000": { "label": "API", "onAutoForward": "notify" },
+    "4000": { "label": "Dashboard", "onAutoForward": "openBrowser" },
+    "5341": { "label": "Seq (logs)" },
+    "16686": { "label": "Jaeger (traces)" },
+    "8080": { "label": "Keycloak" },
+    "8025": { "label": "Mailhog" },
+    "9001": { "label": "MinIO console" },
+    "15672": { "label": "RabbitMQ" }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csdevkit",
+        "ms-dotnettools.csharp",
+        "editorconfig.editorconfig",
+        "humao.rest-client",
+        "github.vscode-pull-request-github",
+        "nefrob.vscode-just-syntax",
+        "DavidAnson.vscode-markdownlint",
+        "streetsidesoftware.code-spell-checker"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.rulers": [100],
+        "files.exclude": {
+          "**/bin": true,
+          "**/obj": true
+        }
+      }
+    }
+  },
+  "postCreateCommand": "dotnet tool restore && just bootstrap",
+  "remoteUser": "vscode"
+}

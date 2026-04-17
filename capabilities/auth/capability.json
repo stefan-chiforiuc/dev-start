@@ -1,0 +1,18 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "auth",
+  "version": "0.1.0",
+  "description": "OIDC authentication. Uses Keycloak in dev (compose realm preloaded); any OIDC IdP in prod.",
+  "dependsOn": ["base"],
+  "conflictsWith": [],
+  "addsServices": ["keycloak"],
+  "envAdditions": [
+    { "key": "Auth__Authority", "example": "http://localhost:8080/realms/devstart" },
+    { "key": "Auth__Audience", "example": "devstart-api" }
+  ],
+  "postInstall": ["dotnet restore"],
+  "doctor": [
+    { "check": "service", "name": "keycloak", "port": 8080 },
+    { "check": "env", "name": "Auth__Authority" }
+  ]
+}

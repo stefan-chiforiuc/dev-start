@@ -1,0 +1,27 @@
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      otel:
+        patterns: ["OpenTelemetry*"]
+      ef:
+        patterns: ["Microsoft.EntityFrameworkCore*", "Npgsql*"]
+      test:
+        patterns: ["xunit*", "Testcontainers*", "FluentAssertions*"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: docker
+    directory: /platform/devcontainer
+    schedule:
+      interval: weekly

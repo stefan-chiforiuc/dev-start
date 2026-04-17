@@ -1,0 +1,19 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "otel",
+  "version": "0.1.0",
+  "description": "OpenTelemetry traces, metrics, and logs via OTLP. Serilog bridge. Jaeger + Seq in dev.",
+  "dependsOn": ["base"],
+  "conflictsWith": [],
+  "addsServices": ["jaeger", "seq"],
+  "envAdditions": [
+    { "key": "OTEL_EXPORTER_OTLP_ENDPOINT", "example": "http://localhost:4317" },
+    { "key": "OTEL_SERVICE_NAME", "example": "{{name}}" }
+  ],
+  "postInstall": ["dotnet restore"],
+  "doctor": [
+    { "check": "service", "name": "jaeger", "port": 16686 },
+    { "check": "service", "name": "seq", "port": 5341 },
+    { "check": "env", "name": "OTEL_EXPORTER_OTLP_ENDPOINT" }
+  ]
+}

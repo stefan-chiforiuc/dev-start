@@ -1,0 +1,111 @@
+# Backing services used by dev-start-generated projects.
+# Start with `just up` from the target project root.
+
+name: devstart
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: app
+    ports: ["5432:5432"]
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev -d app"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    restart: unless-stopped
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: "true"
+    ports: ["8080:8080"]
+    volumes:
+      - ./keycloak/realm-dev.json:/opt/keycloak/data/import/realm-dev.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /health/ready HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q '200 OK' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  seq:
+    image: datalust/seq:2024
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+    ports: ["5341:80"]
+    volumes:
+      - seq-data:/data
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.55
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"   # UI
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    restart: unless-stopped
+    ports:
+      - "1025:1025"     # SMTP
+      - "8025:8025"     # UI
+
+  minio:
+    image: minio/minio:RELEASE.2024-10-13T13-34-11Z
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: devuser
+      MINIO_ROOT_PASSWORD: devsecret
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  # Enabled by `dev-start add queue`.
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    profiles: ["queue"]
+
+  # Enabled by `dev-start add cache`.
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports: ["6379:6379"]
+    profiles: ["cache"]
+
+  # Simple static page listing every running service.
+  dashboard:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports: ["4000:80"]
+    volumes:
+      - ./dashboard:/usr/share/nginx/html:ro
+
+volumes:
+  postgres-data:
+  seq-data:
+  minio-data:

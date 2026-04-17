@@ -1,0 +1,19 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "mail",
+  "version": "0.1.0",
+  "description": "SMTP email abstraction. Mailhog in dev, any SMTP provider in prod.",
+  "dependsOn": ["base"],
+  "conflictsWith": [],
+  "addsServices": ["mailhog"],
+  "envAdditions": [
+    { "key": "Smtp__Host", "example": "localhost" },
+    { "key": "Smtp__Port", "example": "1025" },
+    { "key": "Smtp__From", "example": "no-reply@example.com" }
+  ],
+  "postInstall": ["dotnet restore"],
+  "doctor": [
+    { "check": "service", "name": "mailhog", "port": 1025 },
+    { "check": "env", "name": "Smtp__Host" }
+  ]
+}

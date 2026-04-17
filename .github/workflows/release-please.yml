@@ -1,0 +1,61 @@
+name: release-please
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+  attestations: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          release-type: simple
+          package-name: dev-start
+
+      - name: Checkout
+        if: ${{ steps.release.outputs.release_created }}
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        if: ${{ steps.release.outputs.release_created }}
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Pack global tool
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          dotnet pack src/DevStart.Cli/DevStart.Cli.csproj \
+            --configuration Release \
+            -p:Version=${{ steps.release.outputs.version }} \
+            -o artifacts
+
+      - name: Generate SBOM
+        if: ${{ steps.release.outputs.release_created }}
+        uses: CycloneDX/gh-dotnet-generate-sbom@v2
+        with:
+          path: ./DevStart.sln
+          github-bearer-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Attest build provenance
+        if: ${{ steps.release.outputs.release_created }}
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: "artifacts/*.nupkg"
+
+      - name: Publish to NuGet
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          dotnet nuget push artifacts/*.nupkg \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate

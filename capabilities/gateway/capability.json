@@ -1,0 +1,14 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "gateway",
+  "version": "0.1.0",
+  "description": "YARP reverse proxy for multi-service mode. Forwards auth, per-route policies, request IDs.",
+  "dependsOn": ["base", "auth"],
+  "conflictsWith": [],
+  "addsServices": [],
+  "envAdditions": [],
+  "postInstall": ["dotnet restore"],
+  "doctor": [
+    { "check": "file", "path": "gateway/appsettings.json" }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "postgres",
+  "version": "0.1.0",
+  "description": "EF Core + Npgsql, migrations, outbox-ready DbContext, Testcontainers integration-test base, seed data.",
+  "dependsOn": ["base"],
+  "conflictsWith": [],
+  "addsServices": ["postgres"],
+  "envAdditions": [
+    { "key": "ConnectionStrings__Default", "example": "Host=localhost;Database=app;Username=dev;Password=dev" }
+  ],
+  "postInstall": [
+    "dotnet restore",
+    "dotnet ef database update --project src/*.Infrastructure --startup-project src/*.Api"
+  ],
+  "doctor": [
+    { "check": "service", "name": "postgres", "port": 5432 },
+    { "check": "env", "name": "ConnectionStrings__Default" },
+    { "check": "dotnet-tool", "name": "dotnet-ef" }
+  ]
+}

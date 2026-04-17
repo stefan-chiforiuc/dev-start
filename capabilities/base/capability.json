@@ -1,0 +1,21 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "base",
+  "version": "0.1.0",
+  "description": "Minimum viable .NET 8 API: layered projects, minimal API host, Problem+JSON errors, health checks, OpenAPI, justfile, Dockerfile.",
+  "dependsOn": [],
+  "conflictsWith": [],
+  "addsServices": [],
+  "envAdditions": [
+    { "key": "ASPNETCORE_URLS", "example": "http://+:5000" },
+    { "key": "ASPNETCORE_ENVIRONMENT", "example": "Development" }
+  ],
+  "postInstall": [
+    "dotnet restore",
+    "dotnet build -c Debug"
+  ],
+  "doctor": [
+    { "check": "dotnet-version", "min": "8.0" },
+    { "check": "file", "path": "src/{{Name}}.Api/Program.cs" }
+  ]
+}

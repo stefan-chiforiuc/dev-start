@@ -1,0 +1,19 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "queue",
+  "version": "0.1.0",
+  "description": "RabbitMQ + MassTransit + EF outbox. Exactly-once delivery semantics via outbox + dedupe.",
+  "dependsOn": ["postgres"],
+  "conflictsWith": [],
+  "addsServices": ["rabbitmq"],
+  "envAdditions": [
+    { "key": "RabbitMq__Host", "example": "localhost" },
+    { "key": "RabbitMq__Username", "example": "guest" },
+    { "key": "RabbitMq__Password", "example": "guest" }
+  ],
+  "postInstall": ["dotnet restore"],
+  "doctor": [
+    { "check": "service", "name": "rabbitmq", "port": 5672 },
+    { "check": "env", "name": "RabbitMq__Host" }
+  ]
+}

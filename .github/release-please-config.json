@@ -1,0 +1,22 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "package-name": "dev-start",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": false,
+      "include-v-in-tag": true
+    }
+  },
+  "changelog-sections": [
+    { "type": "feat", "section": "Features" },
+    { "type": "fix", "section": "Bug Fixes" },
+    { "type": "perf", "section": "Performance" },
+    { "type": "deps", "section": "Dependencies" },
+    { "type": "docs", "section": "Documentation", "hidden": false },
+    { "type": "refactor", "section": "Code Refactoring", "hidden": true },
+    { "type": "test", "section": "Tests", "hidden": true },
+    { "type": "ci", "section": "CI/CD", "hidden": true },
+    { "type": "chore", "section": "Chores", "hidden": true }
+  ]
+}

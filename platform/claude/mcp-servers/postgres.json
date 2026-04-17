@@ -1,0 +1,13 @@
+{
+  "_comment": "MCP server that exposes the live dev Postgres schema to Claude. Installed into the generated project's .claude/ folder. Connection string points at the compose stack.",
+  "mcpServers": {
+    "postgres": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-postgres",
+        "postgres://dev:dev@localhost:5432/app"
+      ],
+      "env": {}
+    }
+  }
+}
