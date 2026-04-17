@@ -14,6 +14,11 @@
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
     <PackageReference Include="FluentAssertions" Version="6.12.2" />
+    <!--
+      Roslyn parser lets us assert that every generated .cs file is
+      at least syntactically valid, without spinning up a full `dotnet build`.
+    -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" />
   </ItemGroup>
 
 </Project>
