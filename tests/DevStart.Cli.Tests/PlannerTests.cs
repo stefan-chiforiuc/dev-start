@@ -3,6 +3,7 @@ using Xunit;
 
 namespace DevStart.Tests;
 
+[Collection("SandboxCwd")]
 public class PlannerTests : IDisposable
 {
     private readonly string _sandbox;

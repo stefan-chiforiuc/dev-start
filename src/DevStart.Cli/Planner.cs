@@ -7,8 +7,8 @@ namespace DevStart;
 /// <summary>
 /// Executes a <c>dev-start new</c> scaffold: resolves capability
 /// dependencies, copies embedded files (with token substitution) into the
-/// target directory, applies injectors, writes the manifest, and runs
-/// post-install hooks.
+/// target directory, applies injectors, copies the shared platform
+/// bundles, writes the manifest, and runs <c>git init</c>.
 /// </summary>
 public sealed class Planner
 {
@@ -18,15 +18,6 @@ public sealed class Planner
     public IReadOnlyList<string> Capabilities { get; }
     public string DeployTarget { get; }
     public bool IncludeClaude { get; }
-
-    /// <summary>File contents known to be textual — get token substitution.</summary>
-    private static readonly HashSet<string> TextExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".cs", ".csproj", ".json", ".jsonc", ".yaml", ".yml", ".md", ".http",
-        ".props", ".targets", ".sln", ".editorconfig", ".gitignore", ".gitkeep",
-        ".sh", ".ps1", ".cmd", ".dockerfile", ".Dockerfile", ".env", ".example",
-        ".xml", ".html", ".css", ".js", ".ts", ""
-    };
 
     public Planner(
         string name,
@@ -44,10 +35,7 @@ public sealed class Planner
         var resolved = new List<string> { "base" };
         foreach (var c in capabilities)
         {
-            if (!resolved.Contains(c, StringComparer.Ordinal))
-            {
-                resolved.Add(c);
-            }
+            if (!resolved.Contains(c, StringComparer.Ordinal)) resolved.Add(c);
         }
         if (multiService && !resolved.Contains("gateway", StringComparer.Ordinal))
         {
@@ -66,8 +54,7 @@ public sealed class Planner
         foreach (var cap in Capabilities)
         {
             AnsiConsole.MarkupLine($"[cyan]· capability[/] {cap}");
-            CopyCapabilityFiles(cap, target);
-            ApplyInjectors(cap, target);
+            CapabilityInstaller.Install(cap, target, Tokens);
         }
 
         if (IncludeClaude) CopyPlatformBundle("platform/claude/", Path.Combine(target, ".claude"));
@@ -83,84 +70,6 @@ public sealed class Planner
         AnsiConsole.MarkupLine("  just bootstrap");
 
         await Task.CompletedTask;
-    }
-
-    private void CopyCapabilityFiles(string capability, string targetRoot)
-    {
-        foreach (var rel in Capability.FilesFor(capability))
-        {
-            var bytes = Capability.ReadFile(capability, rel)
-                ?? throw new InvalidOperationException($"Missing resource for {capability}/{rel}");
-
-            var resolvedRel = Tokens.Apply(rel);
-            var dest = Path.Combine(targetRoot, resolvedRel);
-            Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
-
-            if (IsText(rel))
-            {
-                var text = System.Text.Encoding.UTF8.GetString(bytes);
-                File.WriteAllText(dest, Tokens.Apply(text));
-            }
-            else
-            {
-                File.WriteAllBytes(dest, bytes);
-            }
-        }
-    }
-
-    private void ApplyInjectors(string capability, string targetRoot)
-    {
-        var injectors = Capability.LoadInjectors(capability);
-        foreach (var inj in injectors.Injectors)
-        {
-            var file = Path.Combine(targetRoot, Tokens.Apply(inj.File));
-            if (!File.Exists(file))
-            {
-                AnsiConsole.MarkupLine($"  [yellow]skip[/] injector — target missing: [grey]{inj.File}[/]");
-                continue;
-            }
-
-            var fragment = Capability.ReadFragment(capability, inj.Fragment)
-                ?? throw new InvalidOperationException($"Missing fragment {capability}/{inj.Fragment}");
-            fragment = Tokens.Apply(fragment);
-
-            var content = File.ReadAllText(file);
-
-            if (inj.Marker is { Length: > 0 })
-            {
-                if (!content.Contains(inj.Marker, StringComparison.Ordinal))
-                {
-                    throw new InvalidOperationException($"Marker '{inj.Marker}' not found in {inj.File}");
-                }
-                var rep = inj.Placement == "before"
-                    ? fragment + inj.Marker
-                    : inj.Placement == "replace"
-                        ? fragment
-                        : inj.Marker + Environment.NewLine + fragment.TrimEnd() + Environment.NewLine;
-                // "after" is the default; trim trailing and re-add a single newline so repeated applies stay stable.
-                content = content.Replace(inj.Marker, rep, StringComparison.Ordinal);
-            }
-            else if (inj.Anchor is { Length: > 0 })
-            {
-                if (!content.Contains(inj.Anchor, StringComparison.Ordinal))
-                {
-                    throw new InvalidOperationException($"Anchor '{inj.Anchor}' not found in {inj.File}");
-                }
-                var rep = inj.Placement switch
-                {
-                    "before" => fragment + inj.Anchor,
-                    "replace" => fragment,
-                    _ => inj.Anchor + Environment.NewLine + fragment
-                };
-                content = content.Replace(inj.Anchor, rep, StringComparison.Ordinal);
-            }
-            else
-            {
-                throw new InvalidOperationException($"Injector for {inj.File} has neither marker nor anchor.");
-            }
-
-            File.WriteAllText(file, content);
-        }
     }
 
     private void CopyPlatformBundle(string resourcePrefix, string destRoot)
@@ -240,10 +149,14 @@ public sealed class Planner
     private static bool IsText(string path)
     {
         var ext = Path.GetExtension(path);
-        if (TextExtensions.Contains(ext)) return true;
-        var name = Path.GetFileName(path);
-        return name.StartsWith('.') || string.Equals(name, "Dockerfile", StringComparison.Ordinal)
-            || string.Equals(name, "justfile", StringComparison.Ordinal)
-            || string.Equals(name, "Tiltfile", StringComparison.Ordinal);
+        return ext switch
+        {
+            ".cs" or ".csproj" or ".json" or ".jsonc" or ".yaml" or ".yml" or ".md"
+            or ".http" or ".props" or ".targets" or ".sln" or ".editorconfig"
+            or ".gitignore" or ".gitkeep" or ".sh" or ".ps1" or ".cmd"
+            or ".dockerfile" or ".env" or ".example" or ".xml" or ".html"
+            or ".css" or ".js" or ".ts" or "" => true,
+            _ => Path.GetFileName(path) is "Dockerfile" or "justfile" or "Tiltfile",
+        };
     }
 }
