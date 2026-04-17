@@ -8,5 +8,6 @@ root.AddCommand(AddCommand.Build());
 root.AddCommand(DoctorCommand.Build());
 root.AddCommand(UpgradeCommand.Build());
 root.AddCommand(ListCommand.Build());
+root.AddCommand(CapabilityCommand.Build());
 
 return await root.InvokeAsync(args);

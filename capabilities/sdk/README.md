@@ -19,7 +19,7 @@ autocompletion and no hand-written types.
 - **Spec is the source of truth.** Don't hand-edit the SDK.
 - **`openapi-typescript` over NSwag** for TS output — smaller, faster,
   zero runtime.
-- **API-diff gate in CI** (see `platform/ci/dotnet-ci.yml`) — breaking
+- **API-diff gate in CI** (see `.github/workflows/dotnet-ci.yml`) — breaking
   changes fail the PR.
 
 ## Escape hatches

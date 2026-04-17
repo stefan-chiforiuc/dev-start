@@ -1,0 +1,69 @@
+name: Capability proposal
+description: Propose a new capability module for the scaffolder.
+labels: ["capability", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Proposing a new capability. Please read
+        [`capabilities/README.md`](../capabilities/README.md) and
+        [ADR 0006](../docs/adr/0006-capabilities-not-templates.md) first.
+
+        The bar for a new capability is: a working .NET team would reach for
+        it on a real project this year, and the opinions within it are
+        stable enough to commit to.
+  - type: input
+    id: name
+    attributes:
+      label: Capability name (kebab-case)
+      placeholder: "e.g. eventing, graphql, grpc"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem this removes from day-0 toil
+    validations:
+      required: true
+  - type: textarea
+    id: wires
+    attributes:
+      label: What would it wire?
+      description: Files, packages, DI registrations, compose services, CI steps.
+    validations:
+      required: true
+  - type: textarea
+    id: opinions
+    attributes:
+      label: Opinions (and their alternatives)
+      description: What does this commit to, and what's the escape hatch?
+    validations:
+      required: true
+  - type: dropdown
+    id: depends
+    attributes:
+      label: Depends on
+      multiple: true
+      options:
+        - base
+        - postgres
+        - auth
+        - otel
+        - queue
+        - cache
+        - s3
+        - mail
+        - flags
+        - sdk
+        - gateway
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-filing checks
+      options:
+        - label: "I've read `capabilities/README.md` and ADR 0006."
+          required: true
+        - label: "I've checked existing capabilities for overlap."
+          required: true
+        - label: "I'm willing to draft the initial PR (or find someone who will)."
+          required: false

@@ -85,7 +85,7 @@ Dependencies flow inward only: `Api → Application → Domain`;
 
 ## CI / CD
 
-- **GitHub Actions**, reusable workflow from `platform/ci`.
+- **GitHub Actions**, reusable workflow at `.github/workflows/dotnet-ci.yml`.
 - **Conventional commits** + **release-please** for tags and changelogs.
 - **CodeQL**, **Trivy**, **gitleaks** gates on every PR.
 - **API diff** gate on the checked-in OpenAPI spec.
