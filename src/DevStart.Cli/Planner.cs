@@ -147,6 +147,7 @@ public sealed class Planner
             "- ADR 0004 — Serilog + OpenTelemetry",
             "- ADR 0005 — CQRS with MediatR + outbox",
             "- ADR 0006 — Capabilities, not monolithic templates",
+            "- ADR 0007 — Injectors, not per-capability template forks",
         ]);
 
         var extras = new List<string>();
