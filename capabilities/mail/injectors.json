@@ -1,0 +1,16 @@
+{
+  "injectors": [
+    {
+      "file": "src/{{Name}}.Infrastructure/DependencyInjection.cs",
+      "marker": "// devstart:infrastructure-services",
+      "placement": "after",
+      "fragment": "infrastructure-services.cs.fragment"
+    },
+    {
+      "file": "src/{{Name}}.Api/appsettings.json",
+      "anchor": "\"AllowedHosts\": \"*\"",
+      "placement": "before",
+      "fragment": "appsettings-smtp.json.fragment"
+    }
+  ]
+}

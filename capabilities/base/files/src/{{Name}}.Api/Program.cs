@@ -30,8 +30,8 @@ app.UseProblemDetailsErrorHandling();
 app.MapOpenApi();
 app.MapScalarApiReference("/docs");
 
-app.MapHealthChecks("/healthz");
-app.MapHealthChecks("/readyz", new() { Predicate = h => h.Tags.Contains("ready") });
+app.MapHealthChecks("/healthz").AllowAnonymous();
+app.MapHealthChecks("/readyz", new() { Predicate = h => h.Tags.Contains("ready") }).AllowAnonymous();
 
 // devstart:program-endpoints
 app.MapEndpoints();

@@ -16,19 +16,7 @@
       "file": "src/{{Name}}.Api/appsettings.json",
       "anchor": "\"AllowedHosts\": \"*\"",
       "placement": "before",
-      "fragment": "appsettings-connectionstring.json.fragment"
-    },
-    {
-      "file": "tests/{{Name}}.IntegrationTests/{{Name}}.IntegrationTests.csproj",
-      "anchor": "<!-- postgres capability adds Testcontainers.PostgreSql -->",
-      "placement": "replace",
-      "fragment": "integration-tests.csproj.fragment"
-    },
-    {
-      "file": "src/{{Name}}.Api/DependencyInjection.cs",
-      "marker": "// devstart:api-endpoints",
-      "placement": "after",
-      "fragment": "api-endpoints.cs.fragment"
+      "fragment": "appsettings-storage.json.fragment"
     }
   ]
 }

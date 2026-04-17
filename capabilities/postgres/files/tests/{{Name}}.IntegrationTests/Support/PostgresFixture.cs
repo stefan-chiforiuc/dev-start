@@ -32,7 +32,15 @@ public sealed class ApiFactory(PostgresFixture postgres) : WebApplicationFactory
         {
             using var scope = services.BuildServiceProvider().CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            db.Database.Migrate();
+            if (db.Database.GetMigrations().Any())
+            {
+                db.Database.Migrate();
+            }
+            else
+            {
+                // Pre-migration bootstrap so tests don't require a migration to exist.
+                db.Database.EnsureCreated();
+            }
         });
     }
 }
