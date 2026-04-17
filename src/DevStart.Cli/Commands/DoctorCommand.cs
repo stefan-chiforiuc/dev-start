@@ -1,4 +1,5 @@
 using System.CommandLine;
+using System.Diagnostics;
 using System.Net.Sockets;
 using Spectre.Console;
 
@@ -9,7 +10,7 @@ public static class DoctorCommand
     public static Command Build()
     {
         var projectOpt = new Option<string>(["--project", "-p"], () => ".", "Path to the target project.");
-        var cmd = new Command("doctor", "Diagnose a project for drift, missing env vars, and broken services.") { projectOpt };
+        var cmd = new Command("doctor", "Diagnose a project for drift, missing env vars, broken services, and missing tools.") { projectOpt };
 
         cmd.SetHandler(async (projectPath) =>
         {
@@ -21,15 +22,27 @@ public static class DoctorCommand
             AnsiConsole.MarkupLine($"capabilities: {string.Join(", ", manifest.Capabilities)}");
             AnsiConsole.WriteLine();
 
-            var table = new Table().AddColumns("Check", "Result");
+            var table = new Table().AddColumns("Category", "Check", "Result");
 
+            // Baseline tool checks — independent of manifest.
+            table.AddRow("tool", "git", ToolVersion("git", "--version"));
+            table.AddRow("tool", "dotnet", ToolVersion("dotnet", "--version"));
+            table.AddRow("tool", "docker", ToolVersion("docker", "--version"));
+            table.AddRow("tool", "just", ToolVersion("just", "--version"));
+
+            // Known expected manifest file.
+            table.AddRow("project", ".devstart.json", File.Exists(Path.Combine(root, ".devstart.json"))
+                ? "[green]ok[/]"
+                : "[red]missing[/]");
+
+            // Per-capability doctor checks.
             foreach (var capName in manifest.Capabilities)
             {
                 var cap = Capability.LoadEmbedded(capName);
                 foreach (var check in cap.Doctor)
                 {
                     var result = await RunCheckAsync(check, root);
-                    table.AddRow($"{capName}:{check.Check} {check.Name ?? check.Path ?? ""}", result);
+                    table.AddRow(capName, $"{check.Check} {check.Name ?? check.Path ?? ""}", result);
                 }
             }
 
@@ -50,8 +63,8 @@ public static class DoctorCommand
                 "file" when check.Path is string rel => File.Exists(Path.Combine(projectRoot, rel))
                     ? "[green]ok[/]"
                     : "[red]missing[/]",
-                "dotnet-version" => "[grey]TODO[/]",
-                "dotnet-tool" => "[grey]TODO[/]",
+                "dotnet-version" => ToolVersion("dotnet", "--version"),
+                "dotnet-tool" when check.Name is string tool => CheckDotnetTool(tool),
                 _ => "[grey]unknown check[/]",
             };
         }
@@ -71,4 +84,56 @@ public static class DoctorCommand
 
     private static string CheckEnv(string key)
         => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)) ? "[green]set[/]" : "[red]missing[/]";
+
+    private static string ToolVersion(string tool, string args)
+    {
+        try
+        {
+            var psi = new ProcessStartInfo(tool, args)
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+            };
+            using var p = Process.Start(psi);
+            if (p is null) return "[red]missing[/]";
+            var output = p.StandardOutput.ReadToEnd().Trim();
+            p.WaitForExit();
+            return p.ExitCode == 0
+                ? $"[green]{Escape(output.Split('\n')[0])}[/]"
+                : "[red]error[/]";
+        }
+        catch
+        {
+            return "[red]missing[/]";
+        }
+    }
+
+    private static string CheckDotnetTool(string toolName)
+    {
+        try
+        {
+            var psi = new ProcessStartInfo("dotnet", "tool list -g")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+            };
+            using var p = Process.Start(psi);
+            if (p is null) return "[red]missing[/]";
+            var output = p.StandardOutput.ReadToEnd();
+            p.WaitForExit();
+            return output.Contains(toolName, StringComparison.OrdinalIgnoreCase)
+                ? "[green]installed[/]"
+                : "[red]not installed[/]";
+        }
+        catch
+        {
+            return "[red]missing[/]";
+        }
+    }
+
+    private static string Escape(string input) => input
+        .Replace("[", "[[", StringComparison.Ordinal)
+        .Replace("]", "]]", StringComparison.Ordinal);
 }

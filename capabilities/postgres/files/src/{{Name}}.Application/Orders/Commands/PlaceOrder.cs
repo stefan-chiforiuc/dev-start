@@ -1,9 +1,8 @@
 using FluentValidation;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using {{Name}}.Application.Orders.Contracts;
+using {{Name}}.Application.Persistence;
 using {{Name}}.Domain.Orders;
-using {{Name}}.Infrastructure.Persistence;
 
 namespace {{Name}}.Application.Orders.Commands;
 
@@ -25,7 +24,7 @@ public sealed class PlaceOrderValidator : AbstractValidator<PlaceOrder>
     }
 }
 
-internal sealed class PlaceOrderHandler(ApplicationDbContext db, TimeProvider time)
+internal sealed class PlaceOrderHandler(IAppDbContext db, TimeProvider time)
     : IRequestHandler<PlaceOrder, OrderDto>
 {
     public async Task<OrderDto> Handle(PlaceOrder request, CancellationToken ct)

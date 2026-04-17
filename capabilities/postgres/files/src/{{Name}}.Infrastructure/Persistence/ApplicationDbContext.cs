@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using {{Name}}.Application.Persistence;
 
 namespace {{Name}}.Infrastructure.Persistence;
 
 public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-    : DbContext(options)
+    : DbContext(options), IAppDbContext
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

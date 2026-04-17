@@ -2,14 +2,14 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using {{Name}}.Application.Orders.Commands;
 using {{Name}}.Application.Orders.Contracts;
+using {{Name}}.Application.Persistence;
 using {{Name}}.Domain.Orders;
-using {{Name}}.Infrastructure.Persistence;
 
 namespace {{Name}}.Application.Orders.Queries;
 
 public sealed record GetOrderById(Guid Id) : IRequest<OrderDto?>;
 
-internal sealed class GetOrderByIdHandler(ApplicationDbContext db) : IRequestHandler<GetOrderById, OrderDto?>
+internal sealed class GetOrderByIdHandler(IAppDbContext db) : IRequestHandler<GetOrderById, OrderDto?>
 {
     public async Task<OrderDto?> Handle(GetOrderById request, CancellationToken ct)
     {

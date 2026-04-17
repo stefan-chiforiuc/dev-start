@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using {{Name}}.Application.Persistence;
 using {{Name}}.Infrastructure.Persistence;
 using {{Name}}.Infrastructure.Persistence.Interceptors;
 
@@ -23,6 +24,8 @@ internal static class PostgresModule
                 .UseSnakeCaseNamingConvention()
                 .AddInterceptors(sp.GetRequiredService<DomainEventsInterceptor>());
         });
+
+        services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
         services.AddHealthChecks()
             .AddNpgSql(
