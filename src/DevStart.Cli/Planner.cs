@@ -56,7 +56,7 @@ public sealed class Planner
         _ => null,
     };
 
-    public async Task RunAsync()
+    public Task RunAsync()
     {
         var target = Path.GetFullPath(Tokens.KebabName);
         Directory.CreateDirectory(target);
@@ -85,7 +85,7 @@ public sealed class Planner
         AnsiConsole.MarkupLine($"  cd {Tokens.KebabName}");
         AnsiConsole.MarkupLine("  just bootstrap");
 
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
     private void CopyPlatformBundle(string resourcePrefix, string destRoot)
