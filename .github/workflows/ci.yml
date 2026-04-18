@@ -44,15 +44,9 @@ jobs:
           name: test-results
           path: "**/TestResults/*.trx"
 
-  # Lint/scan jobs only run on push to main and on a weekly schedule so PR
-  # churn isn't blocked by rule churn in markdownlint or false positives in
-  # gitleaks. actionlint stays on PRs — it's fast and catches workflow
-  # syntax bugs that are hard to debug any other way.
   lint-markdown:
     name: Lint markdown
-    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: DavidAnson/markdownlint-cli2-action@v16
@@ -61,7 +55,6 @@ jobs:
 
   gitleaks:
     name: Secret scan
-    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

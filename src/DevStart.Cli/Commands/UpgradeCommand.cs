@@ -41,7 +41,7 @@ public static class UpgradeCommand
                     CapabilityInstaller.ApplyInjectors(cap, staging, tokens);
                 }
 
-                AnsiConsole.Rule("diff");
+                AnsiConsole.Write(new Rule("diff"));
                 var output = DiffDirs(root, staging);
                 AnsiConsole.WriteLine(output);
 

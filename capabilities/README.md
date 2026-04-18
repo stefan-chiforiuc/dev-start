@@ -16,7 +16,7 @@ Each capability is a folder that describes:
 
 ## Anatomy
 
-```
+```text
 capabilities/<name>/
   capability.json      # metadata (see schema below)
   README.md            # human docs: what, why, opinions, escape hatches

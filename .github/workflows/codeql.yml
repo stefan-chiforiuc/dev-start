@@ -3,13 +3,10 @@ name: CodeQL
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   schedule:
     - cron: "19 3 * * 1"
-  # CodeQL uploads SARIF to GitHub Advanced Security; on repos without
-  # GHAS the job ends in "failure" even when the scan itself succeeded.
-  # We still run on every push to main + weekly schedule so findings get
-  # surfaced; keep off PRs.
-  workflow_dispatch:
 
 permissions:
   actions: read
@@ -20,10 +17,6 @@ jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
-    # CodeQL uploads SARIF to GitHub Advanced Security; on repos where GHAS
-    # isn't enabled the upload step fails. We want to still run the scan for
-    # its log output but not block the PR on it.
-    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:

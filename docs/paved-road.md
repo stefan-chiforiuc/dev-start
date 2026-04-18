@@ -10,7 +10,7 @@ One page. Everything `dev-start` commits to by default.
 
 ## Project layout (clean-ish, not dogmatic)
 
-```
+```text
 src/
   My.Api/                 # minimal API host, composition root, OpenAPI
   My.Application/         # MediatR handlers, validators, DTOs

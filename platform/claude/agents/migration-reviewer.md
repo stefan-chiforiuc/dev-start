@@ -42,13 +42,13 @@ migrations from reaching production.
 
 Return either:
 
-```
+```text
 APPROVED — <one-line reason>
 ```
 
 or
 
-```
+```text
 BLOCKED
 - <issue 1>
 - <issue 2>

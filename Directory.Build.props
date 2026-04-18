@@ -4,14 +4,8 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AnalysisLevel>latest</AnalysisLevel>
-    <!--
-      dev-start's own source is pre-v1 and iterating quickly.
-      Generated projects (capabilities/base/files/Directory.Build.props)
-      keep TreatWarningsAsErrors + EnforceCodeStyleInBuild — users should
-      start their projects strict; we relax it for the CLI itself.
-    -->
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 </Project>
-
