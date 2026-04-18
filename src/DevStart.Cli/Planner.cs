@@ -63,21 +63,10 @@ public sealed class Planner
 
         AnsiConsole.MarkupLine($"[grey]target:[/] {target}");
 
-        foreach (var cap in Capabilities)
-        {
-            AnsiConsole.MarkupLine($"[cyan]· capability[/] {cap}");
-            CapabilityInstaller.Install(cap, target, Tokens);
-        }
-
-        if (IncludeClaude)
-        {
-            CopyPlatformBundle("platform/claude/", Path.Combine(target, ".claude"));
-            RenderClaudeBriefing(target);
-        }
-        CopyPlatformBundle("platform/compose/", target);
-        CopyPlatformBundle("platform/devcontainer/", Path.Combine(target, ".devcontainer"));
+        var baselines = Render(target, verbose: true);
 
         WriteManifest(target);
+        baselines.Save(target);
         TryGitInit(target);
 
         AnsiConsole.MarkupLine("[green]Done.[/]");
@@ -88,7 +77,35 @@ public sealed class Planner
         return Task.CompletedTask;
     }
 
-    private void CopyPlatformBundle(string resourcePrefix, string destRoot)
+    /// <summary>
+    /// Render the template into <paramref name="target"/>: capability files +
+    /// injectors + platform bundles + CLAUDE.md. Callers that want manifest
+    /// + git init should use <see cref="RunAsync"/>. <c>dev-start upgrade</c>
+    /// calls this directly against a staging directory.
+    /// </summary>
+    public Baselines Render(string target, bool verbose = false)
+    {
+        Directory.CreateDirectory(target);
+        var baselines = new Baselines();
+
+        foreach (var cap in Capabilities)
+        {
+            if (verbose) AnsiConsole.MarkupLine($"[cyan]· capability[/] {cap}");
+            CapabilityInstaller.Install(cap, target, Tokens, baselines);
+        }
+
+        if (IncludeClaude)
+        {
+            CopyPlatformBundle("platform/claude/", Path.Combine(target, ".claude"), target, baselines);
+            RenderClaudeBriefing(target, baselines);
+        }
+        CopyPlatformBundle("platform/compose/", target, target, baselines);
+        CopyPlatformBundle("platform/devcontainer/", Path.Combine(target, ".devcontainer"), target, baselines);
+
+        return baselines;
+    }
+
+    private void CopyPlatformBundle(string resourcePrefix, string destRoot, string projectRoot, Baselines? baselines)
     {
         var asm = Assembly.GetExecutingAssembly();
         var resources = asm.GetManifestResourceNames()
@@ -104,22 +121,30 @@ public sealed class Planner
             stream.CopyTo(ms);
             var bytes = ms.ToArray();
 
-            var dest = Path.Combine(destRoot, Tokens.Apply(rel));
+            var appliedRel = Tokens.Apply(rel);
+            var dest = Path.Combine(destRoot, appliedRel);
             Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
 
+            byte[] content;
             if (IsText(rel))
             {
                 var text = System.Text.Encoding.UTF8.GetString(bytes);
-                File.WriteAllText(dest, Tokens.Apply(text));
+                content = System.Text.Encoding.UTF8.GetBytes(Tokens.Apply(text));
             }
             else
             {
-                File.WriteAllBytes(dest, bytes);
+                content = bytes;
             }
+            File.WriteAllBytes(dest, content);
+
+            // Record with a path relative to the project root, not destRoot —
+            // upgrade --apply needs the same key shape as CapabilityInstaller.
+            var relativeFromProject = Path.GetRelativePath(projectRoot, dest);
+            baselines?.Record(relativeFromProject, content);
         }
     }
 
-    private void RenderClaudeBriefing(string target)
+    private void RenderClaudeBriefing(string target, Baselines? baselines)
     {
         var templatePath = Path.Combine(target, ".claude", "CLAUDE.md.template");
         if (!File.Exists(templatePath)) return;
@@ -162,7 +187,12 @@ public sealed class Planner
             .Replace("{{AdrList}}", adrs, StringComparison.Ordinal)
             .Replace("{{ConditionalServices}}", string.Join(Environment.NewLine, extras), StringComparison.Ordinal);
 
-        File.WriteAllText(Path.Combine(target, ".claude", "CLAUDE.md"), content);
+        var claudeMdPath = Path.Combine(target, ".claude", "CLAUDE.md");
+        File.WriteAllText(claudeMdPath, content);
+        baselines?.Record(Path.GetRelativePath(target, claudeMdPath), content);
+        // The template itself was baseline-recorded during CopyPlatformBundle;
+        // forget it now so upgrade --apply doesn't try to reconcile a deleted file.
+        baselines?.Forget(Path.GetRelativePath(target, templatePath));
         File.Delete(templatePath);
     }
 
