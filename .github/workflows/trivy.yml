@@ -3,9 +3,12 @@ name: Trivy
 on:
   push:
     branches: [main]
-  pull_request:
   schedule:
     - cron: "23 4 * * 2"
+  # Pull-request Trivy has to be manually dispatched — the upload-sarif
+  # step needs GitHub Advanced Security, which isn't enabled for every
+  # contributor fork and produces confusing "failure" checks.
+  workflow_dispatch:
 
 permissions:
   contents: read
