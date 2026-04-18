@@ -43,7 +43,7 @@ public static class UpgradeCommand
                     includeClaude: Directory.Exists(Path.Join(root, ".claude")));
                 var newBaselines = planner.Render(staging);
 
-                var plan = BuildPlan(root, staging, oldBaselines, newBaselines);
+                var plan = Upgrader.BuildPlan(root, staging, oldBaselines);
                 PrintPlan(plan);
 
                 if (!apply)
@@ -53,7 +53,7 @@ public static class UpgradeCommand
                     return;
                 }
 
-                ApplyPlan(plan, root, staging);
+                Upgrader.ApplyPlan(plan, root, staging);
                 newBaselines.Save(root);
 
                 // Bump the manifest's templateVersion to the CLI that
@@ -73,90 +73,13 @@ public static class UpgradeCommand
             }
             finally
             {
-                try { Directory.Delete(staging, recursive: true); } catch { /* best-effort */ }
+                try { Directory.Delete(staging, recursive: true); }
+                catch (IOException) { /* best-effort cleanup */ }
+                catch (UnauthorizedAccessException) { /* best-effort cleanup */ }
             }
         }, projectOpt, applyOpt);
 
         return cmd;
-    }
-
-    private sealed record UpgradePlan(
-        List<string> Added,
-        List<string> UpdatedCleanly,
-        List<string> UnchangedOnBothSides,
-        List<string> UserEditsPreserved,
-        List<string> Conflicts,
-        List<string> RemovedFromTemplate);
-
-    private static UpgradePlan BuildPlan(
-        string root, string staging, Baselines old, Baselines fresh)
-    {
-        var added = new List<string>();
-        var updatedCleanly = new List<string>();
-        var unchanged = new List<string>();
-        var userPreserved = new List<string>();
-        var conflicts = new List<string>();
-        var removed = new List<string>();
-
-        // Walk staging — every file the new template produces.
-        foreach (var stagedAbs in Directory.EnumerateFiles(staging, "*", SearchOption.AllDirectories))
-        {
-            var rel = Normalize(Path.GetRelativePath(staging, stagedAbs));
-            var diskPath = Path.Join(root, rel);
-            var stagedBytes = File.ReadAllBytes(stagedAbs);
-            var stagedHash = Baselines.Hash(stagedBytes);
-
-            if (!File.Exists(diskPath))
-            {
-                added.Add(rel);
-                continue;
-            }
-
-            var diskBytes = File.ReadAllBytes(diskPath);
-            var diskHash = Baselines.Hash(diskBytes);
-
-            if (diskHash == stagedHash)
-            {
-                unchanged.Add(rel);
-                continue;
-            }
-
-            var baseHash = old.Get(rel);
-            if (baseHash is null)
-            {
-                // We're generating a file the project already has but we
-                // never baselined. Safest: treat as conflict.
-                conflicts.Add(rel);
-                continue;
-            }
-
-            if (diskHash == baseHash)
-            {
-                // User didn't touch this file; template moved forward.
-                updatedCleanly.Add(rel);
-            }
-            else if (stagedHash == baseHash)
-            {
-                // Template unchanged for this file; user edited it. Keep.
-                userPreserved.Add(rel);
-            }
-            else
-            {
-                // Both sides changed.
-                conflicts.Add(rel);
-            }
-        }
-
-        // Files that were in the old baseline but no longer in staging —
-        // capability removed or template trimmed. We *don't* delete them;
-        // the user might still want them. Just note.
-        foreach (var key in old.Files.Keys)
-        {
-            var stagedAbs = Path.Join(staging, key);
-            if (!File.Exists(stagedAbs)) removed.Add(key);
-        }
-
-        return new UpgradePlan(added, updatedCleanly, unchanged, userPreserved, conflicts, removed);
     }
 
     private static void PrintPlan(UpgradePlan plan)
@@ -180,25 +103,4 @@ public static class UpgradeCommand
             AnsiConsole.MarkupLine($"  {p.EscapeMarkup()}");
         }
     }
-
-    private static void ApplyPlan(UpgradePlan plan, string root, string staging)
-    {
-        foreach (var rel in plan.Added.Concat(plan.UpdatedCleanly))
-        {
-            var src = Path.Join(staging, rel);
-            var dst = Path.Join(root, rel);
-            Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
-            File.Copy(src, dst, overwrite: true);
-        }
-
-        foreach (var rel in plan.Conflicts)
-        {
-            var src = Path.Join(staging, rel);
-            var preview = Path.Join(root, rel) + ".upgrade-preview";
-            Directory.CreateDirectory(Path.GetDirectoryName(preview)!);
-            File.Copy(src, preview, overwrite: true);
-        }
-    }
-
-    private static string Normalize(string p) => p.Replace('\\', '/');
 }
