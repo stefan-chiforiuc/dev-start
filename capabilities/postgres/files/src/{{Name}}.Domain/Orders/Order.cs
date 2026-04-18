@@ -40,5 +40,3 @@ public sealed class Order : AggregateRoot
         return order;
     }
 }
-
-public sealed class DomainException(string message) : Exception(message);
