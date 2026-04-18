@@ -19,20 +19,23 @@ public static class CapabilityInstaller
         ".xml", ".html", ".css", ".js", ".ts", ".toml", ".bicep", ".tf", "",
     };
 
-    public static void Install(string capability, string targetRoot, Tokens tokens)
+    public static void Install(
+        string capability, string targetRoot, Tokens tokens, Baselines? baselines = null)
     {
-        CopyFiles(capability, targetRoot, tokens);
-        ApplyInjectors(capability, targetRoot, tokens);
+        CopyFiles(capability, targetRoot, tokens, baselines);
+        ApplyInjectors(capability, targetRoot, tokens, baselines);
     }
 
-    public static void CopyFiles(string capability, string targetRoot, Tokens tokens)
+    public static void CopyFiles(
+        string capability, string targetRoot, Tokens tokens, Baselines? baselines = null)
     {
         foreach (var rel in Capability.FilesFor(capability))
         {
             var bytes = Capability.ReadFile(capability, rel)
                 ?? throw new InvalidOperationException($"Missing resource for {capability}/{rel}");
 
-            var dest = Path.Combine(targetRoot, tokens.Apply(rel));
+            var relativeOutPath = tokens.Apply(rel);
+            var dest = Path.Join(targetRoot, relativeOutPath);
             Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
 
             byte[] content;
@@ -51,7 +54,10 @@ public static class CapabilityInstaller
                 var existing = File.ReadAllBytes(dest);
                 if (existing.AsSpan().SequenceEqual(content))
                 {
-                    continue; // already identical — no-op, preserves mtime
+                    // Already identical — record baseline anyway so upgrade
+                    // knows this file is template-tracked.
+                    baselines?.Record(relativeOutPath, content);
+                    continue;
                 }
                 AnsiConsole.MarkupLine(
                     $"  [yellow]skip[/] {rel.EscapeMarkup()} — already exists and differs; remove it first to re-install");
@@ -59,15 +65,18 @@ public static class CapabilityInstaller
             }
 
             File.WriteAllBytes(dest, content);
+            baselines?.Record(relativeOutPath, content);
         }
     }
 
-    public static void ApplyInjectors(string capability, string targetRoot, Tokens tokens)
+    public static void ApplyInjectors(
+        string capability, string targetRoot, Tokens tokens, Baselines? baselines = null)
     {
         var spec = Capability.LoadInjectors(capability);
         foreach (var inj in spec.Injectors)
         {
-            var file = Path.Combine(targetRoot, tokens.Apply(inj.File));
+            var relativeFile = tokens.Apply(inj.File);
+            var file = Path.Join(targetRoot, relativeFile);
             if (!File.Exists(file))
             {
                 AnsiConsole.MarkupLine($"  [yellow]skip[/] injector — target missing: [grey]{inj.File}[/]");
@@ -81,6 +90,10 @@ public static class CapabilityInstaller
             var content = File.ReadAllText(file);
             content = ApplyOne(content, inj, fragment);
             File.WriteAllText(file, content);
+
+            // Injectors mutate files base shipped. The new combined state
+            // is now the template baseline for this file.
+            baselines?.Record(relativeFile, content);
         }
     }
 

@@ -47,10 +47,12 @@ public static class AddCommand
             AnsiConsole.MarkupLine($"[grey]{cap.Description}[/]");
 
             var tokens = new Tokens(manifest.Name);
-            CapabilityInstaller.Install(capName, root, tokens);
+            var baselines = Baselines.Load(root);
+            CapabilityInstaller.Install(capName, root, tokens, baselines);
 
             manifest.Capabilities.Add(capName);
             manifest.Save(root);
+            baselines.Save(root);
 
             AnsiConsole.MarkupLine($"[green]Installed.[/]");
 
