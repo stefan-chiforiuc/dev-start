@@ -9,8 +9,9 @@ architecture tests, and a pre-briefed `.claude/` AI assistant already wired.
 It also stays useful after day 1 — add capabilities, diagnose drift, and
 upgrade templates through the same CLI.
 
-> Status: **pre-v1**. The repo is being built in public; nothing is stable
-> yet. See [`ROADMAP.md`](./ROADMAP.md).
+> Status: **v1.0.0**. Stable surface — `new` / `add` / `doctor` /
+> `upgrade --apply` all ship. See [`CHANGELOG.md`](./CHANGELOG.md) for the
+> v1 release notes and [`ROADMAP.md`](./ROADMAP.md) for what's next.
 
 ---
 
