@@ -16,7 +16,7 @@ public static class CapabilityInstaller
         ".cs", ".csproj", ".json", ".jsonc", ".yaml", ".yml", ".md", ".http",
         ".props", ".targets", ".sln", ".editorconfig", ".gitignore", ".gitkeep",
         ".sh", ".ps1", ".cmd", ".dockerfile", ".env", ".example", ".fragment",
-        ".xml", ".html", ".css", ".js", ".ts", "",
+        ".xml", ".html", ".css", ".js", ".ts", ".toml", ".bicep", ".tf", "",
     };
 
     public static void Install(string capability, string targetRoot, Tokens tokens)

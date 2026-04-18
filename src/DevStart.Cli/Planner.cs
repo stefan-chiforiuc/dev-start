@@ -218,7 +218,8 @@ public sealed class Planner
             or ".http" or ".props" or ".targets" or ".sln" or ".editorconfig"
             or ".gitignore" or ".gitkeep" or ".sh" or ".ps1" or ".cmd"
             or ".dockerfile" or ".env" or ".example" or ".xml" or ".html"
-            or ".css" or ".js" or ".ts" or "" => true,
+            or ".css" or ".js" or ".ts" or ".toml" or ".bicep" or ".tf"
+            or "" => true,
             _ => Path.GetFileName(path) is "Dockerfile" or "justfile" or "Tiltfile",
         };
     }
