@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Reflection;
 using Spectre.Console;
 
 namespace DevStart;
@@ -107,19 +106,10 @@ public sealed class Planner
 
     private void CopyPlatformBundle(string resourcePrefix, string destRoot, string projectRoot, Baselines? baselines)
     {
-        var asm = Assembly.GetExecutingAssembly();
-        var resources = asm.GetManifestResourceNames()
-            .Where(n => n.StartsWith(resourcePrefix, StringComparison.Ordinal));
-
-        foreach (var name in resources)
+        foreach (var rel in Capability.ResourceNamesUnder(resourcePrefix))
         {
-            var rel = name[resourcePrefix.Length..];
-            if (string.IsNullOrEmpty(rel)) continue;
-
-            using var stream = asm.GetManifestResourceStream(name)!;
-            using var ms = new MemoryStream();
-            stream.CopyTo(ms);
-            var bytes = ms.ToArray();
+            var bytes = Capability.ReadBytes(resourcePrefix + rel)
+                ?? throw new InvalidOperationException($"Missing platform resource {resourcePrefix}{rel}");
 
             var appliedRel = Tokens.Apply(rel);
             var dest = Path.Join(destRoot, appliedRel);
