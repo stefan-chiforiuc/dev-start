@@ -10,9 +10,18 @@ public static class DoctorCommand
     public static Command Build()
     {
         var projectOpt = new Option<string>(["--project", "-p"], () => ".", "Path to the target project.");
-        var cmd = new Command("doctor", "Diagnose a project for drift, missing env vars, broken services, and missing tools.") { projectOpt };
+        var fixOpt = new Option<bool>("--fix",
+            "Best-effort remediate what can be fixed safely: write missing env keys " +
+            "to .env.local using each capability's example values. Never overwrites existing " +
+            "entries and never modifies .env (which may be gitignored differently).");
 
-        cmd.SetHandler(async (projectPath) =>
+        var cmd = new Command("doctor",
+            "Diagnose a project for drift, missing env vars, broken services, and missing tools.")
+        {
+            projectOpt, fixOpt,
+        };
+
+        cmd.SetHandler(async (projectPath, fix) =>
         {
             var root = Path.GetFullPath(projectPath);
             var manifest = Manifest.Load(root);
@@ -31,11 +40,12 @@ public static class DoctorCommand
             table.AddRow("tool", "just", ToolVersion("just", "--version"));
 
             // Known expected manifest file.
-            table.AddRow("project", ".devstart.json", File.Exists(Path.Combine(root, ".devstart.json"))
+            table.AddRow("project", ".devstart.json", File.Exists(Path.Join(root, ".devstart.json"))
                 ? "[green]ok[/]"
                 : "[red]missing[/]");
 
-            // Per-capability doctor checks.
+            // Per-capability doctor checks + collect missing env keys for --fix.
+            var missingEnv = new List<Capability.EnvAddition>();
             foreach (var capName in manifest.Capabilities)
             {
                 var cap = Capability.LoadEmbedded(capName);
@@ -43,13 +53,72 @@ public static class DoctorCommand
                 {
                     var result = await RunCheckAsync(check, root);
                     table.AddRow(capName, $"{check.Check} {check.Name ?? check.Path ?? ""}", result);
+
+                    // If this was an env check that failed, see if the capability
+                    // declared a known-example for it.
+                    if (check.Check == "env" && check.Name is string envKey
+                        && string.IsNullOrEmpty(Environment.GetEnvironmentVariable(envKey)))
+                    {
+                        var hint = cap.EnvAdditions.FirstOrDefault(e =>
+                            string.Equals(e.Key, envKey, StringComparison.Ordinal));
+                        if (hint is not null) missingEnv.Add(hint);
+                    }
                 }
             }
 
             AnsiConsole.Write(table);
-        }, projectOpt);
+
+            if (fix)
+            {
+                ApplyFixes(root, missingEnv);
+            }
+            else if (missingEnv.Count > 0)
+            {
+                AnsiConsole.MarkupLine("");
+                AnsiConsole.MarkupLine(
+                    $"[grey]{missingEnv.Count} missing env key(s) can be auto-populated with[/] [cyan]dev-start doctor --fix[/].");
+            }
+        }, projectOpt, fixOpt);
 
         return cmd;
+    }
+
+    private static void ApplyFixes(string projectRoot, IReadOnlyList<Capability.EnvAddition> missing)
+    {
+        if (missing.Count == 0)
+        {
+            AnsiConsole.MarkupLine("");
+            AnsiConsole.MarkupLine("[green]Nothing to fix.[/]");
+            return;
+        }
+
+        var envFile = Path.Join(projectRoot, ".env.local");
+        var existing = File.Exists(envFile) ? File.ReadAllText(envFile) : "";
+
+        using var writer = new StreamWriter(envFile, append: true);
+        if (existing.Length > 0 && !existing.EndsWith('\n'))
+        {
+            writer.WriteLine();
+        }
+        if (!existing.Contains("# dev-start doctor --fix", StringComparison.Ordinal))
+        {
+            writer.WriteLine("# dev-start doctor --fix — placeholder values from capability examples");
+            writer.WriteLine("# Review each entry; examples point at local-dev defaults, not real secrets.");
+        }
+
+        var wrote = 0;
+        foreach (var env in missing)
+        {
+            // Skip if the user already wrote this key, even as a comment.
+            if (existing.Contains($"{env.Key}=", StringComparison.Ordinal)) continue;
+            writer.WriteLine($"{env.Key}={env.Example}");
+            wrote++;
+        }
+
+        AnsiConsole.MarkupLine("");
+        AnsiConsole.MarkupLine(
+            $"[green]doctor --fix[/] wrote [cyan]{wrote}[/] entries to [grey]{Path.GetRelativePath(projectRoot, envFile)}[/]. " +
+            "Review before running [cyan]just up[/].");
     }
 
     private static async Task<string> RunCheckAsync(Capability.DoctorCheck check, string projectRoot)
@@ -60,7 +129,7 @@ public static class DoctorCommand
             {
                 "service" when check.Port is int port => await CheckPortAsync("localhost", port),
                 "env" when check.Name is string key => CheckEnv(key),
-                "file" when check.Path is string rel => File.Exists(Path.Combine(projectRoot, rel))
+                "file" when check.Path is string rel => File.Exists(Path.Join(projectRoot, rel))
                     ? "[green]ok[/]"
                     : "[red]missing[/]",
                 "dotnet-version" => ToolVersion("dotnet", "--version"),
@@ -103,7 +172,11 @@ public static class DoctorCommand
                 ? $"[green]{Escape(output.Split('\n')[0])}[/]"
                 : "[red]error[/]";
         }
-        catch
+        catch (System.ComponentModel.Win32Exception)
+        {
+            return "[red]missing[/]";
+        }
+        catch (InvalidOperationException)
         {
             return "[red]missing[/]";
         }
@@ -127,7 +200,11 @@ public static class DoctorCommand
                 ? "[green]installed[/]"
                 : "[red]not installed[/]";
         }
-        catch
+        catch (System.ComponentModel.Win32Exception)
+        {
+            return "[red]missing[/]";
+        }
+        catch (InvalidOperationException)
         {
             return "[red]missing[/]";
         }
