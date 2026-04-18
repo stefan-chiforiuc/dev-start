@@ -15,7 +15,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4
         id: release
         with:
           release-type: simple
@@ -41,10 +41,11 @@ jobs:
 
       - name: Generate SBOM
         if: ${{ steps.release.outputs.release_created }}
-        uses: CycloneDX/gh-dotnet-generate-sbom@v2
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
         with:
-          path: ./DevStart.sln
-          github-bearer-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ./artifacts
+          format: cyclonedx-json
+          output-file: sbom.cdx.json
 
       - name: Attest build provenance
         if: ${{ steps.release.outputs.release_created }}
