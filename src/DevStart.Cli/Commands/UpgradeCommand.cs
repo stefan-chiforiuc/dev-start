@@ -55,7 +55,16 @@ public static class UpgradeCommand
 
                 ApplyPlan(plan, root, staging);
                 newBaselines.Save(root);
-                AnsiConsole.MarkupLine("[green]Applied.[/]");
+
+                // Bump the manifest's templateVersion to the CLI that
+                // just applied the refresh — the project now reflects
+                // that version's opinions.
+                var oldVersion = manifest.TemplateVersion;
+                manifest.TemplateVersion = CliVersion.Current;
+                manifest.Save(root);
+
+                AnsiConsole.MarkupLine(
+                    $"[green]Applied.[/] templateVersion: [grey]{oldVersion}[/] → [cyan]{manifest.TemplateVersion}[/]");
                 if (plan.Conflicts.Count > 0)
                 {
                     AnsiConsole.MarkupLine(

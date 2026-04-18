@@ -194,6 +194,7 @@ public sealed class Planner
             Capabilities = [.. Capabilities],
             Services = MultiService ? ["gateway", "users", "orders"] : ["api"],
             Deploy = DeployTarget,
+            TemplateVersion = CliVersion.Current,
         };
         manifest.Save(target);
     }
