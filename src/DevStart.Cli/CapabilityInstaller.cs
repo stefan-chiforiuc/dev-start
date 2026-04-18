@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Spectre.Console;
 
 namespace DevStart;
@@ -66,6 +67,50 @@ public static class CapabilityInstaller
 
             File.WriteAllBytes(dest, content);
             baselines?.Record(relativeOutPath, content);
+
+            // Auto-register new .csproj files in the solution so `dotnet build`
+            // picks them up without the user needing to run `dotnet sln add`.
+            if (dest.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase))
+            {
+                TryRegisterInSolution(targetRoot, dest);
+            }
+        }
+    }
+
+    private static void TryRegisterInSolution(string projectRoot, string csprojPath)
+    {
+        var sln = Directory.EnumerateFiles(projectRoot, "*.sln", SearchOption.TopDirectoryOnly)
+            .FirstOrDefault();
+        if (sln is null) return; // multi-service layouts may not have a root sln
+
+        try
+        {
+            var psi = new ProcessStartInfo("dotnet", $"sln \"{sln}\" add \"{csprojPath}\"")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                WorkingDirectory = projectRoot,
+            };
+            using var p = Process.Start(psi);
+            if (p is null) return;
+            p.WaitForExit(10_000);
+            // `dotnet sln add` is idempotent — it prints "Project already has a
+            // reference" and exits 0 on re-add. Non-zero means something genuinely
+            // went wrong (SDK missing, malformed sln); don't fail the install.
+            if (p.ExitCode != 0)
+            {
+                AnsiConsole.MarkupLine(
+                    $"  [yellow]warn[/] couldn't auto-register {Path.GetFileName(csprojPath)} in the solution; run [cyan]dotnet sln add[/] manually");
+            }
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            // dotnet SDK not on PATH — not a hard failure; the user can add manually.
+        }
+        catch (InvalidOperationException)
+        {
+            // Process couldn't start for another reason.
         }
     }
 
