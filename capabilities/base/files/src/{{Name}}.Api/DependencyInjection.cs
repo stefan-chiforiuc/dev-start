@@ -11,7 +11,10 @@ public static class DependencyInjection
     {
         services.AddHealthChecks();
         services.AddEndpointsApiExplorer();
-        services.AddOpenApi();
+        // Swashbuckle generates the OpenAPI document; Scalar renders a docs UI
+        // from it. Kept on Swashbuckle (not .NET 9's built-in AddOpenApi) so the
+        // target framework stays on the LTS .NET 8.
+        services.AddSwaggerGen();
         services.AddProblemDetails();
         // devstart:api-services
         return services;

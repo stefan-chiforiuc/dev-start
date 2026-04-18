@@ -1,7 +1,6 @@
 using {{Name}}.Api;
 using {{Name}}.Application;
 using {{Name}}.Infrastructure;
-using Scalar.AspNetCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,11 +26,14 @@ var app = builder.Build();
 app.UseSerilogRequestLogging();
 app.UseProblemDetailsErrorHandling();
 
-app.MapOpenApi();
-app.MapScalarApiReference("/docs");
+app.UseSwagger();                        // serves /swagger/v1/swagger.json
+app.UseSwaggerUI(ui => ui.SwaggerEndpoint("/swagger/v1/swagger.json", "API"));
+// Scalar's docs UI is optional; enable once you've pinned the API surface:
+//     app.MapScalarApiReference();
 
 app.MapHealthChecks("/healthz").AllowAnonymous();
-app.MapHealthChecks("/readyz", new() { Predicate = h => h.Tags.Contains("ready") }).AllowAnonymous();
+app.MapHealthChecks("/readyz",
+    new() { Predicate = h => h.Tags.Contains("ready", StringComparer.Ordinal) }).AllowAnonymous();
 
 // devstart:program-endpoints
 app.MapEndpoints();

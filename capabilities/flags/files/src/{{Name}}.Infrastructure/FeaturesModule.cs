@@ -12,10 +12,10 @@ internal static class FeaturesModule
     {
         // In-memory provider for dev/tests. Swap to your provider (LaunchDarkly,
         // Unleash, GrowthBook, ConfigCat) by registering a different IFeatureProvider.
-        var provider = new InMemoryProvider(new Dictionary<string, Flag>
+        var provider = new InMemoryProvider(new Dictionary<string, Flag>(StringComparer.Ordinal)
         {
             ["orders.new-flow-enabled"] = new Flag<bool>(
-                variants: new Dictionary<string, bool> { ["on"] = true, ["off"] = false },
+                variants: new Dictionary<string, bool>(StringComparer.Ordinal) { ["on"] = true, ["off"] = false },
                 defaultVariant: "off"),
         });
 

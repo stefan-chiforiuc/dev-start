@@ -16,7 +16,7 @@ internal static class TelemetryModule
         services.AddOpenTelemetry()
             .ConfigureResource(r => r
                 .AddService(serviceName: serviceName)
-                .AddAttributes(new Dictionary<string, object>
+                .AddAttributes(new Dictionary<string, object>(StringComparer.Ordinal)
                 {
                     ["deployment.environment"] = config["ASPNETCORE_ENVIRONMENT"] ?? "Development",
                 }))
