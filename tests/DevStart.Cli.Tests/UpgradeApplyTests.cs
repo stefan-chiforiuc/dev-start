@@ -57,6 +57,27 @@ public class UpgradeApplyTests : IDisposable
     }
 
     [Fact]
+    public async Task Planner_stamps_manifest_with_cli_version()
+    {
+        var planner = new Planner("demo", multiService: false,
+            capabilities: [], deployTarget: "none", includeClaude: false);
+        await planner.RunAsync();
+
+        var manifest = Manifest.Load(Path.Join(_sandbox, "demo"));
+        manifest.TemplateVersion.Should().Be(CliVersion.Current,
+            "the manifest records which CLI version scaffolded the project");
+        manifest.TemplateVersion.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public void CliVersion_is_stable_and_non_empty()
+    {
+        CliVersion.Current.Should().NotBeNullOrWhiteSpace();
+        // Should not contain SourceLink's +<sha> suffix.
+        CliVersion.Current.Should().NotContain("+");
+    }
+
+    [Fact]
     public void Hash_is_deterministic_across_invocations()
     {
         var a = Baselines.Hash("hello");
