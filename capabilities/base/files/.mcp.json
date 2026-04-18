@@ -1,5 +1,0 @@
-{
-  "mcpServers": {
-    "_docs": "Uncomment the servers you want Claude Code to attach to. Start the stack with `just up` first so the URLs below are reachable."
-  }
-}
