@@ -56,20 +56,22 @@ public class CliSmokeTests
     }
 
     [Theory]
-    [InlineData(new[] { "--help" })]
-    [InlineData(new[] { "new", "--help" })]
-    [InlineData(new[] { "add", "--help" })]
-    [InlineData(new[] { "doctor", "--help" })]
-    [InlineData(new[] { "upgrade", "--help" })]
-    [InlineData(new[] { "list", "--help" })]
-    [InlineData(new[] { "capability", "new", "--help" })]
-    public async Task Help_renders_without_throwing(string[] args)
+    [InlineData("--help")]
+    [InlineData("new --help")]
+    [InlineData("add --help")]
+    [InlineData("doctor --help")]
+    [InlineData("upgrade --help")]
+    [InlineData("list --help")]
+    [InlineData("capability new --help")]
+    public async Task Help_renders_without_throwing(string argline)
     {
+        // InlineData can't carry string[] directly (attribute-argument
+        // rules), so we pass the command line as a single string and
+        // split it here.
+        var args = argline.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var root = BuildRoot();
-        // --help makes System.CommandLine emit help and return 0 without
-        // invoking the handler; anything else is a smoke-failure.
         var exit = await root.InvokeAsync(args);
-        exit.Should().Be(0, because: $"`dev-start {string.Join(' ', args)}` must at least render help");
+        exit.Should().Be(0, because: $"`dev-start {argline}` must at least render help");
     }
 
     [Fact]
