@@ -1,3 +1,8 @@
+// DomainException lives in the parent {{Name}}.Domain namespace.
+// C# file-scoped namespaces should inherit lookup from parent, but
+// analyzers sometimes need the import to be explicit — be explicit.
+using {{Name}}.Domain;
+
 namespace {{Name}}.Domain.Orders;
 
 public sealed class Order : AggregateRoot
