@@ -1,0 +1,5 @@
+### Liveness
+GET http://localhost:5000/healthz
+
+### Readiness
+GET http://localhost:5000/readyz

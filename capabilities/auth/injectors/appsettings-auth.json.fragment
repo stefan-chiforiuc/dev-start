@@ -1,0 +1,4 @@
+  "Auth": {
+    "Authority": "http://localhost:8080/realms/devstart",
+    "Audience": "devstart-api"
+  },

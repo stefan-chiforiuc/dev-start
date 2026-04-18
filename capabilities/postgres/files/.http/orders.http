@@ -1,0 +1,14 @@
+### Place an order
+POST http://localhost:5000/v1/orders
+Content-Type: application/json
+
+{
+  "customerEmail": "dev@example.com",
+  "lines": [
+    { "sku": "SKU-001", "quantity": 2, "unitPrice": 9.99 },
+    { "sku": "SKU-002", "quantity": 1, "unitPrice": 19.50 }
+  ]
+}
+
+### Get order by id (replace the id)
+GET http://localhost:5000/v1/orders/00000000-0000-0000-0000-000000000000

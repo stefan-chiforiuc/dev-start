@@ -71,7 +71,7 @@ to do.
 
 If your project includes the `.claude/` bundle, you can ask Claude Code:
 
-```
+```text
 /add-endpoint shipments
 ```
 

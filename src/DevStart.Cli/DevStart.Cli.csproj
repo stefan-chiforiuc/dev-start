@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,22 +30,32 @@
     <PackageReference Include="Spectre.Console" Version="0.49.1" />
   </ItemGroup>
 
+  <!--
+    Embed capability modules and platform bundles so the tool is self-contained.
+
+    Note: resource names use %(RecursiveDir), which on Linux produces forward
+    slashes and on Windows produces backslashes. CI runs on Linux, so the
+    packed tool ships resources with '/' separators. Windows contributors
+    building locally should use WSL2 until the cross-OS normalization lands.
+  -->
   <ItemGroup>
-    <!-- Capabilities are embedded so the tool is self-contained. -->
-    <EmbeddedResource Include="..\..\capabilities\**\*.*">
-      <Link>capabilities\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    <EmbeddedResource Include="../../capabilities/**/*"
+                      Exclude="../../capabilities/**/bin/**;../../capabilities/**/obj/**">
       <LogicalName>capabilities/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\..\platform\compose\**\*.*">
-      <Link>platform\compose\%(RecursiveDir)%(Filename)%(Extension)</Link>
+
+    <EmbeddedResource Include="../../platform/compose/**/*"
+                      Exclude="../../platform/compose/**/bin/**;../../platform/compose/**/obj/**">
       <LogicalName>platform/compose/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\..\platform\claude\**\*.*">
-      <Link>platform\claude\%(RecursiveDir)%(Filename)%(Extension)</Link>
+
+    <EmbeddedResource Include="../../platform/claude/**/*"
+                      Exclude="../../platform/claude/**/bin/**;../../platform/claude/**/obj/**">
       <LogicalName>platform/claude/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\..\platform\devcontainer\**\*.*">
-      <Link>platform\devcontainer\%(RecursiveDir)%(Filename)%(Extension)</Link>
+
+    <EmbeddedResource Include="../../platform/devcontainer/**/*"
+                      Exclude="../../platform/devcontainer/**/bin/**;../../platform/devcontainer/**/obj/**">
       <LogicalName>platform/devcontainer/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>
   </ItemGroup>

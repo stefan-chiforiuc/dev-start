@@ -1,0 +1,3 @@
+  "Redis": {
+    "Connection": "localhost:6379"
+  },

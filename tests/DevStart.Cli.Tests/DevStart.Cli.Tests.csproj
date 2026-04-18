@@ -14,6 +14,18 @@
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
     <PackageReference Include="FluentAssertions" Version="6.12.2" />
+    <!--
+      Roslyn parser lets us assert that every generated .cs file is
+      at least syntactically valid, without spinning up a full `dotnet build`.
+    -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" />
+    <!--
+      Surfaces xUnit test failures as GitHub Actions annotations on the
+      check run. Without this, a failed test just shows "Process
+      completed with exit code 1" and the real assertion message is
+      buried in the log viewer.
+    -->
+    <PackageReference Include="GitHubActionsTestLogger" Version="2.4.1" />
   </ItemGroup>
 
 </Project>

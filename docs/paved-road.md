@@ -10,7 +10,7 @@ One page. Everything `dev-start` commits to by default.
 
 ## Project layout (clean-ish, not dogmatic)
 
-```
+```text
 src/
   My.Api/                 # minimal API host, composition root, OpenAPI
   My.Application/         # MediatR handlers, validators, DTOs
@@ -85,7 +85,7 @@ Dependencies flow inward only: `Api → Application → Domain`;
 
 ## CI / CD
 
-- **GitHub Actions**, reusable workflow from `platform/ci`.
+- **GitHub Actions**, reusable workflow at `.github/workflows/dotnet-ci.yml`.
 - **Conventional commits** + **release-please** for tags and changelogs.
 - **CodeQL**, **Trivy**, **gitleaks** gates on every PR.
 - **API diff** gate on the checked-in OpenAPI spec.

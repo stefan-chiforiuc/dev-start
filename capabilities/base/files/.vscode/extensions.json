@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "ms-dotnettools.csdevkit",
+    "ms-dotnettools.csharp",
+    "editorconfig.editorconfig",
+    "humao.rest-client",
+    "nefrob.vscode-just-syntax",
+    "DavidAnson.vscode-markdownlint"
+  ]
+}

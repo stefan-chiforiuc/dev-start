@@ -1,0 +1,40 @@
+{
+  "injectors": [
+    {
+      "file": "src/{{Name}}.Infrastructure/{{Name}}.Infrastructure.csproj",
+      "anchor": "</Project>",
+      "placement": "before",
+      "fragment": "infrastructure.csproj.fragment"
+    },
+    {
+      "file": "src/{{Name}}.Infrastructure/DependencyInjection.cs",
+      "marker": "// devstart:infrastructure-services",
+      "placement": "after",
+      "fragment": "infrastructure-services.fragment"
+    },
+    {
+      "file": "src/{{Name}}.Api/appsettings.json",
+      "anchor": "\"AllowedHosts\": \"*\"",
+      "placement": "before",
+      "fragment": "appsettings-connectionstring.json.fragment"
+    },
+    {
+      "file": "tests/{{Name}}.IntegrationTests/{{Name}}.IntegrationTests.csproj",
+      "anchor": "<!-- postgres capability adds Testcontainers.PostgreSql -->",
+      "placement": "replace",
+      "fragment": "integration-tests.csproj.fragment"
+    },
+    {
+      "file": "src/{{Name}}.Api/DependencyInjection.cs",
+      "marker": "// devstart:api-endpoints",
+      "placement": "after",
+      "fragment": "api-endpoints.fragment"
+    },
+    {
+      "file": "src/{{Name}}.Application/{{Name}}.Application.csproj",
+      "anchor": "</Project>",
+      "placement": "before",
+      "fragment": "application.csproj.fragment"
+    }
+  ]
+}

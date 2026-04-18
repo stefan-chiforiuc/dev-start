@@ -48,30 +48,66 @@ public sealed class Capability
         [JsonPropertyName("min")] public string? Min { get; set; }
     }
 
-    /// <summary>
-    /// Load a capability's metadata from the embedded resources baked into
-    /// the global tool. Capability files live under <c>capabilities/&lt;name&gt;/*</c>.
-    /// </summary>
     public static Capability LoadEmbedded(string name)
     {
-        var asm = Assembly.GetExecutingAssembly();
-        var resource = $"capabilities/{name}/capability.json";
-        using var stream = asm.GetManifestResourceStream(resource)
+        var json = ReadResource($"capabilities/{name}/capability.json")
             ?? throw new InvalidOperationException($"Unknown capability '{name}'.");
-        using var reader = new StreamReader(stream);
-        var json = reader.ReadToEnd();
         return JsonSerializer.Deserialize<Capability>(json)
             ?? throw new InvalidOperationException($"Invalid capability.json for '{name}'.");
+    }
+
+    public static InjectorFile LoadInjectors(string name)
+    {
+        var json = ReadResource($"capabilities/{name}/injectors.json");
+        return json is null
+            ? new InjectorFile()
+            : (JsonSerializer.Deserialize<InjectorFile>(json) ?? new InjectorFile());
     }
 
     public static IEnumerable<string> AvailableNames()
     {
         var asm = Assembly.GetExecutingAssembly();
         return asm.GetManifestResourceNames()
-            .Where(n => n.StartsWith("capabilities/", StringComparison.Ordinal) && n.EndsWith("/capability.json", StringComparison.Ordinal))
+            .Where(n => n.StartsWith("capabilities/", StringComparison.Ordinal)
+                     && n.EndsWith("/capability.json", StringComparison.Ordinal))
             .Select(n => n["capabilities/".Length..^"/capability.json".Length])
             .Where(n => !n.StartsWith('_'))
             .Distinct()
             .OrderBy(n => n, StringComparer.Ordinal);
+    }
+
+    /// <summary>
+    /// Enumerate files a capability wants to copy, keyed by path relative
+    /// to the target project root (tokens unresolved).
+    /// </summary>
+    public static IEnumerable<string> FilesFor(string name)
+    {
+        var prefix = $"capabilities/{name}/files/";
+        var asm = Assembly.GetExecutingAssembly();
+        return asm.GetManifestResourceNames()
+            .Where(n => n.StartsWith(prefix, StringComparison.Ordinal))
+            .Select(n => n[prefix.Length..]);
+    }
+
+    public static byte[]? ReadFile(string capabilityName, string relativePath)
+        => ReadResourceBytes($"capabilities/{capabilityName}/files/{relativePath}");
+
+    public static string? ReadFragment(string capabilityName, string fragmentPath)
+        => ReadResource($"capabilities/{capabilityName}/injectors/{fragmentPath}");
+
+    private static string? ReadResource(string logicalName)
+    {
+        var bytes = ReadResourceBytes(logicalName);
+        return bytes is null ? null : System.Text.Encoding.UTF8.GetString(bytes);
+    }
+
+    private static byte[]? ReadResourceBytes(string logicalName)
+    {
+        var asm = Assembly.GetExecutingAssembly();
+        using var stream = asm.GetManifestResourceStream(logicalName);
+        if (stream is null) return null;
+        using var ms = new MemoryStream();
+        stream.CopyTo(ms);
+        return ms.ToArray();
     }
 }

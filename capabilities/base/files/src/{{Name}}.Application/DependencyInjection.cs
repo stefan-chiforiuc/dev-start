@@ -11,6 +11,8 @@ public static class DependencyInjection
         var asm = Assembly.GetExecutingAssembly();
         services.AddMediatR(c => c.RegisterServicesFromAssembly(asm));
         services.AddValidatorsFromAssembly(asm);
+        services.AddSingleton(TimeProvider.System);
+        // devstart:application-services
         return services;
     }
 }

@@ -1,0 +1,5 @@
+  "Smtp": {
+    "Host": "localhost",
+    "Port": 1025,
+    "From": "no-reply@example.com"
+  },

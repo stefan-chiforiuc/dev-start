@@ -104,8 +104,8 @@ jobs:
       - name: Smoke
         run: k6 run tests/perf/smoke.js
 
-  codeql:
-    uses: ./.github/workflows/codeql.yml
-
-  trivy:
-    uses: ./.github/workflows/trivy.yml
+  # CodeQL and Trivy run in the caller's own workflow (see the generated
+  # project's `.github/workflows/codeql.yml` and `trivy.yml`). Nested
+  # `uses: ./.github/workflows/...` in a reusable workflow resolves against
+  # the reusable workflow's own repo, not the caller — which would scan
+  # dev-start's code, not the user's.

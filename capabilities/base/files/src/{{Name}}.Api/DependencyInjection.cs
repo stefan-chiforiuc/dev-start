@@ -13,6 +13,7 @@ public static class DependencyInjection
         services.AddEndpointsApiExplorer();
         services.AddOpenApi();
         services.AddProblemDetails();
+        // devstart:api-services
         return services;
     }
 
@@ -25,7 +26,7 @@ public static class DependencyInjection
 
     public static WebApplication MapEndpoints(this WebApplication app)
     {
-        // Route groups go here; the `/add-endpoint` skill appends to this method.
+        // devstart:api-endpoints
         return app;
     }
 }

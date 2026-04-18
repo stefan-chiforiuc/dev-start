@@ -24,7 +24,7 @@ change that satisfies it without breaking the paved road.
 
 ## Output template
 
-```
+```text
 ## Proposal
 
 <1-3 sentences, what changes>

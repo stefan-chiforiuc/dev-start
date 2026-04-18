@@ -82,20 +82,20 @@ services:
       retries: 10
 
   # Enabled by `dev-start add queue`.
+  # Used by the `queue` capability. Remove if you haven't installed queue
+  # and don't want the extra container footprint.
   rabbitmq:
     image: rabbitmq:3.13-management
     restart: unless-stopped
     ports:
       - "5672:5672"
       - "15672:15672"
-    profiles: ["queue"]
 
-  # Enabled by `dev-start add cache`.
+  # Used by the `cache` capability. Remove if you haven't installed cache.
   redis:
     image: redis:7-alpine
     restart: unless-stopped
     ports: ["6379:6379"]
-    profiles: ["cache"]
 
   # Simple static page listing every running service.
   dashboard:

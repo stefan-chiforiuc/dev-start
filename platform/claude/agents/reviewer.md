@@ -36,7 +36,7 @@ is to catch drift from the paved road and point it out specifically.
 
 Return a markdown list grouped by severity:
 
-```
+```text
 ## Blocking
 - <file:line>: <what> — <why> — <suggested fix>
 

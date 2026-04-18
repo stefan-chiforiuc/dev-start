@@ -1,0 +1,18 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "deploy-fly",
+  "version": "0.1.0",
+  "description": "Fly.io deploy recipe: fly.toml + CI workflow. Installed automatically when `--deploy fly` is selected.",
+  "dependsOn": ["base"],
+  "conflictsWith": ["deploy-aca"],
+  "addsServices": [],
+  "envAdditions": [
+    { "key": "FLY_API_TOKEN", "example": "<set as GitHub secret>" }
+  ],
+  "postInstall": [
+    "fly apps create {{name}} --org personal  # first time only"
+  ],
+  "doctor": [
+    { "check": "file", "path": "fly.toml" }
+  ]
+}

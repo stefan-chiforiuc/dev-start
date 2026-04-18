@@ -1,0 +1,22 @@
+{
+  "injectors": [
+    {
+      "file": "src/{{Name}}.Infrastructure/{{Name}}.Infrastructure.csproj",
+      "anchor": "</Project>",
+      "placement": "before",
+      "fragment": "infrastructure.csproj.fragment"
+    },
+    {
+      "file": "src/{{Name}}.Infrastructure/DependencyInjection.cs",
+      "marker": "// devstart:infrastructure-services",
+      "placement": "after",
+      "fragment": "infrastructure-services.fragment"
+    },
+    {
+      "file": "src/{{Name}}.Api/appsettings.json",
+      "anchor": "\"AllowedHosts\": \"*\"",
+      "placement": "before",
+      "fragment": "appsettings-rabbitmq.json.fragment"
+    }
+  ]
+}

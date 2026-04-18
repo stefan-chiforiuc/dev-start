@@ -47,14 +47,14 @@ just up         # brings up Postgres, Keycloak, Seq, Jaeger, Mailhog, MinIO
 just test       # Testcontainers-backed integration tests
 ```
 
-Then open the **dashboard at http://localhost:4000** for links to every
+Then open the **dashboard at <http://localhost:4000>** for links to every
 running service.
 
 ---
 
 ## What you get in a generated repo
 
-```
+```text
 my-app/
   src/
     My.Api/                 # minimal API host + composition root
