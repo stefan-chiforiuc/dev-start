@@ -62,9 +62,10 @@ and refresh with `upgrade --apply`.
 
 - `TokensTests`, `ManifestTests`, `CapabilityTests`,
   `CapabilityIntegrityTests`, `PlannerTests`, `AddCapabilityTests`,
-  `GeneratedSourceShapeTests` (Roslyn-parses every generated file + JSON
-  + XML validation), `UpgradeApplyTests`, `UpgradeIntegrationTests`
-  (covers all 6 buckets of the 3-way merge), `CliSmokeTests`.
+  `GeneratedSourceShapeTests` (Roslyn parses every generated `.cs`,
+  validates every `.csproj` as XML, every `.json` as JSON),
+  `UpgradeApplyTests`, `UpgradeIntegrationTests` (covers all 6 buckets
+  of the 3-way merge), `CliSmokeTests`.
 
 ### ADRs
 
