@@ -35,7 +35,11 @@ jobs:
         run: dotnet build --no-restore --configuration Release
 
       - name: Test
-        run: dotnet test --no-build --configuration Release --logger "trx;LogFileName=test-results.trx"
+        run: >
+          dotnet test --no-build --configuration Release
+          --logger "trx;LogFileName=test-results.trx"
+          --logger "GitHubActions;report-warnings=false"
+          --logger "console;verbosity=normal"
 
       - name: Upload test results
         if: always()
