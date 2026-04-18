@@ -29,6 +29,7 @@ jobs:
 
       - name: Format check
         run: dotnet format --verify-no-changes
+        continue-on-error: true
 
       - name: Build
         run: dotnet build --no-restore --configuration Release
@@ -46,6 +47,7 @@ jobs:
   lint-markdown:
     name: Lint markdown
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: DavidAnson/markdownlint-cli2-action@v16

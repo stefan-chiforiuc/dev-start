@@ -1,0 +1,24 @@
+title = "dev-start gitleaks configuration"
+
+# Start from the default gitleaks ruleset.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known false positives for dev-only fixtures"
+paths = [
+  # Keycloak dev realm — the 'secret' field is a fake client secret for the
+  # local compose stack. Not a real secret.
+  '''platform/compose/keycloak/realm-dev\.json''',
+  # Capability docs, envs, and examples intentionally contain placeholders
+  # like Host=localhost;Database=app;Username=dev;Password=dev.
+  '''capabilities/.*/README\.md''',
+  '''capabilities/.*/.*\.env.*''',
+]
+regexes = [
+  # Example/dev-only literal pairs we reuse across docs and fixtures.
+  '''dev-only-not-for-production''',
+  '''Password=dev''',
+  '''dev:dev@''',
+  '''guest:guest''',
+]

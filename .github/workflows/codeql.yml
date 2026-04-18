@@ -17,6 +17,10 @@ jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
+    # CodeQL uploads SARIF to GitHub Advanced Security; on repos where GHAS
+    # isn't enabled the upload step fails. We want to still run the scan for
+    # its log output but not block the PR on it.
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
