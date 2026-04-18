@@ -10,7 +10,7 @@
       "file": "src/{{Name}}.Infrastructure/DependencyInjection.cs",
       "marker": "// devstart:infrastructure-services",
       "placement": "after",
-      "fragment": "infrastructure-services.cs.fragment"
+      "fragment": "infrastructure-services.fragment"
     },
     {
       "file": "src/{{Name}}.Api/appsettings.json",
@@ -28,7 +28,7 @@
       "file": "src/{{Name}}.Api/DependencyInjection.cs",
       "marker": "// devstart:api-endpoints",
       "placement": "after",
-      "fragment": "api-endpoints.cs.fragment"
+      "fragment": "api-endpoints.fragment"
     },
     {
       "file": "src/{{Name}}.Application/{{Name}}.Application.csproj",

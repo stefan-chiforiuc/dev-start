@@ -4,7 +4,7 @@
       "file": "src/{{Name}}.Infrastructure/DependencyInjection.cs",
       "marker": "// devstart:infrastructure-services",
       "placement": "after",
-      "fragment": "infrastructure-services.cs.fragment"
+      "fragment": "infrastructure-services.fragment"
     },
     {
       "file": "src/{{Name}}.Api/appsettings.json",

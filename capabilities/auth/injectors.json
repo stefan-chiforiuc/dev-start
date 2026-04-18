@@ -10,19 +10,19 @@
       "file": "src/{{Name}}.Api/DependencyInjection.cs",
       "marker": "// devstart:api-services",
       "placement": "after",
-      "fragment": "api-services.cs.fragment"
+      "fragment": "api-services.fragment"
     },
     {
       "file": "src/{{Name}}.Api/DependencyInjection.cs",
       "marker": "// devstart:api-endpoints",
       "placement": "after",
-      "fragment": "api-endpoints.cs.fragment"
+      "fragment": "api-endpoints.fragment"
     },
     {
       "file": "src/{{Name}}.Api/Program.cs",
       "marker": "// devstart:program-before-middleware",
       "placement": "after",
-      "fragment": "program-middleware.cs.fragment"
+      "fragment": "program-middleware.fragment"
     },
     {
       "file": "src/{{Name}}.Api/appsettings.json",

@@ -71,7 +71,7 @@ base files by inserting fragments at named markers or literal anchors.
 
       // Path to a file under capabilities/<name>/injectors/ whose contents
       // get inserted. Tokens in the fragment are substituted too.
-      "fragment": "infrastructure-services.cs.fragment"
+      "fragment": "infrastructure-services.fragment"
     }
   ]
 }
