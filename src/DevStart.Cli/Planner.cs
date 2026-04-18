@@ -96,11 +96,11 @@ public sealed class Planner
 
         if (IncludeClaude)
         {
-            CopyPlatformBundle("platform/claude/", Path.Combine(target, ".claude"), target, baselines);
+            CopyPlatformBundle("platform/claude/", Path.Join(target, ".claude"), target, baselines);
             RenderClaudeBriefing(target, baselines);
         }
         CopyPlatformBundle("platform/compose/", target, target, baselines);
-        CopyPlatformBundle("platform/devcontainer/", Path.Combine(target, ".devcontainer"), target, baselines);
+        CopyPlatformBundle("platform/devcontainer/", Path.Join(target, ".devcontainer"), target, baselines);
 
         return baselines;
     }
@@ -122,7 +122,7 @@ public sealed class Planner
             var bytes = ms.ToArray();
 
             var appliedRel = Tokens.Apply(rel);
-            var dest = Path.Combine(destRoot, appliedRel);
+            var dest = Path.Join(destRoot, appliedRel);
             Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
 
             byte[] content;
@@ -146,7 +146,7 @@ public sealed class Planner
 
     private void RenderClaudeBriefing(string target, Baselines? baselines)
     {
-        var templatePath = Path.Combine(target, ".claude", "CLAUDE.md.template");
+        var templatePath = Path.Join(target, ".claude", "CLAUDE.md.template");
         if (!File.Exists(templatePath)) return;
 
         var content = File.ReadAllText(templatePath);
@@ -187,7 +187,7 @@ public sealed class Planner
             .Replace("{{AdrList}}", adrs, StringComparison.Ordinal)
             .Replace("{{ConditionalServices}}", string.Join(Environment.NewLine, extras), StringComparison.Ordinal);
 
-        var claudeMdPath = Path.Combine(target, ".claude", "CLAUDE.md");
+        var claudeMdPath = Path.Join(target, ".claude", "CLAUDE.md");
         File.WriteAllText(claudeMdPath, content);
         baselines?.Record(Path.GetRelativePath(target, claudeMdPath), content);
         // The template itself was baseline-recorded during CopyPlatformBundle;

@@ -35,7 +35,7 @@ public static class CapabilityInstaller
                 ?? throw new InvalidOperationException($"Missing resource for {capability}/{rel}");
 
             var relativeOutPath = tokens.Apply(rel);
-            var dest = Path.Combine(targetRoot, relativeOutPath);
+            var dest = Path.Join(targetRoot, relativeOutPath);
             Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
 
             byte[] content;
@@ -76,7 +76,7 @@ public static class CapabilityInstaller
         foreach (var inj in spec.Injectors)
         {
             var relativeFile = tokens.Apply(inj.File);
-            var file = Path.Combine(targetRoot, relativeFile);
+            var file = Path.Join(targetRoot, relativeFile);
             if (!File.Exists(file))
             {
                 AnsiConsole.MarkupLine($"  [yellow]skip[/] injector — target missing: [grey]{inj.File}[/]");

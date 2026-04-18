@@ -34,7 +34,7 @@ public sealed class Baselines
 
     public static Baselines Load(string projectRoot)
     {
-        var path = Path.Combine(projectRoot, RelativePath);
+        var path = Path.Join(projectRoot, RelativePath);
         if (!File.Exists(path)) return new Baselines();
         return JsonSerializer.Deserialize<Baselines>(File.ReadAllText(path), Json)
             ?? new Baselines();
@@ -42,7 +42,7 @@ public sealed class Baselines
 
     public void Save(string projectRoot)
     {
-        var path = Path.Combine(projectRoot, RelativePath);
+        var path = Path.Join(projectRoot, RelativePath);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         File.WriteAllText(path, JsonSerializer.Serialize(this, Json));
     }

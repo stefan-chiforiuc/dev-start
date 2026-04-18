@@ -40,7 +40,7 @@ public static class UpgradeCommand
                     multiService: manifest.Services.Count > 1,
                     capabilities: manifest.Capabilities,
                     deployTarget: manifest.Deploy,
-                    includeClaude: Directory.Exists(Path.Combine(root, ".claude")));
+                    includeClaude: Directory.Exists(Path.Join(root, ".claude")));
                 var newBaselines = planner.Render(staging);
 
                 var plan = BuildPlan(root, staging, oldBaselines, newBaselines);
@@ -93,7 +93,7 @@ public static class UpgradeCommand
         foreach (var stagedAbs in Directory.EnumerateFiles(staging, "*", SearchOption.AllDirectories))
         {
             var rel = Normalize(Path.GetRelativePath(staging, stagedAbs));
-            var diskPath = Path.Combine(root, rel);
+            var diskPath = Path.Join(root, rel);
             var stagedBytes = File.ReadAllBytes(stagedAbs);
             var stagedHash = Baselines.Hash(stagedBytes);
 
@@ -143,7 +143,7 @@ public static class UpgradeCommand
         // the user might still want them. Just note.
         foreach (var key in old.Files.Keys)
         {
-            var stagedAbs = Path.Combine(staging, key);
+            var stagedAbs = Path.Join(staging, key);
             if (!File.Exists(stagedAbs)) removed.Add(key);
         }
 
@@ -176,16 +176,16 @@ public static class UpgradeCommand
     {
         foreach (var rel in plan.Added.Concat(plan.UpdatedCleanly))
         {
-            var src = Path.Combine(staging, rel);
-            var dst = Path.Combine(root, rel);
+            var src = Path.Join(staging, rel);
+            var dst = Path.Join(root, rel);
             Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
             File.Copy(src, dst, overwrite: true);
         }
 
         foreach (var rel in plan.Conflicts)
         {
-            var src = Path.Combine(staging, rel);
-            var preview = Path.Combine(root, rel) + ".upgrade-preview";
+            var src = Path.Join(staging, rel);
+            var preview = Path.Join(root, rel) + ".upgrade-preview";
             Directory.CreateDirectory(Path.GetDirectoryName(preview)!);
             File.Copy(src, preview, overwrite: true);
         }

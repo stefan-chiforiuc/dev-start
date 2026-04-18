@@ -24,7 +24,9 @@ public class UpgradeApplyTests : IDisposable
     public void Dispose()
     {
         Directory.SetCurrentDirectory(_priorCwd);
-        try { Directory.Delete(_sandbox, recursive: true); } catch { /* best-effort */ }
+        try { Directory.Delete(_sandbox, recursive: true); }
+        catch (IOException) { /* best-effort cleanup */ }
+        catch (UnauthorizedAccessException) { /* best-effort cleanup */ }
         GC.SuppressFinalize(this);
     }
 
@@ -35,7 +37,7 @@ public class UpgradeApplyTests : IDisposable
             capabilities: ["postgres"], deployTarget: "none", includeClaude: false);
         await planner.RunAsync();
 
-        var root = Path.Combine(_sandbox, "demo");
+        var root = Path.Join(_sandbox, "demo");
         var baselines = Baselines.Load(root);
 
         baselines.Files.Should().NotBeEmpty();
@@ -47,7 +49,7 @@ public class UpgradeApplyTests : IDisposable
         // Every recorded hash matches the actual file on disk.
         foreach (var (rel, expected) in baselines.Files)
         {
-            var abs = Path.Combine(root, rel);
+            var abs = Path.Join(root, rel);
             File.Exists(abs).Should().BeTrue($"baseline references {rel}");
             var actual = Baselines.Hash(File.ReadAllBytes(abs));
             actual.Should().Be(expected, $"{rel} hash must match its baseline");
@@ -95,10 +97,10 @@ public class UpgradeApplyTests : IDisposable
             capabilities: ["postgres", "auth"], deployTarget: "none", includeClaude: true);
         await planner.RunAsync();
 
-        var firstRoot = Path.Combine(_sandbox, "demo");
+        var firstRoot = Path.Join(_sandbox, "demo");
         var firstBaselines = Baselines.Load(firstRoot);
 
-        var second = Path.Combine(_sandbox, "demo-second");
+        var second = Path.Join(_sandbox, "demo-second");
         var secondBaselines = planner.Render(second);
 
         foreach (var (rel, hash) in firstBaselines.Files)
