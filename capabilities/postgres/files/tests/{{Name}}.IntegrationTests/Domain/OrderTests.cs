@@ -1,4 +1,5 @@
 using FluentAssertions;
+using {{Name}}.Domain;
 using {{Name}}.Domain.Orders;
 using Xunit;
 

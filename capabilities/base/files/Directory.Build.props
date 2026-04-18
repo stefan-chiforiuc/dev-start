@@ -9,7 +9,14 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);1591</NoWarn> <!-- missing XML comments on public members; noise for apps -->
+    <!--
+      Suppressions:
+        CS1591  — missing XML comments on public members (noise for apps, not libraries).
+        MA0004  — Task.ConfigureAwait(false) on every await. Redundant in ASP.NET
+                  Core (no SynchronizationContext) and adds line-noise.
+        MA0051  — Method length. We prefer readability over a hard line cap.
+    -->
+    <NoWarn>$(NoWarn);1591;MA0004;MA0051</NoWarn>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 

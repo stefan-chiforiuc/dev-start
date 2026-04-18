@@ -5,14 +5,6 @@ using {{Name}}.Application.Storage;
 
 namespace {{Name}}.Infrastructure.Storage;
 
-public sealed class StorageOptions
-{
-    public string Endpoint { get; set; } = "";
-    public string AccessKey { get; set; } = "";
-    public string SecretKey { get; set; } = "";
-    public string Bucket { get; set; } = "";
-}
-
 internal sealed class S3ObjectStorage(IAmazonS3 s3, IOptions<StorageOptions> options) : IObjectStorage
 {
     private readonly string _bucket = options.Value.Bucket;
