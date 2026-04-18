@@ -101,7 +101,58 @@ public sealed class Planner
         CopyPlatformBundle("platform/compose/", target, target, baselines);
         CopyPlatformBundle("platform/devcontainer/", Path.Join(target, ".devcontainer"), target, baselines);
 
+        WriteMcpConfig(target, baselines);
+
         return baselines;
+    }
+
+    /// <summary>
+    /// Writes <c>.mcp.json</c> at the project root with an <c>mcpServers</c>
+    /// entry per installed capability that declares one. Keeps JSON
+    /// injection out of the critical path — each combo produces a stable,
+    /// hand-typable config.
+    /// </summary>
+    private void WriteMcpConfig(string target, Baselines? baselines)
+    {
+        var servers = new Dictionary<string, object>(StringComparer.Ordinal);
+
+        if (Capabilities.Contains("postgres", StringComparer.Ordinal))
+        {
+            servers["postgres"] = new Dictionary<string, object>(StringComparer.Ordinal)
+            {
+                ["command"] = "uvx",
+                ["args"] = new[]
+                {
+                    "mcp-server-postgres",
+                    "postgres://dev:dev@localhost:5432/app",
+                },
+            };
+        }
+
+        if (Capabilities.Contains("otel", StringComparer.Ordinal))
+        {
+            servers["seq-logs"] = new Dictionary<string, object>(StringComparer.Ordinal)
+            {
+                ["command"] = "npx",
+                ["args"] = new[]
+                {
+                    "-y", "@dev-start/mcp-seq",
+                    "--endpoint", "http://localhost:5341",
+                    "--read-only",
+                },
+            };
+        }
+
+        var config = new Dictionary<string, object>(StringComparer.Ordinal)
+        {
+            ["mcpServers"] = servers,
+        };
+
+        var json = System.Text.Json.JsonSerializer.Serialize(config,
+            new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        var path = Path.Join(target, ".mcp.json");
+        File.WriteAllText(path, json);
+        baselines?.Record(".mcp.json", json);
     }
 
     private void CopyPlatformBundle(string resourcePrefix, string destRoot, string projectRoot, Baselines? baselines)
