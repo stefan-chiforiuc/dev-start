@@ -1,0 +1,19 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "ts-mail",
+  "version": "0.1.0",
+  "description": "Transactional email via nodemailer. Mailhog captures dev sends.",
+  "dependsOn": ["ts-base"],
+  "stacks": ["typescript-fastify"],
+  "conflictsWith": [],
+  "addsServices": ["mailhog"],
+  "envAdditions": [
+    { "key": "SMTP_HOST", "example": "localhost" },
+    { "key": "SMTP_PORT", "example": "1025" },
+    { "key": "MAIL_FROM", "example": "no-reply@{{name}}.local" }
+  ],
+  "postInstall": ["pnpm install"],
+  "doctor": [
+    { "check": "service", "name": "mailhog-smtp", "port": 1025 }
+  ]
+}

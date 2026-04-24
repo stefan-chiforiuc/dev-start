@@ -17,5 +17,12 @@
     { "check": "service", "name": "postgres", "port": 5432 },
     { "check": "env", "name": "ConnectionStrings__Default" },
     { "check": "dotnet-tool", "name": "dotnet-ef" }
+  ],
+  "mcp": [
+    {
+      "name": "postgres",
+      "command": "uvx",
+      "args": ["mcp-server-postgres", "postgres://dev:dev@localhost:5432/app"]
+    }
   ]
 }

@@ -17,7 +17,8 @@ public static class CapabilityInstaller
         ".cs", ".csproj", ".json", ".jsonc", ".yaml", ".yml", ".md", ".http",
         ".props", ".targets", ".sln", ".editorconfig", ".gitignore", ".gitkeep",
         ".sh", ".ps1", ".cmd", ".dockerfile", ".env", ".example", ".fragment",
-        ".xml", ".html", ".css", ".js", ".ts", ".toml", ".bicep", ".tf", "",
+        ".xml", ".html", ".css", ".js", ".ts", ".tsx", ".jsx", ".mjs", ".cjs",
+        ".toml", ".bicep", ".tf", ".sql", ".graphql", ".svg", "",
     };
 
     public static void Install(
@@ -118,7 +119,28 @@ public static class CapabilityInstaller
         string capability, string targetRoot, Tokens tokens, Baselines? baselines = null)
     {
         var spec = Capability.LoadInjectors(capability);
-        foreach (var inj in spec.Injectors)
+        ApplyInjectors(
+            spec.Injectors,
+            targetRoot,
+            tokens,
+            baselines,
+            fragmentReader: p => Capability.ReadFragment(capability, p));
+    }
+
+    /// <summary>
+    /// Apply a list of injector specs using a caller-supplied fragment reader.
+    /// Policies reuse this path — they load fragments from
+    /// <c>policies/&lt;name&gt;/fragments/</c> instead of
+    /// <c>capabilities/&lt;name&gt;/injectors/</c>.
+    /// </summary>
+    public static void ApplyInjectors(
+        IEnumerable<InjectorSpec> specs,
+        string targetRoot,
+        Tokens tokens,
+        Baselines? baselines,
+        Func<string, string?> fragmentReader)
+    {
+        foreach (var inj in specs)
         {
             var relativeFile = tokens.Apply(inj.File);
             var file = Path.Join(targetRoot, relativeFile);
@@ -128,8 +150,8 @@ public static class CapabilityInstaller
                 continue;
             }
 
-            var fragment = Capability.ReadFragment(capability, inj.Fragment)
-                ?? throw new InvalidOperationException($"Missing fragment {capability}/{inj.Fragment}");
+            var fragment = fragmentReader(inj.Fragment)
+                ?? throw new InvalidOperationException($"Missing fragment {inj.Fragment}");
             fragment = tokens.Apply(fragment);
 
             var content = File.ReadAllText(file);
@@ -144,6 +166,11 @@ public static class CapabilityInstaller
 
     private static string ApplyOne(string content, InjectorSpec inj, string fragment)
     {
+        if (string.Equals(inj.Mode, "json-merge", StringComparison.OrdinalIgnoreCase))
+        {
+            return JsonMerger.Merge(content, fragment);
+        }
+
         if (inj.Marker is { Length: > 0 })
         {
             if (!content.Contains(inj.Marker, StringComparison.Ordinal))
@@ -198,6 +225,7 @@ public static class CapabilityInstaller
         var ext = Path.GetExtension(path);
         if (TextExtensions.Contains(ext)) return true;
         var name = Path.GetFileName(path);
-        return name.StartsWith('.') || name is "Dockerfile" or "justfile" or "Tiltfile";
+        return name.StartsWith('.') || name is "Dockerfile" or "justfile" or "Tiltfile"
+            or "pnpm-workspace.yaml" or "pnpm-lock.yaml";
     }
 }

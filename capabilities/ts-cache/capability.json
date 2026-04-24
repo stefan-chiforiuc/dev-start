@@ -1,0 +1,18 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "ts-cache",
+  "version": "0.1.0",
+  "description": "Redis via ioredis, typed get/set wrapper.",
+  "dependsOn": ["ts-base"],
+  "stacks": ["typescript-fastify"],
+  "conflictsWith": [],
+  "addsServices": ["redis"],
+  "envAdditions": [
+    { "key": "REDIS_URL", "example": "redis://localhost:6379" }
+  ],
+  "postInstall": ["pnpm install"],
+  "doctor": [
+    { "check": "service", "name": "redis", "port": 6379 },
+    { "check": "env", "name": "REDIS_URL" }
+  ]
+}

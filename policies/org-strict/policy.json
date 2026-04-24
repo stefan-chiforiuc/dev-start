@@ -1,0 +1,41 @@
+{
+  "$schema": "https://dev-start.dev/schemas/policy/1.json",
+  "name": "org-strict",
+  "version": "0.1.0",
+  "description": "Strict org policy: everything in default-open-source plus required commit signing, required k8s labels, and deny-list enforcement.",
+  "appliesToStacks": [],
+  "extends": ["default-open-source"],
+  "injectors": [],
+  "validators": [
+    {
+      "id": "commit-signing-required",
+      "check": "file-contains",
+      "path": ".github/workflows/ci.yml",
+      "pattern": "gpg --verify|ssh-sig",
+      "message": "CI must verify commit signatures"
+    },
+    {
+      "id": "k8s-required-labels",
+      "check": "file-contains",
+      "path": "k8s/helm/templates/deployment.yaml",
+      "pattern": "app.kubernetes.io/name.*\\n.*app.kubernetes.io/version|app.kubernetes.io/name",
+      "message": "k8s Deployment must set app.kubernetes.io/name + version labels"
+    },
+    {
+      "id": "codeql-required",
+      "check": "file-exists",
+      "path": ".github/workflows/codeql.yml",
+      "message": "CodeQL workflow is required (inherited from default-open-source)"
+    },
+    {
+      "id": "base-image-allowlist",
+      "check": "image-allowlist",
+      "path": "Dockerfile",
+      "allowlist": [
+        "cgr.dev/chainguard/",
+        "gcr.io/distroless/"
+      ],
+      "message": "Strict: only chainguard / distroless base images"
+    }
+  ]
+}

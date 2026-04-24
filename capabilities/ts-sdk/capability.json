@@ -1,0 +1,19 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "ts-sdk",
+  "version": "0.1.0",
+  "description": "Generates a typed TS client from the Fastify app's OpenAPI schema (via @fastify/swagger + openapi-typescript).",
+  "dependsOn": ["ts-base"],
+  "stacks": ["typescript-fastify"],
+  "conflictsWith": [],
+  "addsServices": [],
+  "envAdditions": [],
+  "postInstall": [
+    "pnpm install",
+    "pnpm --filter api build:openapi",
+    "pnpm --filter sdk build"
+  ],
+  "doctor": [
+    { "check": "file", "path": "packages/sdk/package.json" }
+  ]
+}

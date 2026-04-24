@@ -1,0 +1,6 @@
+{
+  "flags": {
+    "new-checkout-flow": { "default": false, "rollout": 0 },
+    "dark-mode": { "default": true }
+  }
+}

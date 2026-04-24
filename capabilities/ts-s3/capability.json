@@ -1,0 +1,21 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "ts-s3",
+  "version": "0.1.0",
+  "description": "S3-compatible object storage via @aws-sdk/client-s3. MinIO for local dev.",
+  "dependsOn": ["ts-base"],
+  "stacks": ["typescript-fastify"],
+  "conflictsWith": [],
+  "addsServices": ["minio"],
+  "envAdditions": [
+    { "key": "S3_ENDPOINT", "example": "http://localhost:9000" },
+    { "key": "S3_BUCKET", "example": "{{name}}" },
+    { "key": "S3_ACCESS_KEY", "example": "minioadmin" },
+    { "key": "S3_SECRET_KEY", "example": "minioadmin" }
+  ],
+  "postInstall": ["pnpm install"],
+  "doctor": [
+    { "check": "service", "name": "minio", "port": 9000 },
+    { "check": "env", "name": "S3_BUCKET" }
+  ]
+}

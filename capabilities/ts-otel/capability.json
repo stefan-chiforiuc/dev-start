@@ -1,0 +1,26 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "ts-otel",
+  "version": "0.1.0",
+  "description": "OpenTelemetry Node SDK with auto-instrumentations. pino → OTel via pino-opentelemetry-transport.",
+  "dependsOn": ["ts-base"],
+  "stacks": ["typescript-fastify"],
+  "conflictsWith": [],
+  "addsServices": ["jaeger", "seq"],
+  "envAdditions": [
+    { "key": "OTEL_EXPORTER_OTLP_ENDPOINT", "example": "http://localhost:4317" },
+    { "key": "OTEL_SERVICE_NAME", "example": "{{name}}" }
+  ],
+  "postInstall": ["pnpm install"],
+  "doctor": [
+    { "check": "service", "name": "jaeger", "port": 16686 },
+    { "check": "env", "name": "OTEL_EXPORTER_OTLP_ENDPOINT" }
+  ],
+  "mcp": [
+    {
+      "name": "seq-logs",
+      "command": "npx",
+      "args": ["-y", "@dev-start/mcp-seq", "--endpoint", "http://localhost:5341", "--read-only"]
+    }
+  ]
+}

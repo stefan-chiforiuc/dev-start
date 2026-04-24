@@ -27,6 +27,15 @@ public sealed class InjectorSpec
 
     [JsonPropertyName("fragment")]
     public string Fragment { get; set; } = "";
+
+    /// <summary>
+    /// How the fragment is applied. <c>text</c> (default) uses marker/anchor
+    /// string insertion; <c>json-merge</c> parses both sides as JSON and
+    /// deep-merges the fragment object into the target (used for
+    /// <c>package.json</c>, <c>tsconfig.json</c>, <c>.mcp.json</c>, etc.).
+    /// </summary>
+    [JsonPropertyName("mode")]
+    public string Mode { get; set; } = "text";
 }
 
 public sealed class InjectorFile

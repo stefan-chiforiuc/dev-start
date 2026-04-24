@@ -1,0 +1,22 @@
+# Common commands. `just -l` lists targets.
+
+bootstrap:
+    pnpm install --frozen-lockfile || pnpm install
+
+up:
+    docker compose up -d postgres keycloak seq jaeger mailhog minio
+
+down:
+    docker compose down
+
+dev:
+    pnpm --filter api dev
+
+test:
+    pnpm -r test
+
+build:
+    pnpm -r build
+
+lint:
+    pnpm -r lint

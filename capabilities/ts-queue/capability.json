@@ -1,0 +1,18 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "ts-queue",
+  "version": "0.1.0",
+  "description": "RabbitMQ publisher + consumer skeleton via amqplib. Shared dev container with .NET stack.",
+  "dependsOn": ["ts-base"],
+  "stacks": ["typescript-fastify"],
+  "conflictsWith": [],
+  "addsServices": ["rabbitmq"],
+  "envAdditions": [
+    { "key": "RABBITMQ_URL", "example": "amqp://guest:guest@localhost:5672" }
+  ],
+  "postInstall": ["pnpm install"],
+  "doctor": [
+    { "check": "service", "name": "rabbitmq", "port": 5672 },
+    { "check": "env", "name": "RABBITMQ_URL" }
+  ]
+}

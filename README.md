@@ -9,9 +9,11 @@ architecture tests, and a pre-briefed `.claude/` AI assistant already wired.
 It also stays useful after day 1 — add capabilities, diagnose drift, and
 upgrade templates through the same CLI.
 
-> Status: **v1.0.0**. Stable surface — `new` / `add` / `doctor` /
-> `upgrade --apply` all ship. See [`CHANGELOG.md`](./CHANGELOG.md) for the
-> v1 release notes and [`ROADMAP.md`](./ROADMAP.md) for what's next.
+> Status: **1.1.0 (unreleased)**. Stable surface — `new` / `add` / `doctor` /
+> `upgrade --apply` / `promote` / `policy`. Supports both the .NET/ASP.NET
+> Core stack (default) and the TypeScript/Fastify stack (`--stack typescript`).
+> See [`CHANGELOG.md`](./CHANGELOG.md) for release notes and
+> [`ROADMAP.md`](./ROADMAP.md) for what's next.
 
 ---
 
@@ -76,28 +78,36 @@ my-app/
 
 Built-in capabilities (composable — add only what you need):
 
-| Capability | What it wires |
-|---|---|
-| `postgres` | EF Core + Npgsql + migrations + seed + Testcontainers harness |
-| `auth`     | OIDC client + in-compose Keycloak realm + sample secured endpoint |
-| `otel`     | OpenTelemetry traces/metrics/logs, Jaeger + Seq |
-| `queue`    | RabbitMQ + MassTransit + outbox pattern |
-| `cache`    | Redis + `IDistributedCache` wrapper |
-| `s3`       | MinIO + AWS SDK + signed-URL helper |
-| `mail`     | Mailhog + `IEmailSender` |
-| `sdk`      | TypeScript SDK generated from OpenAPI |
-| `flags`    | OpenFeature provider interface |
-| `gateway`  | YARP reverse proxy (for multi-service mode) |
+| Capability | .NET stack | TypeScript stack | What it wires |
+|---|---|---|---|
+| postgres      | `postgres`  | `ts-postgres` | EF Core / Kysely + migrations + Orders slice |
+| auth          | `auth`      | `ts-auth`     | OIDC via Keycloak |
+| otel          | `otel`      | `ts-otel`     | Traces/metrics/logs via OTLP + Jaeger + Seq |
+| queue         | `queue`     | `ts-queue`    | RabbitMQ publisher/consumer |
+| cache         | `cache`     | `ts-cache`    | Redis wrapper |
+| s3            | `s3`        | `ts-s3`       | MinIO + signed-URL helper |
+| mail          | `mail`      | `ts-mail`     | Mailhog + mailer |
+| flags         | `flags`     | `ts-flags`    | OpenFeature |
+| sdk           | `sdk`       | `ts-sdk`      | TS SDK generated from OpenAPI |
+| gateway       | `gateway`   | `ts-gateway`  | Reverse proxy for multi-service mode |
+| k8s           | `k8s`       | `k8s`         | Helm chart + Kustomize overlays (dev/stage/prod) |
+| frontend      | `frontend`  | `frontend`    | Vite + React 19 + TanStack — consumes the SDK |
+| deploy-fly    | `deploy-fly`    | `ts-deploy-fly`    | Fly.io target |
+| deploy-aca    | `deploy-aca`    | `ts-deploy-aca`    | Azure Container Apps target |
 
 ---
 
-## The four CLI verbs
+## The CLI verbs
 
 ```sh
-dev-start new <name>         # scaffold a new project (wizard)
-dev-start add <capability>   # add a capability to an existing project
-dev-start doctor             # diagnose drift, missing env, broken services
-dev-start upgrade            # open a PR with the delta against latest template
+dev-start new <name> [--stack dotnet|typescript]   # scaffold a new project
+dev-start add <capability>                          # add a capability to an existing project
+dev-start doctor [--fix]                            # diagnose drift, missing env, broken services
+dev-start upgrade [--apply]                         # refresh the project from latest templates
+dev-start list                                      # list capabilities (filtered if in a project)
+dev-start promote <env>                             # emit k8s values for dev | stage | prod
+dev-start policy list|apply|remove|validate         # org-level policy bundles
+dev-start capability new <name>                     # author a new capability from the skeleton
 ```
 
 Same tool on day 0 and day 300.

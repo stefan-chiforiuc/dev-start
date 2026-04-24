@@ -1,0 +1,21 @@
+name: Verify commit signatures
+
+on:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Verify signatures via ssh-sig / gpg --verify
+        run: |
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+          git log --format="%H %G?" "$base..$head" | while read sha status; do
+            case "$status" in
+              G|U|E) echo "ok $sha ($status)" ;;
+              *) echo "unsigned or bad signature: $sha ($status)"; exit 1 ;;
+            esac
+          done

@@ -45,6 +45,10 @@ public class GeneratedSourceShapeTests : IDisposable
         { ["postgres", "auth", "otel", "cache", "queue", "s3", "mail", "flags", "sdk"], false, "fly" },
         // Multi-service with gateway + aca deploy.
         { ["postgres", "auth", "otel"], true, "aca" },
+        // k8s capability (no source files, but still must scaffold cleanly).
+        { ["postgres", "auth", "otel", "k8s"], false, "none" },
+        // Frontend on the .NET stack.
+        { ["postgres", "auth", "otel", "sdk", "frontend"], false, "none" },
     };
 
     [Theory]

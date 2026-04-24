@@ -11,8 +11,12 @@ namespace DevStart;
 /// </summary>
 public sealed class Planner
 {
+    public const string StackDotnet = "dotnet-api";
+    public const string StackTypescript = "typescript-fastify";
+
     public string RawName { get; }
     public Tokens Tokens { get; }
+    public string Stack { get; }
     public bool MultiService { get; }
     public IReadOnlyList<string> Capabilities { get; }
     public string DeployTarget { get; }
@@ -23,24 +27,28 @@ public sealed class Planner
         bool multiService,
         IEnumerable<string> capabilities,
         string deployTarget,
-        bool includeClaude)
+        bool includeClaude,
+        string stack = StackDotnet)
     {
         RawName = name;
         Tokens = new Tokens(name);
+        Stack = NormalizeStack(stack);
         MultiService = multiService;
         DeployTarget = deployTarget;
         IncludeClaude = includeClaude;
 
-        var resolved = new List<string> { "base" };
+        var baseCap = BaseCapabilityFor(Stack);
+        var gatewayCap = GatewayCapabilityFor(Stack);
+        var resolved = new List<string> { baseCap };
         foreach (var c in capabilities)
         {
             if (!resolved.Contains(c, StringComparer.Ordinal)) resolved.Add(c);
         }
-        if (multiService && !resolved.Contains("gateway", StringComparer.Ordinal))
+        if (multiService && !resolved.Contains(gatewayCap, StringComparer.Ordinal))
         {
-            resolved.Add("gateway");
+            resolved.Add(gatewayCap);
         }
-        var deployCap = DeployCapabilityName(deployTarget);
+        var deployCap = DeployCapabilityName(deployTarget, Stack);
         if (deployCap is not null && !resolved.Contains(deployCap, StringComparer.Ordinal))
         {
             resolved.Add(deployCap);
@@ -48,12 +56,37 @@ public sealed class Planner
         Capabilities = resolved;
     }
 
-    private static string? DeployCapabilityName(string target) => target?.ToLowerInvariant() switch
+    public static string NormalizeStack(string stack) => stack?.ToLowerInvariant() switch
     {
-        "fly" or "flyio" or "fly.io" => "deploy-fly",
-        "aca" or "azure" or "azurecontainerapps" => "deploy-aca",
-        _ => null,
+        "dotnet" or "dotnet-api" or "csharp" or ".net" => StackDotnet,
+        "typescript" or "typescript-fastify" or "ts" or "node" or "fastify" => StackTypescript,
+        null or "" => StackDotnet,
+        _ => stack,
     };
+
+    public static string BaseCapabilityFor(string stack) => stack switch
+    {
+        StackTypescript => "ts-base",
+        _ => "base",
+    };
+
+    public static string GatewayCapabilityFor(string stack) => stack switch
+    {
+        StackTypescript => "ts-gateway",
+        _ => "gateway",
+    };
+
+    public static string? DeployCapabilityName(string target, string stack)
+    {
+        var key = target?.ToLowerInvariant() switch
+        {
+            "fly" or "flyio" or "fly.io" => "deploy-fly",
+            "aca" or "azure" or "azurecontainerapps" => "deploy-aca",
+            _ => null,
+        };
+        if (key is null) return null;
+        return stack == StackTypescript ? "ts-" + key : key;
+    }
 
     public Task RunAsync()
     {
@@ -87,19 +120,27 @@ public sealed class Planner
         Directory.CreateDirectory(target);
         var baselines = new Baselines();
 
+        // Platform bundles first — capability injectors may target these
+        // (e.g. frontend injects a web service into docker-compose.yml).
+        CopyPlatformBundle("platform/compose/", target, target, baselines);
+        CopyPlatformBundle("platform/devcontainer/", Path.Join(target, ".devcontainer"), target, baselines);
+        if (IncludeClaude)
+        {
+            CopyClaudeBundle(target, baselines);
+        }
+
         foreach (var cap in Capabilities)
         {
             if (verbose) AnsiConsole.MarkupLine($"[cyan]· capability[/] {cap}");
             CapabilityInstaller.Install(cap, target, Tokens, baselines);
         }
 
+        // CLAUDE.md briefing renders after capabilities so it can enumerate
+        // the installed set (delete the templates when done).
         if (IncludeClaude)
         {
-            CopyPlatformBundle("platform/claude/", Path.Join(target, ".claude"), target, baselines);
             RenderClaudeBriefing(target, baselines);
         }
-        CopyPlatformBundle("platform/compose/", target, target, baselines);
-        CopyPlatformBundle("platform/devcontainer/", Path.Join(target, ".devcontainer"), target, baselines);
 
         WriteMcpConfig(target, baselines);
 
@@ -108,39 +149,35 @@ public sealed class Planner
 
     /// <summary>
     /// Writes <c>.mcp.json</c> at the project root with an <c>mcpServers</c>
-    /// entry per installed capability that declares one. Keeps JSON
-    /// injection out of the critical path — each combo produces a stable,
-    /// hand-typable config.
+    /// entry per installed capability that declares one via its
+    /// <c>mcp</c> section.
     /// </summary>
     private void WriteMcpConfig(string target, Baselines? baselines)
     {
         var servers = new Dictionary<string, object>(StringComparer.Ordinal);
 
-        if (Capabilities.Contains("postgres", StringComparer.Ordinal))
+        foreach (var capName in Capabilities)
         {
-            servers["postgres"] = new Dictionary<string, object>(StringComparer.Ordinal)
-            {
-                ["command"] = "uvx",
-                ["args"] = new[]
-                {
-                    "mcp-server-postgres",
-                    "postgres://dev:dev@localhost:5432/app",
-                },
-            };
-        }
+            Capability cap;
+            try { cap = Capability.LoadEmbedded(capName); }
+            catch { continue; }
 
-        if (Capabilities.Contains("otel", StringComparer.Ordinal))
-        {
-            servers["seq-logs"] = new Dictionary<string, object>(StringComparer.Ordinal)
+            foreach (var spec in cap.Mcp)
             {
-                ["command"] = "npx",
-                ["args"] = new[]
+                if (string.IsNullOrWhiteSpace(spec.Name) || string.IsNullOrWhiteSpace(spec.Command))
+                    continue;
+
+                var entry = new Dictionary<string, object>(StringComparer.Ordinal)
                 {
-                    "-y", "@dev-start/mcp-seq",
-                    "--endpoint", "http://localhost:5341",
-                    "--read-only",
-                },
-            };
+                    ["command"] = spec.Command,
+                    ["args"] = spec.Args.Select(a => Tokens.Apply(a)).ToArray(),
+                };
+                if (spec.Env is { Count: > 0 })
+                {
+                    entry["env"] = spec.Env.ToDictionary(kv => kv.Key, kv => (object)Tokens.Apply(kv.Value));
+                }
+                servers[spec.Name] = entry;
+            }
         }
 
         var config = new Dictionary<string, object>(StringComparer.Ordinal)
@@ -153,6 +190,61 @@ public sealed class Planner
         var path = Path.Join(target, ".mcp.json");
         File.WriteAllText(path, json);
         baselines?.Record(".mcp.json", json);
+    }
+
+    /// <summary>
+    /// Copy <c>platform/claude/</c> into the target's <c>.claude/</c>. Skills
+    /// are stack-filtered: files under <c>skills/dotnet/</c> are copied only
+    /// when the stack is .NET (and land at <c>.claude/skills/</c>); same for
+    /// <c>skills/typescript/</c>. Files outside those subfolders are always
+    /// copied as-is.
+    /// </summary>
+    private void CopyClaudeBundle(string target, Baselines? baselines)
+    {
+        const string prefix = "platform/claude/";
+        var destRoot = Path.Join(target, ".claude");
+
+        foreach (var rel in Capability.ResourceNamesUnder(prefix))
+        {
+            var routed = RouteClaudePath(rel, Stack);
+            if (routed is null) continue; // skipped: wrong stack
+
+            var bytes = Capability.ReadBytes(prefix + rel)
+                ?? throw new InvalidOperationException($"Missing platform resource {prefix}{rel}");
+
+            var appliedRel = Tokens.Apply(routed);
+            var dest = Path.Join(destRoot, appliedRel);
+            Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
+
+            byte[] content;
+            if (IsText(rel))
+            {
+                var text = System.Text.Encoding.UTF8.GetString(bytes);
+                content = System.Text.Encoding.UTF8.GetBytes(Tokens.Apply(text));
+            }
+            else
+            {
+                content = bytes;
+            }
+            File.WriteAllBytes(dest, content);
+            var relativeFromProject = Path.GetRelativePath(target, dest);
+            baselines?.Record(relativeFromProject, content);
+        }
+    }
+
+    public static string? RouteClaudePath(string rel, string stack)
+    {
+        const string dotnetPrefix = "skills/dotnet/";
+        const string tsPrefix = "skills/typescript/";
+        if (rel.StartsWith(dotnetPrefix, StringComparison.Ordinal))
+        {
+            return stack == StackTypescript ? null : "skills/" + rel[dotnetPrefix.Length..];
+        }
+        if (rel.StartsWith(tsPrefix, StringComparison.Ordinal))
+        {
+            return stack == StackTypescript ? "skills/" + rel[tsPrefix.Length..] : null;
+        }
+        return rel;
     }
 
     private void CopyPlatformBundle(string resourcePrefix, string destRoot, string projectRoot, Baselines? baselines)
@@ -187,8 +279,20 @@ public sealed class Planner
 
     private void RenderClaudeBriefing(string target, Baselines? baselines)
     {
-        var templatePath = Path.Join(target, ".claude", "CLAUDE.md.template");
-        if (!File.Exists(templatePath)) return;
+        // Stack-aware template name. Existing v1.0 content continues to live
+        // as CLAUDE.md.dotnet.template; TS scaffolds ship a second variant.
+        var templateName = Stack == StackTypescript
+            ? "CLAUDE.md.typescript.template"
+            : "CLAUDE.md.dotnet.template";
+        var templatePath = Path.Join(target, ".claude", templateName);
+
+        // Back-compat: old bundles may still carry CLAUDE.md.template.
+        if (!File.Exists(templatePath))
+        {
+            var legacy = Path.Join(target, ".claude", "CLAUDE.md.template");
+            if (File.Exists(legacy)) templatePath = legacy;
+            else return;
+        }
 
         var content = File.ReadAllText(templatePath);
 
@@ -205,21 +309,36 @@ public sealed class Planner
             }
         }));
 
-        var adrs = string.Join(Environment.NewLine,
-        [
-            "- ADR 0001 — Record architecture decisions",
-            "- ADR 0002 — Minimal APIs (not controllers)",
-            "- ADR 0003 — EF Core + Npgsql",
-            "- ADR 0004 — Serilog + OpenTelemetry",
-            "- ADR 0005 — CQRS with MediatR + outbox",
-            "- ADR 0006 — Capabilities, not monolithic templates",
-            "- ADR 0007 — Injectors, not per-capability template forks",
-        ]);
+        var adrs = string.Join(Environment.NewLine, Stack == StackTypescript
+            ? new[]
+            {
+                "- ADR 0001 — Record architecture decisions",
+                "- ADR 0002 — Fastify plugins as the composition unit",
+                "- ADR 0003 — Kysely + postgres driver (no ORM until you need one)",
+                "- ADR 0004 — Pino + OpenTelemetry Node SDK",
+                "- ADR 0005 — Zod at every boundary (HTTP, env, events)",
+                "- ADR 0006 — Capabilities, not monolithic templates",
+                "- ADR 0007 — Injectors, not per-capability template forks",
+                "- ADR 0008 — ts-* prefix for TypeScript-stack capabilities",
+            }
+            : new[]
+            {
+                "- ADR 0001 — Record architecture decisions",
+                "- ADR 0002 — Minimal APIs (not controllers)",
+                "- ADR 0003 — EF Core + Npgsql",
+                "- ADR 0004 — Serilog + OpenTelemetry",
+                "- ADR 0005 — CQRS with MediatR + outbox",
+                "- ADR 0006 — Capabilities, not monolithic templates",
+                "- ADR 0007 — Injectors, not per-capability template forks",
+                "- ADR 0008 — ts-* prefix for TypeScript-stack capabilities",
+            });
 
         var extras = new List<string>();
-        if (Capabilities.Contains("queue", StringComparer.Ordinal))
+        if (Capabilities.Contains("queue", StringComparer.Ordinal)
+            || Capabilities.Contains("ts-queue", StringComparer.Ordinal))
             extras.Add("- RabbitMQ: `localhost:5672` (management UI at :15672)");
-        if (Capabilities.Contains("cache", StringComparer.Ordinal))
+        if (Capabilities.Contains("cache", StringComparer.Ordinal)
+            || Capabilities.Contains("ts-cache", StringComparer.Ordinal))
             extras.Add("- Redis: `localhost:6379`");
 
         content = content
@@ -231,23 +350,45 @@ public sealed class Planner
         var claudeMdPath = Path.Join(target, ".claude", "CLAUDE.md");
         File.WriteAllText(claudeMdPath, content);
         baselines?.Record(Path.GetRelativePath(target, claudeMdPath), content);
-        // The template itself was baseline-recorded during CopyPlatformBundle;
-        // forget it now so upgrade --apply doesn't try to reconcile a deleted file.
-        baselines?.Forget(Path.GetRelativePath(target, templatePath));
-        File.Delete(templatePath);
+
+        // Delete both possible template files if present, so staging doesn't
+        // leave .template files behind.
+        foreach (var name in new[] { "CLAUDE.md.dotnet.template", "CLAUDE.md.typescript.template", "CLAUDE.md.template" })
+        {
+            var p = Path.Join(target, ".claude", name);
+            if (File.Exists(p))
+            {
+                baselines?.Forget(Path.GetRelativePath(target, p));
+                File.Delete(p);
+            }
+        }
     }
 
     private void WriteManifest(string target)
     {
+        var services = BuildServices();
         var manifest = new Manifest
         {
             Name = Tokens.KebabName,
+            Stack = Stack,
             Capabilities = [.. Capabilities],
-            Services = MultiService ? ["gateway", "users", "orders"] : ["api"],
+            Services = services,
             Deploy = DeployTarget,
             TemplateVersion = CliVersion.Current,
         };
         manifest.Save(target);
+    }
+
+    private List<string> BuildServices()
+    {
+        var services = MultiService
+            ? new List<string> { "gateway", "users", "orders" }
+            : new List<string> { "api" };
+        if (Capabilities.Contains("frontend", StringComparer.Ordinal) && !services.Contains("web"))
+        {
+            services.Add("web");
+        }
+        return services;
     }
 
     private static void TryGitInit(string target)
@@ -290,9 +431,11 @@ public sealed class Planner
             or ".http" or ".props" or ".targets" or ".sln" or ".editorconfig"
             or ".gitignore" or ".gitkeep" or ".sh" or ".ps1" or ".cmd"
             or ".dockerfile" or ".env" or ".example" or ".xml" or ".html"
-            or ".css" or ".js" or ".ts" or ".toml" or ".bicep" or ".tf"
+            or ".css" or ".js" or ".ts" or ".tsx" or ".jsx" or ".mjs" or ".cjs"
+            or ".toml" or ".bicep" or ".tf" or ".sql" or ".graphql" or ".svg"
             or "" => true,
-            _ => Path.GetFileName(path) is "Dockerfile" or "justfile" or "Tiltfile",
+            _ => Path.GetFileName(path) is "Dockerfile" or "justfile" or "Tiltfile"
+                or "pnpm-workspace.yaml" or "pnpm-lock.yaml",
         };
     }
 }

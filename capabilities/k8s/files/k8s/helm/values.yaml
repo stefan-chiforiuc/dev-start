@@ -1,0 +1,49 @@
+# Shared defaults. Env-specific files override. `dev-start promote <env>` writes
+# `values.generated.yaml` siblings that override these from the current manifest.
+
+image:
+  repository: ghcr.io/your-org/{{name}}
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: false
+  host: {{name}}.example.com
+  className: nginx
+  annotations: {}
+
+hpa:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+migrations:
+  enabled: false
+  image:
+    repository: ghcr.io/your-org/{{name}}
+    tag: latest
+
+otel:
+  enabled: false
+  endpoint: http://otel-collector.observability:4317
+
+env: []
+#  - name: ConnectionStrings__Default
+#    valueFrom:
+#      secretKeyRef: { name: {{name}}-db, key: connectionString }

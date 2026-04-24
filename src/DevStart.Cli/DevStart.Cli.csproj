@@ -9,7 +9,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>dev-start</ToolCommandName>
     <PackageId>DevStart</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Authors>dev-start contributors</Authors>
     <Description>Opinionated scaffolder + day-to-day companion for .NET services. See https://github.com/stefan-chiforiuc/dev-start.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -57,6 +57,11 @@
     <EmbeddedResource Include="../../platform/devcontainer/**/*"
                       Exclude="../../platform/devcontainer/**/bin/**;../../platform/devcontainer/**/obj/**">
       <LogicalName>platform/devcontainer/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+
+    <EmbeddedResource Include="../../policies/**/*"
+                      Exclude="../../policies/**/bin/**;../../policies/**/obj/**">
+      <LogicalName>policies/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
 

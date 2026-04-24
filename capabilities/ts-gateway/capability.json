@@ -1,0 +1,17 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "ts-gateway",
+  "version": "0.1.0",
+  "description": "Fastify-based reverse proxy (@fastify/http-proxy) for multi-service TS layouts.",
+  "dependsOn": ["ts-base"],
+  "stacks": ["typescript-fastify"],
+  "conflictsWith": [],
+  "addsServices": [],
+  "envAdditions": [
+    { "key": "GATEWAY_PORT", "example": "8080" }
+  ],
+  "postInstall": ["pnpm install"],
+  "doctor": [
+    { "check": "file", "path": "apps/gateway/package.json" }
+  ]
+}

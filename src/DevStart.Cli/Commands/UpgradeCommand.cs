@@ -37,10 +37,14 @@ public static class UpgradeCommand
                 // would — so the staging tree is a deterministic target.
                 var planner = new Planner(
                     manifest.Name,
-                    multiService: manifest.Services.Count > 1,
+                    // Multi-service layouts are marked by having "gateway" in
+                    // Services. Monoliths have just "api" (optionally "web"
+                    // when the frontend capability is installed).
+                    multiService: manifest.Services.Contains("gateway"),
                     capabilities: manifest.Capabilities,
                     deployTarget: manifest.Deploy,
-                    includeClaude: Directory.Exists(Path.Join(root, ".claude")));
+                    includeClaude: Directory.Exists(Path.Join(root, ".claude")),
+                    stack: manifest.Stack);
                 var newBaselines = planner.Render(staging);
 
                 var plan = Upgrader.BuildPlan(root, staging, oldBaselines);

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "ts-auth",
+  "version": "0.1.0",
+  "description": "OIDC via @fastify/jwt + openid-client. Keycloak as the local provider.",
+  "dependsOn": ["ts-base"],
+  "stacks": ["typescript-fastify"],
+  "conflictsWith": [],
+  "addsServices": ["keycloak"],
+  "envAdditions": [
+    { "key": "OIDC_ISSUER", "example": "http://localhost:8080/realms/devstart" },
+    { "key": "OIDC_AUDIENCE", "example": "devstart-api" }
+  ],
+  "postInstall": ["pnpm install"],
+  "doctor": [
+    { "check": "service", "name": "keycloak", "port": 8080 },
+    { "check": "env", "name": "OIDC_ISSUER" }
+  ]
+}

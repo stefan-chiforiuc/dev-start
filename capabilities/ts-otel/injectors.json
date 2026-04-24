@@ -1,0 +1,15 @@
+{
+  "injectors": [
+    {
+      "file": "apps/api/package.json",
+      "mode": "json-merge",
+      "fragment": "package.json.fragment"
+    },
+    {
+      "file": "apps/api/src/server.ts",
+      "anchor": "import { buildApp }",
+      "placement": "before",
+      "fragment": "server-preimport.fragment"
+    }
+  ]
+}

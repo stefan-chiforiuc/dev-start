@@ -10,6 +10,92 @@ from conventional-commit messages — don't edit by hand except for the
 
 ## [Unreleased]
 
+### Added — v1.1 (k8s)
+
+- **`k8s` capability** — Helm chart + Kustomize overlays (`dev`, `stage`,
+  `prod`) mirroring the compose stack, including a pre-install migration
+  Job gated by the presence of a `postgres` capability and a
+  `ServiceMonitor` gated by `otel`.
+- **`dev-start promote <env>`** — reads `.devstart.json` and emits
+  `k8s/overlays/<env>/values.generated.yaml` with per-env replica counts,
+  HPA, migration, and OTel settings. `--render` shells out to
+  `helm template` for a fully-rendered manifest.
+
+### Added — v1.2 (TypeScript/Fastify stack, full parity)
+
+- **`--stack` option on `dev-start new`** — `dotnet` (default) or
+  `typescript`. Manifest persists the choice; `Planner` branches on
+  `Stack` when selecting base / gateway / deploy capabilities and when
+  picking the Claude briefing template.
+- **Ten new TypeScript capabilities** — `ts-base`, `ts-postgres`,
+  `ts-auth`, `ts-otel`, `ts-queue`, `ts-cache`, `ts-s3`, `ts-mail`,
+  `ts-flags`, `ts-sdk`, `ts-gateway`, `ts-deploy-fly`, `ts-deploy-aca`.
+  Fastify 5 + TypeScript strict + ESM, pnpm workspace, Vitest,
+  distroless Dockerfile.
+- **ADR 0008** — TS capabilities use a `ts-` prefix convention (one
+  folder = one slice), with explicit `stacks: []` in each
+  `capability.json` for `AddCommand` stack gating.
+
+### Added — v1.3 (React frontend)
+
+- **`frontend` capability** — Vite + React 19 + TanStack Router +
+  TanStack Query scaffold. Stack-agnostic via the new `dependsOnByStack`
+  field (targets `sdk` on .NET, `ts-sdk` on TypeScript).
+- **`# devstart:web-service` marker** in the shared compose file;
+  `frontend`'s injector adds a Node dev service there.
+- **`Manifest.Services`** gets a `web` entry when `frontend` is
+  installed; `dev-start add frontend` keeps that list in sync.
+
+### Added — v1.4 (policy verb)
+
+- **`dev-start policy`** with `list` / `apply` / `remove` / `validate`
+  subcommands. Policy bundles ship in-repo under `policies/<name>/`
+  (embedded alongside capabilities).
+- **Two starter bundles** — `default-open-source` (required CodeQL /
+  Trivy / gitleaks workflows, conventional-commit CI check, base-image
+  allowlist) and `org-strict` (inherits + required commit signing +
+  required k8s labels + stricter base-image allowlist).
+- **Doctor integration** — `dev-start doctor` runs installed policies'
+  validators informationally (doctor never fails); `dev-start policy
+  validate` exits non-zero on any validator failure.
+
+### Changed
+
+- **`.mcp.json` is now fully declarative.** Capabilities declare
+  `mcp: [{ name, command, args, env }]` in their `capability.json`. The
+  hardcoded `WriteMcpConfig` if-blocks for `postgres` + `otel` were
+  replaced by iteration over the installed capabilities' `mcp` sections.
+  Output is byte-identical to v1.0 for those two capabilities, verified
+  by `McpDeclarativeTests`.
+- **`.claude/` bundle is stack-aware.** The template split into
+  `CLAUDE.md.dotnet.template` + `CLAUDE.md.typescript.template`; skills
+  live under `platform/claude/skills/{dotnet,typescript}/` and the
+  Planner copies only the matching stack's set (stripping the prefix
+  so the file still lands at `.claude/skills/<name>.md`).
+- **Manifest schema bumped from 1 to 2** — adds `stack` (default
+  `dotnet-api`) and `policies` (default `[]`). Old manifests are
+  auto-migrated on load. No action required; existing v1.0 projects
+  keep working.
+- **`CapabilityInstaller.ApplyInjectors`** now accepts a fragment-reader
+  delegate; policies reuse the same injector pipeline without
+  duplicating logic.
+- **`Injector` gains a `mode` field** — `"text"` (default) or
+  `"json-merge"` (backed by a new `JsonMerger`). TypeScript capabilities
+  use `json-merge` for `package.json` and `tsconfig.json` dependencies.
+- **`Tokens`** gains `{{nameCamel}}` (camelCase) and `{{NameScope}}`
+  (npm scope `@my-app`) for the TypeScript stack.
+- **`doctor` gains a `tool` check kind** — generic "is X on PATH?"
+  used by `k8s`, `frontend`, `ts-base` (node, pnpm, helm, kubectl, az,
+  flyctl).
+
+### Tests
+
+- `ManifestMigrationTests`, `StackBranchingTests`, `McpDeclarativeTests`,
+  `PromoteTests`, `PolicyTests`, `PolicyIntegrityTests`,
+  `TsStackShapeTests`. `GeneratedSourceShapeTests` extended with `k8s`
+  and `frontend` combos. `CliSmokeTests` extended with `promote` and
+  `policy` help theories.
+
 ## [1.0.0] — 2026-04-18
 
 First stable release. The CLI + capabilities + generated projects form

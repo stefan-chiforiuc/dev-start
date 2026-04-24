@@ -1,0 +1,16 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "ts-deploy-fly",
+  "version": "0.1.0",
+  "description": "Fly.io deploy target tuned for the TypeScript/Fastify stack (pnpm build, distroless runtime).",
+  "dependsOn": ["ts-base"],
+  "stacks": ["typescript-fastify"],
+  "conflictsWith": ["ts-deploy-aca"],
+  "addsServices": [],
+  "envAdditions": [],
+  "postInstall": [],
+  "doctor": [
+    { "check": "tool", "name": "flyctl", "args": "version" },
+    { "check": "file", "path": "fly.toml" }
+  ]
+}

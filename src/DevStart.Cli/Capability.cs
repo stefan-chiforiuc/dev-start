@@ -18,6 +18,15 @@ public sealed class Capability
     [JsonPropertyName("dependsOn")]
     public List<string> DependsOn { get; set; } = [];
 
+    /// <summary>
+    /// Stack-specific dependency override. When a stack key matches the current
+    /// project stack, its list is used instead of <see cref="DependsOn"/>. Lets
+    /// a single capability (e.g. <c>frontend</c>) target <c>sdk</c> on the .NET
+    /// stack and <c>ts-sdk</c> on the TypeScript stack without duplicating.
+    /// </summary>
+    [JsonPropertyName("dependsOnByStack")]
+    public Dictionary<string, List<string>>? DependsOnByStack { get; set; }
+
     [JsonPropertyName("conflictsWith")]
     public List<string> ConflictsWith { get; set; } = [];
 
@@ -33,6 +42,20 @@ public sealed class Capability
     [JsonPropertyName("doctor")]
     public List<DoctorCheck> Doctor { get; set; } = [];
 
+    /// <summary>
+    /// Declarative MCP servers contributed by this capability. Planner merges
+    /// them all into <c>.mcp.json</c>; no per-capability if-blocks required.
+    /// </summary>
+    [JsonPropertyName("mcp")]
+    public List<McpServerSpec> Mcp { get; set; } = [];
+
+    /// <summary>
+    /// Which stacks this capability targets. Empty = any. When set, <c>add</c>
+    /// rejects installation on mismatched stacks.
+    /// </summary>
+    [JsonPropertyName("stacks")]
+    public List<string> Stacks { get; set; } = [];
+
     public sealed class EnvAddition
     {
         [JsonPropertyName("key")] public string Key { get; set; } = "";
@@ -46,6 +69,26 @@ public sealed class Capability
         [JsonPropertyName("port")] public int? Port { get; set; }
         [JsonPropertyName("path")] public string? Path { get; set; }
         [JsonPropertyName("min")] public string? Min { get; set; }
+        [JsonPropertyName("args")] public string? Args { get; set; }
+    }
+
+    public sealed class McpServerSpec
+    {
+        [JsonPropertyName("name")] public string Name { get; set; } = "";
+        [JsonPropertyName("command")] public string Command { get; set; } = "";
+        [JsonPropertyName("args")] public List<string> Args { get; set; } = [];
+        [JsonPropertyName("env")] public Dictionary<string, string>? Env { get; set; }
+    }
+
+    /// <summary>
+    /// Dependencies applicable for a given stack — prefers
+    /// <see cref="DependsOnByStack"/> when a matching key exists.
+    /// </summary>
+    public List<string> EffectiveDependsOn(string stack)
+    {
+        if (DependsOnByStack is { } map && map.TryGetValue(stack, out var scoped))
+            return scoped;
+        return DependsOn;
     }
 
     public static Capability LoadEmbedded(string name)

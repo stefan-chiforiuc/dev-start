@@ -1,0 +1,10 @@
+image:
+  tag: stage
+replicaCount: 2
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+ingress:
+  enabled: true
+  host: {{name}}.stage.example.com

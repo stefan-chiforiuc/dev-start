@@ -25,7 +25,31 @@ public static class AddCommand
 
             var cap = Capability.LoadEmbedded(capName);
 
-            foreach (var dep in cap.DependsOn)
+            // Stack gate: explicit capability.stacks wins. Fall back to prefix
+            // convention — ts-* is typescript-only, otherwise dotnet-only —
+            // except stack-agnostic capabilities that declare dependsOnByStack.
+            if (cap.Stacks.Count > 0 && !cap.Stacks.Contains(manifest.Stack, StringComparer.Ordinal))
+            {
+                AnsiConsole.MarkupLine(
+                    $"[red]Stack mismatch[/]: [cyan]{capName}[/] targets [yellow]{string.Join(", ", cap.Stacks)}[/]; " +
+                    $"this project is [yellow]{manifest.Stack}[/].");
+                return;
+            }
+            if (cap.Stacks.Count == 0 && cap.DependsOnByStack is null)
+            {
+                var implied = capName.StartsWith("ts-", StringComparison.Ordinal)
+                    ? Planner.StackTypescript
+                    : Planner.StackDotnet;
+                if (implied != manifest.Stack)
+                {
+                    AnsiConsole.MarkupLine(
+                        $"[red]Stack mismatch[/]: [cyan]{capName}[/] is a [yellow]{implied}[/] capability; " +
+                        $"this project is [yellow]{manifest.Stack}[/].");
+                    return;
+                }
+            }
+
+            foreach (var dep in cap.EffectiveDependsOn(manifest.Stack))
             {
                 if (!manifest.Capabilities.Contains(dep, StringComparer.Ordinal))
                 {
@@ -51,6 +75,10 @@ public static class AddCommand
             CapabilityInstaller.Install(capName, root, tokens, baselines);
 
             manifest.Capabilities.Add(capName);
+            if (capName == "frontend" && !manifest.Services.Contains("web"))
+            {
+                manifest.Services.Add("web");
+            }
             manifest.Save(root);
             baselines.Save(root);
 
