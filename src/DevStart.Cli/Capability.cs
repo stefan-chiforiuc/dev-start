@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -109,9 +108,8 @@ public sealed class Capability
 
     public static IEnumerable<string> AvailableNames()
     {
-        return ResourceIndex.Keys
-            .Where(n => n.StartsWith("capabilities/", StringComparison.Ordinal)
-                     && n.EndsWith("/capability.json", StringComparison.Ordinal))
+        return EmbeddedResourceIndex.KeysUnder("capabilities/")
+            .Where(n => n.EndsWith("/capability.json", StringComparison.Ordinal))
             .Select(n => n["capabilities/".Length..^"/capability.json".Length])
             .Where(n => !n.StartsWith('_'))
             .Distinct()
@@ -126,16 +124,14 @@ public sealed class Capability
     public static IEnumerable<string> FilesFor(string name)
     {
         var prefix = $"capabilities/{name}/files/";
-        return ResourceIndex.Keys
-            .Where(n => n.StartsWith(prefix, StringComparison.Ordinal))
-            .Select(n => n[prefix.Length..]);
+        return EmbeddedResourceIndex.KeysUnder(prefix).Select(n => n[prefix.Length..]);
     }
 
     public static byte[]? ReadFile(string capabilityName, string relativePath)
-        => ReadResourceBytes($"capabilities/{capabilityName}/files/{relativePath}");
+        => EmbeddedResourceIndex.ReadBytes($"capabilities/{capabilityName}/files/{relativePath}");
 
     public static string? ReadFragment(string capabilityName, string fragmentPath)
-        => ReadResource($"capabilities/{capabilityName}/injectors/{fragmentPath}");
+        => EmbeddedResourceIndex.ReadText($"capabilities/{capabilityName}/injectors/{fragmentPath}");
 
     /// <summary>
     /// Resource names beginning with <paramref name="prefix"/> (e.g.
@@ -144,61 +140,15 @@ public sealed class Capability
     /// </summary>
     public static IEnumerable<string> ResourceNamesUnder(string prefix)
     {
-        return ResourceIndex.Keys
-            .Where(n => n.StartsWith(prefix, StringComparison.Ordinal))
+        return EmbeddedResourceIndex.KeysUnder(prefix)
             .Select(n => n[prefix.Length..])
             .Where(n => n.Length > 0);
     }
 
     /// <summary>Raw bytes for a resource by its forward-slash-normalized name.</summary>
-    public static byte[]? ReadBytes(string logicalName) => ReadResourceBytes(logicalName);
+    public static byte[]? ReadBytes(string logicalName)
+        => EmbeddedResourceIndex.ReadBytes(logicalName);
 
     private static string? ReadResource(string logicalName)
-    {
-        var bytes = ReadResourceBytes(logicalName);
-        return bytes is null ? null : System.Text.Encoding.UTF8.GetString(bytes);
-    }
-
-    private static byte[]? ReadResourceBytes(string logicalName)
-    {
-        var normalized = Normalize(logicalName);
-        if (!ResourceIndex.TryGetValue(normalized, out var actual)) return null;
-
-        var asm = Assembly.GetExecutingAssembly();
-        using var stream = asm.GetManifestResourceStream(actual);
-        if (stream is null) return null;
-        using var ms = new MemoryStream();
-        stream.CopyTo(ms);
-        return ms.ToArray();
-    }
-
-    /// <summary>
-    /// <para>
-    /// Windows-built packs produce resource names with '\' (MSBuild's
-    /// <c>%(RecursiveDir)</c> uses the platform separator); Linux builds use
-    /// '/'. Both forms land as the assembly's manifest names depending on where
-    /// the <c>.nupkg</c> was built.
-    /// </para>
-    /// <para>
-    /// This index lets the rest of the CLI look up resources by a single
-    /// canonical form (forward slashes) regardless of how the pack was built.
-    /// </para>
-    /// </summary>
-    private static readonly Lazy<Dictionary<string, string>> _resourceIndex =
-        new(BuildResourceIndex, isThreadSafe: true);
-
-    private static Dictionary<string, string> ResourceIndex => _resourceIndex.Value;
-
-    private static Dictionary<string, string> BuildResourceIndex()
-    {
-        var asm = Assembly.GetExecutingAssembly();
-        var map = new Dictionary<string, string>(StringComparer.Ordinal);
-        foreach (var name in asm.GetManifestResourceNames())
-        {
-            map[Normalize(name)] = name;
-        }
-        return map;
-    }
-
-    private static string Normalize(string name) => name.Replace('\\', '/');
+        => EmbeddedResourceIndex.ReadText(logicalName);
 }

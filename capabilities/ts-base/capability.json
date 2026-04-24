@@ -5,7 +5,7 @@
   "description": "Fastify + TypeScript monorepo skeleton. pnpm workspace, Vitest, distroless-ready Dockerfile, justfile.",
   "dependsOn": [],
   "stacks": ["typescript-fastify"],
-  "conflictsWith": ["base"],
+  "conflictsWith": [],
   "addsServices": [],
   "envAdditions": [
     { "key": "NODE_ENV", "example": "development" },

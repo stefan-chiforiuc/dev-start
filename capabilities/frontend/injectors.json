@@ -5,6 +5,11 @@
       "anchor": "# devstart:web-service",
       "placement": "after",
       "fragment": "compose-web.fragment"
+    },
+    {
+      "file": "justfile",
+      "marker": "# devstart:just-targets",
+      "fragment": "justfile-web.fragment"
     }
   ]
 }

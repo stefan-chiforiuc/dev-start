@@ -30,6 +30,10 @@
     <PackageReference Include="Spectre.Console" Version="0.49.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="DevStart.Cli.Tests" />
+  </ItemGroup>
+
   <!--
     Embed capability modules and platform bundles so the tool is self-contained.
 

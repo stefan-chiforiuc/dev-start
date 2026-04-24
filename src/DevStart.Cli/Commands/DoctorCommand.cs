@@ -67,6 +67,7 @@ public static class DoctorCommand
             }
 
             // Policy validators run informationally (doctor never fails).
+            // Walk extends so inherited bundles' validators show up too.
             foreach (var policyName in manifest.Policies)
             {
                 Policy policy;
@@ -76,10 +77,13 @@ public static class DoctorCommand
                     table.AddRow("policy", policyName, "[yellow]missing bundle[/]");
                     continue;
                 }
-                foreach (var res in PolicyValidatorRunner.Run(policy, root))
+                foreach (var link in PolicyCommand.ResolveExtends(policy))
                 {
-                    table.AddRow($"policy/{res.PolicyName}", res.ValidatorId,
-                        res.Passed ? "[green]ok[/]" : $"[red]fail[/] {res.Message}");
+                    foreach (var res in PolicyValidatorRunner.Run(link, root))
+                    {
+                        table.AddRow($"policy/{res.PolicyName}", res.ValidatorId,
+                            res.Passed ? "[green]ok[/]" : $"[red]fail[/] {res.Message}");
+                    }
                 }
             }
 

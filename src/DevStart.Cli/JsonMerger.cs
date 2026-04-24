@@ -18,10 +18,23 @@ public static class JsonMerger
         WriteIndented = true,
     };
 
+    // tsconfig.json and other jsonc-shaped files ship with comments and
+    // trailing commas. Accept both when parsing; emit clean JSON on write.
+    private static readonly JsonNodeOptions NodeOptions = new()
+    {
+        PropertyNameCaseInsensitive = false,
+    };
+
+    private static readonly JsonDocumentOptions DocumentOptions = new()
+    {
+        AllowTrailingCommas = true,
+        CommentHandling = JsonCommentHandling.Skip,
+    };
+
     public static string Merge(string targetJson, string fragmentJson)
     {
-        var target = JsonNode.Parse(targetJson);
-        var fragment = JsonNode.Parse(fragmentJson);
+        var target = JsonNode.Parse(targetJson, NodeOptions, DocumentOptions);
+        var fragment = JsonNode.Parse(fragmentJson, NodeOptions, DocumentOptions);
         var merged = MergeNodes(target, fragment) ?? target ?? fragment;
         return merged?.ToJsonString(WriteOptions) ?? targetJson;
     }

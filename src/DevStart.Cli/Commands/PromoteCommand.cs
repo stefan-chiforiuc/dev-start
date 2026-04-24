@@ -81,7 +81,7 @@ public static class PromoteCommand
         return cmd;
     }
 
-    public static string BuildValues(string env, Manifest manifest)
+    internal static string BuildValues(string env, Manifest manifest)
     {
         var (replicas, cpu, mem, hpaEnabled) = env.ToLowerInvariant() switch
         {

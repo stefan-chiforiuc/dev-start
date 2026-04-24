@@ -88,13 +88,57 @@ from conventional-commit messages — don't edit by hand except for the
   used by `k8s`, `frontend`, `ts-base` (node, pnpm, helm, kubectl, az,
   flyctl).
 
+### Fixed (post-review)
+
+- **`fastify-plugin` dep** added to `ts-base/apps/api/package.json`. Without
+  it, every `ts-*` capability that wraps its plugin in `fp()` failed to
+  typecheck after install.
+- **`ts-auth /me` route** is now mounted: a new injector registers
+  `authRoutes` at the `// devstart:app-routes` marker. Before the fix the
+  plugin decorated FastifyInstance but no route accepted requests.
+- **`@fastify/jwt` JWKS wiring** rewritten to use `get-jwks` and a
+  `secret` function keyed off the token's `kid`. The prior config passed
+  the JWKS URL as literal key material — verification would have failed
+  at runtime.
+- **`policy extends` is now executed.** `PolicyCommand.Apply` walks the
+  extends chain bases-first; `validate` and `doctor` run inherited
+  validators. `org-strict` now actually gets `default-open-source`'s
+  workflows + validators rolled in.
+- **CLAUDE templates filter by stack.** Only the matching
+  `CLAUDE.md.<stack>.template` is copied; the other is no longer staged
+  just to be deleted.
+- **Transitive capability resolution** — `Planner` now walks
+  `EffectiveDependsOn` so `dev-start new --stack typescript --with frontend`
+  implicitly pulls in `ts-sdk`. Previously only direct deps were added.
+
+### Changed (post-review)
+
+- `commands/` and `agents/` in the Claude bundle are now stack-split into
+  `dotnet/` and `typescript/` subfolders (matching the skills/ layout).
+  `/add-endpoint` and `/add-migration` briefings are stack-specific.
+- `Capability` and `Policy` share an `EmbeddedResourceIndex` utility
+  instead of each building their own reflection-backed dictionary.
+- `InternalsVisibleTo("DevStart.Cli.Tests")` replaces the public helper
+  surface I briefly exposed for testability (`Planner.NormalizeStack`,
+  `RouteClaudePath`, `BaseCapabilityFor`, `GatewayCapabilityFor`,
+  `DeployCapabilityName`, `PromoteCommand.BuildValues`).
+- `JsonMerger` tolerates jsonc comments and trailing commas in the target
+  JSON (relevant for `tsconfig.json`). Output stays plain JSON.
+- `base` and `ts-base` justfiles gain a `# devstart:just-targets` marker;
+  `frontend` injects a `web` target into it so `just web` boots the Vite
+  dev server on either stack.
+- `ts-base` drops `conflictsWith: ["base"]` — the stack gate already
+  prevents cross-stack installation.
+
 ### Tests
 
 - `ManifestMigrationTests`, `StackBranchingTests`, `McpDeclarativeTests`,
-  `PromoteTests`, `PolicyTests`, `PolicyIntegrityTests`,
+  `PromoteTests`, `PolicyTests`, `PolicyIntegrityTests`, `JsonMergerTests`,
   `TsStackShapeTests`. `GeneratedSourceShapeTests` extended with `k8s`
   and `frontend` combos. `CliSmokeTests` extended with `promote` and
-  `policy` help theories.
+  `policy` help theories. `StackBranchingTests` now exercises
+  `RouteClaudePath` across skills / commands / agents / templates and
+  transitive resolution of `dependsOnByStack`.
 
 ## [1.0.0] — 2026-04-18
 

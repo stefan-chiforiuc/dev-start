@@ -81,13 +81,19 @@ public static class PolicyCommand
             AnsiConsole.MarkupLine($"[bold]dev-start policy apply[/] [cyan]{name}[/]");
             AnsiConsole.MarkupLine($"[grey]{policy.Description}[/]");
 
-            CopyFiles(policy, root, tokens, baselines);
-            CapabilityInstaller.ApplyInjectors(
-                policy.Injectors,
-                root,
-                tokens,
-                baselines,
-                fragmentReader: p => Policy.ReadFragment(name, p));
+            // Resolve extends transitively (depth-first, dedup by name). Each
+            // policy in the chain contributes files + injectors in extends-first
+            // order so the applying policy wins on overlapping markers.
+            foreach (var p in ResolveExtends(policy))
+            {
+                CopyFiles(p, root, tokens, baselines);
+                CapabilityInstaller.ApplyInjectors(
+                    p.Injectors,
+                    root,
+                    tokens,
+                    baselines,
+                    fragmentReader: frag => Policy.ReadFragment(p.Name, frag));
+            }
 
             if (!manifest.Policies.Contains(name)) manifest.Policies.Add(name);
             manifest.Save(root);
@@ -95,6 +101,36 @@ public static class PolicyCommand
             AnsiConsole.MarkupLine("[green]Applied.[/]");
         }, nameArg, projectOpt);
         return apply;
+    }
+
+    /// <summary>
+    /// Flatten a policy's <c>extends</c> chain into a list ordered bases-first,
+    /// applying policy last. Cycles are broken by name-dedup.
+    /// </summary>
+    internal static IReadOnlyList<Policy> ResolveExtends(Policy leaf)
+    {
+        var ordered = new List<Policy>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+
+        void Visit(Policy p)
+        {
+            if (!seen.Add(p.Name)) return;
+            foreach (var baseName in p.Extends)
+            {
+                Policy @base;
+                try { @base = Policy.LoadEmbedded(baseName); }
+                catch
+                {
+                    AnsiConsole.MarkupLine($"  [yellow]skip extends[/] — missing policy '{baseName}'");
+                    continue;
+                }
+                Visit(@base);
+            }
+            ordered.Add(p);
+        }
+
+        Visit(leaf);
+        return ordered;
     }
 
     private static void CopyFiles(Policy policy, string root, Tokens tokens, Baselines baselines)
@@ -195,11 +231,17 @@ public static class PolicyCommand
                     continue;
                 }
 
-                foreach (var res in PolicyValidatorRunner.Run(p, root))
+                // Validate across the full extends chain so inherited
+                // validators fire even when only the leaf is listed in the
+                // manifest's Policies array.
+                foreach (var link in ResolveExtends(p))
                 {
-                    var tag = res.Passed ? "[green]ok[/]" : "[red]fail[/]";
-                    table.AddRow(res.PolicyName, res.ValidatorId, tag, res.Message.EscapeMarkup());
-                    if (!res.Passed) failed = true;
+                    foreach (var res in PolicyValidatorRunner.Run(link, root))
+                    {
+                        var tag = res.Passed ? "[green]ok[/]" : "[red]fail[/]";
+                        table.AddRow(res.PolicyName, res.ValidatorId, tag, res.Message.EscapeMarkup());
+                        if (!res.Passed) failed = true;
+                    }
                 }
             }
             AnsiConsole.Write(table);

@@ -1,3 +1,4 @@
+using DevStart.Commands;
 using FluentAssertions;
 using Xunit;
 
@@ -5,6 +6,28 @@ namespace DevStart.Tests;
 
 public class PolicyTests
 {
+    [Fact]
+    public void ResolveExtends_orders_bases_before_leaf()
+    {
+        var strict = Policy.LoadEmbedded("org-strict");
+        var chain = PolicyCommand.ResolveExtends(strict).Select(p => p.Name).ToList();
+        chain.Should().Equal("default-open-source", "org-strict");
+    }
+
+    [Fact]
+    public void Validate_runs_inherited_validators()
+    {
+        // org-strict extends default-open-source; the OSS-baseline
+        // codeql-required validator must still fire when validating strict.
+        var strict = Policy.LoadEmbedded("org-strict");
+        var validators = PolicyCommand.ResolveExtends(strict)
+            .SelectMany(p => p.Validators.Select(v => v.Id))
+            .ToList();
+        validators.Should().Contain("codeql-required");
+        validators.Should().Contain("commit-signing-required");
+    }
+
+
     [Fact]
     public void Bundles_discoverable_by_name()
     {

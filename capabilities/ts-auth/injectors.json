@@ -15,6 +15,11 @@
       "file": "apps/api/src/app.ts",
       "marker": "// devstart:app-plugins",
       "fragment": "app-plugins.fragment"
+    },
+    {
+      "file": "apps/api/src/app.ts",
+      "marker": "// devstart:app-routes",
+      "fragment": "app-routes.fragment"
     }
   ]
 }

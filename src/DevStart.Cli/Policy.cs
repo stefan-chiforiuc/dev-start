@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -45,7 +44,7 @@ public sealed class Policy
 
     public static Policy LoadEmbedded(string name)
     {
-        var json = ReadResource($"policies/{name}/policy.json")
+        var json = EmbeddedResourceIndex.ReadText($"policies/{name}/policy.json")
             ?? throw new InvalidOperationException($"Unknown policy '{name}'.");
         return JsonSerializer.Deserialize<Policy>(json)
             ?? throw new InvalidOperationException($"Invalid policy.json for '{name}'.");
@@ -53,9 +52,8 @@ public sealed class Policy
 
     public static IEnumerable<string> AvailableNames()
     {
-        return ResourceIndex.Keys
-            .Where(n => n.StartsWith("policies/", StringComparison.Ordinal)
-                     && n.EndsWith("/policy.json", StringComparison.Ordinal))
+        return EmbeddedResourceIndex.KeysUnder("policies/")
+            .Where(n => n.EndsWith("/policy.json", StringComparison.Ordinal))
             .Select(n => n["policies/".Length..^"/policy.json".Length])
             .Distinct()
             .OrderBy(n => n, StringComparer.Ordinal);
@@ -64,49 +62,14 @@ public sealed class Policy
     public static IEnumerable<string> FilesFor(string name)
     {
         var prefix = $"policies/{name}/files/";
-        return ResourceIndex.Keys
-            .Where(n => n.StartsWith(prefix, StringComparison.Ordinal))
-            .Select(n => n[prefix.Length..]);
+        return EmbeddedResourceIndex.KeysUnder(prefix).Select(n => n[prefix.Length..]);
     }
 
     public static byte[]? ReadFile(string policyName, string relativePath)
-        => ReadResourceBytes($"policies/{policyName}/files/{relativePath}");
+        => EmbeddedResourceIndex.ReadBytes($"policies/{policyName}/files/{relativePath}");
 
     public static string? ReadFragment(string policyName, string fragmentPath)
-        => ReadResource($"policies/{policyName}/fragments/{fragmentPath}");
-
-    private static string? ReadResource(string logicalName)
-    {
-        var bytes = ReadResourceBytes(logicalName);
-        return bytes is null ? null : System.Text.Encoding.UTF8.GetString(bytes);
-    }
-
-    private static byte[]? ReadResourceBytes(string logicalName)
-    {
-        var normalized = logicalName.Replace('\\', '/');
-        if (!ResourceIndex.TryGetValue(normalized, out var actual)) return null;
-        var asm = Assembly.GetExecutingAssembly();
-        using var stream = asm.GetManifestResourceStream(actual);
-        if (stream is null) return null;
-        using var ms = new MemoryStream();
-        stream.CopyTo(ms);
-        return ms.ToArray();
-    }
-
-    private static readonly Lazy<Dictionary<string, string>> _resourceIndex =
-        new(BuildResourceIndex, isThreadSafe: true);
-    private static Dictionary<string, string> ResourceIndex => _resourceIndex.Value;
-
-    private static Dictionary<string, string> BuildResourceIndex()
-    {
-        var asm = Assembly.GetExecutingAssembly();
-        var map = new Dictionary<string, string>(StringComparer.Ordinal);
-        foreach (var name in asm.GetManifestResourceNames())
-        {
-            map[name.Replace('\\', '/')] = name;
-        }
-        return map;
-    }
+        => EmbeddedResourceIndex.ReadText($"policies/{policyName}/fragments/{fragmentPath}");
 }
 
 /// <summary>Runs a policy's validator list against a project tree.</summary>

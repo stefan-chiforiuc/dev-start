@@ -39,24 +39,59 @@ public sealed class Planner
 
         var baseCap = BaseCapabilityFor(Stack);
         var gatewayCap = GatewayCapabilityFor(Stack);
-        var resolved = new List<string> { baseCap };
+
+        // Collect the user-requested set plus auto-added gateway / deploy caps.
+        var requested = new List<string> { baseCap };
         foreach (var c in capabilities)
         {
-            if (!resolved.Contains(c, StringComparer.Ordinal)) resolved.Add(c);
+            if (!requested.Contains(c, StringComparer.Ordinal)) requested.Add(c);
         }
-        if (multiService && !resolved.Contains(gatewayCap, StringComparer.Ordinal))
+        if (multiService && !requested.Contains(gatewayCap, StringComparer.Ordinal))
         {
-            resolved.Add(gatewayCap);
+            requested.Add(gatewayCap);
         }
         var deployCap = DeployCapabilityName(deployTarget, Stack);
-        if (deployCap is not null && !resolved.Contains(deployCap, StringComparer.Ordinal))
+        if (deployCap is not null && !requested.Contains(deployCap, StringComparer.Ordinal))
         {
-            resolved.Add(deployCap);
+            requested.Add(deployCap);
         }
-        Capabilities = resolved;
+
+        Capabilities = ResolveTransitively(requested, Stack);
     }
 
-    public static string NormalizeStack(string stack) => stack?.ToLowerInvariant() switch
+    /// <summary>
+    /// Topologically order the requested capability set plus anything they
+    /// transitively depend on (via <see cref="Capability.EffectiveDependsOn"/>).
+    /// A capability missing from the embedded set is kept in-place — it'll
+    /// fail loudly at install time with a readable error.
+    /// </summary>
+    internal static IReadOnlyList<string> ResolveTransitively(
+        IReadOnlyList<string> requested, string stack)
+    {
+        var ordered = new List<string>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+
+        void Visit(string name)
+        {
+            if (!seen.Add(name)) return;
+            Capability? cap = null;
+            try { cap = Capability.LoadEmbedded(name); }
+            catch { /* unknown capability — install step will diagnose */ }
+            if (cap is not null)
+            {
+                foreach (var dep in cap.EffectiveDependsOn(stack))
+                {
+                    Visit(dep);
+                }
+            }
+            ordered.Add(name);
+        }
+
+        foreach (var name in requested) Visit(name);
+        return ordered;
+    }
+
+    internal static string NormalizeStack(string stack) => stack?.ToLowerInvariant() switch
     {
         "dotnet" or "dotnet-api" or "csharp" or ".net" => StackDotnet,
         "typescript" or "typescript-fastify" or "ts" or "node" or "fastify" => StackTypescript,
@@ -64,19 +99,19 @@ public sealed class Planner
         _ => stack,
     };
 
-    public static string BaseCapabilityFor(string stack) => stack switch
+    internal static string BaseCapabilityFor(string stack) => stack switch
     {
         StackTypescript => "ts-base",
         _ => "base",
     };
 
-    public static string GatewayCapabilityFor(string stack) => stack switch
+    internal static string GatewayCapabilityFor(string stack) => stack switch
     {
         StackTypescript => "ts-gateway",
         _ => "gateway",
     };
 
-    public static string? DeployCapabilityName(string target, string stack)
+    internal static string? DeployCapabilityName(string target, string stack)
     {
         var key = target?.ToLowerInvariant() switch
         {
@@ -232,20 +267,34 @@ public sealed class Planner
         }
     }
 
-    public static string? RouteClaudePath(string rel, string stack)
+    internal static string? RouteClaudePath(string rel, string stack)
     {
-        const string dotnetPrefix = "skills/dotnet/";
-        const string tsPrefix = "skills/typescript/";
-        if (rel.StartsWith(dotnetPrefix, StringComparison.Ordinal))
+        // skills/, commands/, and agents/ are stack-split into subfolders.
+        // Strip the stack prefix (so the file lands at .claude/skills/<name>.md)
+        // and filter to the current stack.
+        foreach (var root in ClaudeStackedRoots)
         {
-            return stack == StackTypescript ? null : "skills/" + rel[dotnetPrefix.Length..];
+            var dotnetPrefix = root + "dotnet/";
+            var tsPrefix = root + "typescript/";
+            if (rel.StartsWith(dotnetPrefix, StringComparison.Ordinal))
+                return stack == StackTypescript ? null : root + rel[dotnetPrefix.Length..];
+            if (rel.StartsWith(tsPrefix, StringComparison.Ordinal))
+                return stack == StackTypescript ? root + rel[tsPrefix.Length..] : null;
         }
-        if (rel.StartsWith(tsPrefix, StringComparison.Ordinal))
-        {
-            return stack == StackTypescript ? "skills/" + rel[tsPrefix.Length..] : null;
-        }
+
+        // CLAUDE.md templates are per-stack; only copy the matching one.
+        if (rel == "CLAUDE.md.dotnet.template")
+            return stack == StackTypescript ? null : rel;
+        if (rel == "CLAUDE.md.typescript.template")
+            return stack == StackTypescript ? rel : null;
+
         return rel;
     }
+
+    private static readonly string[] ClaudeStackedRoots =
+    {
+        "skills/", "commands/", "agents/",
+    };
 
     private void CopyPlatformBundle(string resourcePrefix, string destRoot, string projectRoot, Baselines? baselines)
     {
