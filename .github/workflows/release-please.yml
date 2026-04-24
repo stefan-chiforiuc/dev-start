@@ -15,7 +15,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         id: release
         with:
           release-type: simple
@@ -23,11 +23,11 @@ jobs:
 
       - name: Checkout
         if: ${{ steps.release.outputs.release_created }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup .NET
         if: ${{ steps.release.outputs.release_created }}
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
 
@@ -48,7 +48,7 @@ jobs:
 
       - name: Attest build provenance
         if: ${{ steps.release.outputs.release_created }}
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: "artifacts/*.nupkg"
 
