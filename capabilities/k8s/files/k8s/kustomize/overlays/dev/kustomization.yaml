@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: {{name}}-dev
+
+resources:
+  - ../../base
+
+images:
+  - name: ghcr.io/your-org/{{name}}
+    newTag: dev
+
+patches:
+  - path: replicas.yaml
+    target: { kind: Deployment, name: {{name}} }

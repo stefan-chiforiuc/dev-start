@@ -1,0 +1,23 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "frontend",
+  "version": "0.1.0",
+  "description": "Vite + React 19 + TanStack Router + TanStack Query. Consumes the generated SDK from sdk / ts-sdk.",
+  "dependsOn": [],
+  "dependsOnByStack": {
+    "typescript-fastify": ["ts-base", "ts-sdk"],
+    "dotnet-api": ["base", "sdk"]
+  },
+  "stacks": ["typescript-fastify", "dotnet-api"],
+  "conflictsWith": [],
+  "addsServices": ["web"],
+  "envAdditions": [
+    { "key": "VITE_API_BASE_URL", "example": "http://localhost:5000" }
+  ],
+  "postInstall": ["pnpm install"],
+  "doctor": [
+    { "check": "tool", "name": "node", "args": "--version" },
+    { "check": "tool", "name": "pnpm", "args": "--version" },
+    { "check": "file", "path": "apps/web/package.json" }
+  ]
+}

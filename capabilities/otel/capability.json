@@ -15,5 +15,12 @@
     { "check": "service", "name": "jaeger", "port": 16686 },
     { "check": "service", "name": "seq", "port": 5341 },
     { "check": "env", "name": "OTEL_EXPORTER_OTLP_ENDPOINT" }
+  ],
+  "mcp": [
+    {
+      "name": "seq-logs",
+      "command": "npx",
+      "args": ["-y", "@dev-start/mcp-seq", "--endpoint", "http://localhost:5341", "--read-only"]
+    }
   ]
 }

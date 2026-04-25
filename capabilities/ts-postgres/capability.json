@@ -1,0 +1,28 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "ts-postgres",
+  "version": "0.1.0",
+  "description": "Kysely + pg, plain-SQL migrations, zod-validated Orders slice, Vitest integration tests via Testcontainers.",
+  "dependsOn": ["ts-base"],
+  "stacks": ["typescript-fastify"],
+  "conflictsWith": [],
+  "addsServices": ["postgres"],
+  "envAdditions": [
+    { "key": "DATABASE_URL", "example": "postgres://dev:dev@localhost:5432/app" }
+  ],
+  "postInstall": [
+    "pnpm install",
+    "pnpm --filter api migrate"
+  ],
+  "doctor": [
+    { "check": "service", "name": "postgres", "port": 5432 },
+    { "check": "env", "name": "DATABASE_URL" }
+  ],
+  "mcp": [
+    {
+      "name": "postgres",
+      "command": "uvx",
+      "args": ["mcp-server-postgres", "postgres://dev:dev@localhost:5432/app"]
+    }
+  ]
+}

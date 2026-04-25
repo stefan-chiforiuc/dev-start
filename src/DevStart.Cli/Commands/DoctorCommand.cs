@@ -66,6 +66,27 @@ public static class DoctorCommand
                 }
             }
 
+            // Policy validators run informationally (doctor never fails).
+            // Walk extends so inherited bundles' validators show up too.
+            foreach (var policyName in manifest.Policies)
+            {
+                Policy policy;
+                try { policy = Policy.LoadEmbedded(policyName); }
+                catch
+                {
+                    table.AddRow("policy", policyName, "[yellow]missing bundle[/]");
+                    continue;
+                }
+                foreach (var link in PolicyCommand.ResolveExtends(policy))
+                {
+                    foreach (var res in PolicyValidatorRunner.Run(link, root))
+                    {
+                        table.AddRow($"policy/{res.PolicyName}", res.ValidatorId,
+                            res.Passed ? "[green]ok[/]" : $"[red]fail[/] {res.Message}");
+                    }
+                }
+            }
+
             AnsiConsole.Write(table);
 
             if (fix)
@@ -134,6 +155,7 @@ public static class DoctorCommand
                     : "[red]missing[/]",
                 "dotnet-version" => ToolVersion("dotnet", "--version"),
                 "dotnet-tool" when check.Name is string tool => CheckDotnetTool(tool),
+                "tool" when check.Name is string tool => ToolVersion(tool, check.Args ?? "--version"),
                 _ => "[grey]unknown check[/]",
             };
         }

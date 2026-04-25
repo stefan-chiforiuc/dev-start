@@ -1,0 +1,25 @@
+{
+  "injectors": [
+    {
+      "file": "apps/api/package.json",
+      "mode": "json-merge",
+      "fragment": "package.json.fragment"
+    },
+    {
+      "file": "apps/api/src/app.ts",
+      "anchor": "import cors from \"@fastify/cors\";",
+      "placement": "after",
+      "fragment": "app-imports.fragment"
+    },
+    {
+      "file": "apps/api/src/app.ts",
+      "marker": "// devstart:app-plugins",
+      "fragment": "app-plugins.fragment"
+    },
+    {
+      "file": "apps/api/src/app.ts",
+      "marker": "// devstart:app-routes",
+      "fragment": "app-routes.fragment"
+    }
+  ]
+}

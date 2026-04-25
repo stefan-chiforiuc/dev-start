@@ -23,6 +23,8 @@ public class CliSmokeTests
         root.AddCommand(UpgradeCommand.Build());
         root.AddCommand(ListCommand.Build());
         root.AddCommand(CapabilityCommand.Build());
+        root.AddCommand(PromoteCommand.Build());
+        root.AddCommand(PolicyCommand.Build());
         return root;
     }
 
@@ -40,6 +42,8 @@ public class CliSmokeTests
     [InlineData("upgrade")]
     [InlineData("list")]
     [InlineData("capability")]
+    [InlineData("promote")]
+    [InlineData("policy")]
     public void Subcommand_exists(string name)
     {
         var root = BuildRoot();
@@ -63,6 +67,11 @@ public class CliSmokeTests
     [InlineData("upgrade --help")]
     [InlineData("list --help")]
     [InlineData("capability new --help")]
+    [InlineData("promote --help")]
+    [InlineData("policy --help")]
+    [InlineData("policy list --help")]
+    [InlineData("policy apply --help")]
+    [InlineData("policy validate --help")]
     public async Task Help_renders_without_throwing(string argline)
     {
         // InlineData can't carry string[] directly (attribute-argument

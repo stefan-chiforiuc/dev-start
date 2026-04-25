@@ -1,0 +1,16 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "k8s",
+  "version": "0.1.0",
+  "description": "Helm chart + Kustomize overlays (dev/stage/prod) mirroring the compose stack. Pair with `dev-start promote <env>` to emit env-specific values.",
+  "dependsOn": ["base"],
+  "conflictsWith": [],
+  "addsServices": [],
+  "envAdditions": [],
+  "postInstall": [],
+  "doctor": [
+    { "check": "tool", "name": "helm", "args": "version --short" },
+    { "check": "tool", "name": "kubectl", "args": "version --client=true --output=yaml" },
+    { "check": "file", "path": "k8s/helm/Chart.yaml" }
+  ]
+}

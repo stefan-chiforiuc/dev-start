@@ -105,6 +105,9 @@ services:
     volumes:
       - ./dashboard:/usr/share/nginx/html:ro
 
+  # devstart:web-service
+  # Enabled by `dev-start add frontend`. Serves the Vite dev server.
+
 volumes:
   postgres-data:
   seq-data:

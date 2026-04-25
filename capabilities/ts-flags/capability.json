@@ -1,0 +1,15 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "ts-flags",
+  "version": "0.1.0",
+  "description": "Feature flags via OpenFeature server SDK + local JSON provider.",
+  "dependsOn": ["ts-base"],
+  "stacks": ["typescript-fastify"],
+  "conflictsWith": [],
+  "addsServices": [],
+  "envAdditions": [],
+  "postInstall": ["pnpm install"],
+  "doctor": [
+    { "check": "file", "path": "apps/api/flags.json" }
+  ]
+}

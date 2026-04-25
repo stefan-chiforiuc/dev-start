@@ -45,6 +45,20 @@ public class CapabilityIntegrityTests
                 }
             }
 
+            if (cap.DependsOnByStack is not null)
+            {
+                foreach (var (stack, deps) in cap.DependsOnByStack)
+                {
+                    foreach (var dep in deps)
+                    {
+                        if (!names.Contains(dep))
+                        {
+                            issues.Add($"{name}: dependsOnByStack[{stack}] '{dep}' not found");
+                        }
+                    }
+                }
+            }
+
             foreach (var conflict in cap.ConflictsWith)
             {
                 if (!names.Contains(conflict))
@@ -57,7 +71,10 @@ public class CapabilityIntegrityTests
             for (var i = 0; i < injectors.Injectors.Count; i++)
             {
                 var inj = injectors.Injectors[i];
-                if (string.IsNullOrEmpty(inj.Marker) && string.IsNullOrEmpty(inj.Anchor))
+                var isJsonMerge = string.Equals(inj.Mode, "json-merge", StringComparison.OrdinalIgnoreCase);
+                if (!isJsonMerge
+                    && string.IsNullOrEmpty(inj.Marker)
+                    && string.IsNullOrEmpty(inj.Anchor))
                 {
                     issues.Add($"{name}: injector[{i}] has neither marker nor anchor");
                 }
@@ -86,11 +103,15 @@ public class CapabilityIntegrityTests
         foreach (var name in Capability.AvailableNames())
         {
             var cap = Capability.LoadEmbedded(name);
-            if (!name.StartsWith("deploy-", StringComparison.Ordinal)) continue;
+            var isDeploy = name.StartsWith("deploy-", StringComparison.Ordinal)
+                        || name.StartsWith("ts-deploy-", StringComparison.Ordinal);
+            if (!isDeploy) continue;
 
             foreach (var conflict in cap.ConflictsWith)
             {
-                conflict.Should().StartWith("deploy-",
+                var conflictIsDeploy = conflict.StartsWith("deploy-", StringComparison.Ordinal)
+                                    || conflict.StartsWith("ts-deploy-", StringComparison.Ordinal);
+                conflictIsDeploy.Should().BeTrue(
                     because: $"{name} declares a conflict with '{conflict}', but only other deploy-* targets should conflict with each other");
             }
         }

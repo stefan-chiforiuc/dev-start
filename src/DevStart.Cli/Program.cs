@@ -9,5 +9,7 @@ root.AddCommand(DoctorCommand.Build());
 root.AddCommand(UpgradeCommand.Build());
 root.AddCommand(ListCommand.Build());
 root.AddCommand(CapabilityCommand.Build());
+root.AddCommand(PromoteCommand.Build());
+root.AddCommand(PolicyCommand.Build());
 
 return await root.InvokeAsync(args);

@@ -1,0 +1,2 @@
+import { authPlugin } from "./auth/plugin.js";
+import { authRoutes } from "./auth/routes.js";

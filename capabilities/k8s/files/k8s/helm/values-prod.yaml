@@ -1,0 +1,13 @@
+image:
+  tag: prod
+replicaCount: 3
+hpa:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20
+resources:
+  requests: { cpu: 200m, memory: 512Mi }
+  limits:   { cpu: 1000m, memory: 1Gi }
+ingress:
+  enabled: true
+  host: {{name}}.example.com

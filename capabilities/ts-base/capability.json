@@ -1,0 +1,20 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "ts-base",
+  "version": "0.1.0",
+  "description": "Fastify + TypeScript monorepo skeleton. pnpm workspace, Vitest, distroless-ready Dockerfile, justfile.",
+  "dependsOn": [],
+  "stacks": ["typescript-fastify"],
+  "conflictsWith": [],
+  "addsServices": [],
+  "envAdditions": [
+    { "key": "NODE_ENV", "example": "development" },
+    { "key": "PORT", "example": "5000" }
+  ],
+  "postInstall": ["pnpm install"],
+  "doctor": [
+    { "check": "tool", "name": "node", "args": "--version" },
+    { "check": "tool", "name": "pnpm", "args": "--version" },
+    { "check": "file", "path": "apps/api/src/app.ts" }
+  ]
+}

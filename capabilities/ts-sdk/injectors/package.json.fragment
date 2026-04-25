@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@fastify/swagger": "9.2.0"
+  },
+  "devDependencies": {
+    "openapi-typescript": "7.4.2"
+  },
+  "scripts": {
+    "build:openapi": "node dist/openapi.js > ../../packages/sdk/openapi.json"
+  }
+}

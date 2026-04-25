@@ -58,3 +58,5 @@ bootstrap:
     @until docker compose exec -T postgres pg_isready -U dev -d app >/dev/null 2>&1; do sleep 1; done
     -just db-migrate
     just test
+
+# devstart:just-targets

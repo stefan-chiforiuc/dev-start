@@ -10,8 +10,10 @@ namespace DevStart;
 /// </summary>
 public sealed class Manifest
 {
+    public const int CurrentSchemaVersion = 2;
+
     [JsonPropertyName("schemaVersion")]
-    public int SchemaVersion { get; set; } = 1;
+    public int SchemaVersion { get; set; } = CurrentSchemaVersion;
 
     [JsonPropertyName("stack")]
     public string Stack { get; set; } = "dotnet-api";
@@ -31,6 +33,9 @@ public sealed class Manifest
     [JsonPropertyName("deploy")]
     public string Deploy { get; set; } = "none";
 
+    [JsonPropertyName("policies")]
+    public List<string> Policies { get; set; } = [];
+
     private static readonly JsonSerializerOptions Json = new()
     {
         WriteIndented = true,
@@ -46,13 +51,30 @@ public sealed class Manifest
                 $"No .devstart.json in {projectRoot}. Run this from a dev-start-generated project.");
         }
 
-        return JsonSerializer.Deserialize<Manifest>(File.ReadAllText(path), Json)
+        var manifest = JsonSerializer.Deserialize<Manifest>(File.ReadAllText(path), Json)
             ?? throw new InvalidOperationException("Manifest is empty or invalid.");
+
+        return Migrate(manifest);
     }
 
     public void Save(string projectRoot)
     {
         var path = Path.Combine(projectRoot, ".devstart.json");
         File.WriteAllText(path, JsonSerializer.Serialize(this, Json));
+    }
+
+    /// <summary>
+    /// Bring an older manifest up to the current schema. v1 manifests predate
+    /// the <c>stack</c> and <c>policies</c> fields; default them and bump.
+    /// </summary>
+    private static Manifest Migrate(Manifest m)
+    {
+        if (m.SchemaVersion < 2)
+        {
+            if (string.IsNullOrEmpty(m.Stack)) m.Stack = "dotnet-api";
+            m.Policies ??= [];
+            m.SchemaVersion = CurrentSchemaVersion;
+        }
+        return m;
     }
 }

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://dev-start.dev/schemas/policy/1.json",
+  "name": "default-open-source",
+  "version": "0.1.0",
+  "description": "Baseline policy for OSS projects: required security workflows, base-image allowlist, conventional commits.",
+  "appliesToStacks": [],
+  "injectors": [],
+  "validators": [
+    {
+      "id": "codeql-required",
+      "check": "file-exists",
+      "path": ".github/workflows/codeql.yml",
+      "message": "CodeQL workflow is required"
+    },
+    {
+      "id": "trivy-required",
+      "check": "file-exists",
+      "path": ".github/workflows/trivy.yml",
+      "message": "Trivy workflow is required"
+    },
+    {
+      "id": "gitleaks-required",
+      "check": "file-exists",
+      "path": ".github/workflows/gitleaks.yml",
+      "message": "gitleaks workflow is required"
+    },
+    {
+      "id": "conventional-commits",
+      "check": "file-contains",
+      "path": ".github/workflows/ci.yml",
+      "pattern": "(?i)conventional[- ]commits|commitlint",
+      "message": "CI should enforce conventional commits"
+    },
+    {
+      "id": "base-image-allowlist",
+      "check": "image-allowlist",
+      "path": "Dockerfile",
+      "allowlist": [
+        "cgr.dev/chainguard/",
+        "gcr.io/distroless/",
+        "public.ecr.aws/docker/library/",
+        "mcr.microsoft.com/dotnet/",
+        "node:",
+        "alpine:"
+      ],
+      "message": "Dockerfile FROM must use an allowed base image"
+    }
+  ]
+}

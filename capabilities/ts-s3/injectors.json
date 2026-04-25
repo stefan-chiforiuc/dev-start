@@ -1,0 +1,9 @@
+{
+  "injectors": [
+    {
+      "file": "apps/api/package.json",
+      "mode": "json-merge",
+      "fragment": "package.json.fragment"
+    }
+  ]
+}

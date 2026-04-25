@@ -1,0 +1,1 @@
+import { cachePlugin } from "./infra/cache.js";
