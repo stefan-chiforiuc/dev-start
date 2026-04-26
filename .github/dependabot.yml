@@ -5,23 +5,43 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    labels: [dependencies]
     groups:
       otel:
         patterns: ["OpenTelemetry*"]
       ef:
         patterns: ["Microsoft.EntityFrameworkCore*", "Npgsql*"]
       test:
-        patterns: ["xunit*", "Testcontainers*", "FluentAssertions*"]
+        patterns: ["xunit*", "Testcontainers*"]
+    ignore:
+      # FluentAssertions 8.x adopted a commercial license. Hold majors
+      # until the licensing decision is made (stay on 6.x, switch to a
+      # fork like AwesomeAssertions, or accept the commercial terms).
+      - dependency-name: "FluentAssertions"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    open-pull-requests-limit: 5
+    labels: [dependencies, ci]
     groups:
-      actions:
+      # First-party (actions/*, github/*) ride on tags. Bumps here are
+      # generally low-risk and can be reviewed together.
+      actions-core:
+        patterns: ["actions/*", "github/*"]
+      # Third-party actions are SHA-pinned (enforced by the pin-check
+      # job). Group them separately so a risky bump (e.g.
+      # release-please-action major) doesn't ride alongside a routine
+      # one.
+      actions-third-party:
         patterns: ["*"]
+        exclude-patterns: ["actions/*", "github/*"]
 
   - package-ecosystem: docker
     directory: /platform/devcontainer
     schedule:
       interval: weekly
+    open-pull-requests-limit: 5
+    labels: [dependencies]
