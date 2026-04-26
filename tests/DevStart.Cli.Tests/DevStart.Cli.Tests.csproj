@@ -25,7 +25,7 @@
       completed with exit code 1" and the real assertion message is
       buried in the log viewer.
     -->
-    <PackageReference Include="GitHubActionsTestLogger" Version="2.4.1" />
+    <PackageReference Include="GitHubActionsTestLogger" Version="3.0.3" />
   </ItemGroup>
 
 </Project>
