@@ -1,0 +1,59 @@
+name: release-workflow
+
+# Independent release pipeline for the reusable .NET CI workflow
+# (.github/workflows/dotnet-ci.yml). Generated projects pin to
+# `workflow-v<MAJOR>` (floating) for unattended bumps, or
+# `workflow-v<MAJOR>.<MINOR>.<PATCH>` (immutable) to lock in.
+#
+# The CLI's own version (release-please) is intentionally separate —
+# CLI bumps should not invalidate downstream workflow pins, and vice
+# versa.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Workflow version (MAJOR.MINOR.PATCH, no leading v)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Validate version
+        env:
+          V: ${{ inputs.version }}
+        run: |
+          if ! [[ "$V" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::version must match MAJOR.MINOR.PATCH (got '$V')"
+            exit 1
+          fi
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Tag
+        env:
+          V: ${{ inputs.version }}
+        run: |
+          MAJOR="${V%%.*}"
+          IMMUTABLE="workflow-v${V}"
+          FLOATING="workflow-v${MAJOR}"
+          if git rev-parse "$IMMUTABLE" >/dev/null 2>&1; then
+            echo "::error::tag $IMMUTABLE already exists; pick a new version"
+            exit 1
+          fi
+          git tag -a "$IMMUTABLE" -m "Reusable workflow ${V}"
+          git tag -fa "$FLOATING" -m "Floating major pointer for reusable workflow v${MAJOR}"
+          git push origin "$IMMUTABLE"
+          git push --force origin "$FLOATING"

@@ -4,7 +4,7 @@
       "release-type": "simple",
       "package-name": "dev-start",
       "bump-minor-pre-major": true,
-      "bump-patch-for-minor-pre-major": false,
+      "bump-patch-for-minor-pre-major": true,
       "include-v-in-tag": true
     }
   },

@@ -10,8 +10,28 @@ from conventional-commit messages — don't edit by hand except for the
 
 ## [Unreleased]
 
+### Changed
+
+- Release pipeline split into `build` → `verify` → `deploy` stages. Deploy
+  is now gated on the `nuget-production` GitHub Environment and requires
+  manual reviewer approval before any push to NuGet.org. The `verify` stage
+  installs the freshly packed `.nupkg` from the workflow artifact (not from
+  NuGet) and runs `dev-start new` end-to-end plus a Trivy SBOM scan; if it
+  fails, the deploy gate never opens.
+- Reusable CI workflow (`.github/workflows/dotnet-ci.yml`) now versions
+  independently from the CLI under `workflow-v<MAJOR>.<MINOR>.<PATCH>` tags
+  with floating `workflow-v<MAJOR>` pointers. Cut via the new
+  `release-workflow` manual dispatch. Generated projects should pin
+  `@workflow-v1` instead of `@v1`. See `RELEASING.md`.
+- `release-please` now bumps the patch version for `fix:` / `perf:` commits
+  pre-1.0 (`bump-patch-for-minor-pre-major: true`) so bug fixes ship without
+  waiting on the next feature.
+
 ### Added
 
+- `RELEASING.md` documenting the build/verify/deploy flow, rollback
+  procedure, NuGet Trusted Publishing migration path, and required one-time
+  GitHub setup.
 - Capability-based scaffolder: `dev-start new`, `add`, `doctor`, `upgrade`,
   `list`, `capability new`.
 - v1 capabilities: `base`, `postgres`, `auth`, `otel`, `queue`, `cache`, `s3`,
