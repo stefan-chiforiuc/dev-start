@@ -3,6 +3,10 @@
 This roadmap is intentionally narrow. We'd rather do one thing excellently
 than ten things badly.
 
+The capability registry — what exists today vs. what is planned — lives in
+[`capabilities/README.md`](./capabilities/README.md). The release process
+and the v1 cut criteria live in [`RELEASING.md`](./RELEASING.md).
+
 ## v1 — `.NET API starter + capabilities`
 
 The baseline release. Acceptance test from the design doc:
@@ -11,8 +15,7 @@ The baseline release. Acceptance test from the design doc:
   running stack, seeded DB, green tests.
 - **Path B (local):** `dotnet tool install -g DevStart` → `dev-start new` →
   `just up` → < 2 min to same result.
-- `dev-start add <cap>` works idempotently for: `postgres`, `auth`, `otel`,
-  `queue`, `cache`, `s3`, `mail`, `sdk`, `flags`, `gateway`.
+- `dev-start add <cap>` works idempotently for every v1 capability.
 - `dev-start doctor` and `dev-start upgrade` pass smoke tests.
 - Generated `.claude/` bundle answers `/add-endpoint <name>` with a full
   slice (aggregate, handler, migration, test) respecting house style.
@@ -20,6 +23,8 @@ The baseline release. Acceptance test from the design doc:
   perf smoke.
 - Release pipeline signs containers (cosign), attaches SBOM (CycloneDX),
   produces SLSA L2 attestation.
+
+The full v1 cut checklist is in [`RELEASING.md`](./RELEASING.md#v1-cut-criteria).
 
 ## v1.1 — `k8s capability`
 

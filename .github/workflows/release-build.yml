@@ -1,0 +1,101 @@
+name: release-build
+
+# Stage 2 of 3 in the release pipeline. See RELEASING.md.
+# Triggered when release-please publishes a GitHub Release.
+# Packs the global tool, generates the SBOM, attests build provenance,
+# smoke-installs the produced .nupkg in a fresh container, and attaches
+# all artifacts to the Release.
+#
+# This workflow does NOT push to NuGet. Stage 3 (release-publish.yml) is
+# a manual workflow_dispatch that the maintainer triggers after reviewing
+# this workflow's output and the attached artifacts on the Release.
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write       # attach assets to the Release
+  id-token: write       # provenance attestation
+  attestations: write   # provenance attestation
+
+concurrency:
+  group: release-build-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4 # TODO(supply-chain): pin to commit SHA
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Resolve version from tag
+        id: version
+        run: |
+          tag="${{ github.event.release.tag_name }}"
+          echo "value=${tag#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4 # TODO(supply-chain): pin to commit SHA
+        with:
+          global-json-file: global.json
+
+      - name: Pack global tool
+        run: |
+          dotnet pack src/DevStart.Cli/DevStart.Cli.csproj \
+            --configuration Release \
+            -p:Version=${{ steps.version.outputs.value }} \
+            -o artifacts
+
+      - name: Generate SBOM
+        uses: CycloneDX/gh-dotnet-generate-sbom@v2 # TODO(supply-chain): pin to commit SHA
+        with:
+          path: ./DevStart.sln
+          github-bearer-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Stage SBOM
+        run: |
+          mkdir -p artifacts
+          # CycloneDX action writes bom.xml at the workspace root by default.
+          if [ -f bom.xml ]; then
+            mv bom.xml artifacts/dev-start-${{ steps.version.outputs.value }}.cdx.xml
+          fi
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v1 # TODO(supply-chain): pin to commit SHA
+        with:
+          subject-path: "artifacts/*.nupkg"
+
+      - name: Smoke-install packed tool
+        run: |
+          set -euxo pipefail
+          docker run --rm \
+            -v "$PWD/artifacts:/artifacts:ro" \
+            mcr.microsoft.com/dotnet/sdk:8.0 \
+            bash -lc '
+              set -euxo pipefail
+              dotnet tool install -g --add-source /artifacts DevStart \
+                --version ${{ steps.version.outputs.value }}
+              export PATH="$PATH:/root/.dotnet/tools"
+              actual="$(dev-start --version)"
+              echo "dev-start --version → $actual"
+              echo "$actual" | grep -q "${{ steps.version.outputs.value }}"
+              workdir="$(mktemp -d)"
+              cd "$workdir"
+              dev-start new smoke-app --with base --no-claude
+              cd smoke-app
+              dotnet build --nologo --configuration Release
+            '
+
+      - name: Upload artifacts to the Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            artifacts/*.nupkg \
+            artifacts/*.cdx.xml \
+            --clobber

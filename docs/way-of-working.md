@@ -8,8 +8,9 @@ reasonable default for projects generated from it.
 - `main` is always releasable.
 - Feature branches are short-lived: `feat/<ticket>-<slug>`,
   `fix/<ticket>-<slug>`.
-- **No long-lived develop/release branches.** Release-please cuts releases
-  from `main` on merge.
+- **No long-lived develop/release branches** while pre-v1. A
+  `release/0.x` branch is forked at the v1 cut to receive security
+  backports — see [`RELEASING.md`](../RELEASING.md).
 
 ## Commits
 
@@ -21,36 +22,14 @@ reasonable default for projects generated from it.
 
 ## Reviews
 
-- Every PR needs one reviewer listed in `CODEOWNERS`.
-- Reviewers check: tests, architecture rules, ADR coverage of any default
-  change, docs for user-visible changes.
-- **No nits after approval.** If you spotted a nit during review, leave
-  it as a non-blocking comment.
+While the project has a single maintainer, there is no code-review gate;
+the maintainer self-reviews and merges. A peer-review policy will be
+re-introduced when a co-maintainer joins.
 
 ## Releases
 
-- Release-please opens a release PR on every merge to `main`.
-- Merging the release PR creates a tag, publishes the NuGet package,
-  attaches the SBOM, and signs the artifact.
-- Patch: any `fix:` merged to `main`.
-- Minor: any `feat:` or `deps:` group update.
-- Major: any `BREAKING CHANGE:`.
-
-## Hotfixes
-
-- Same process as a normal fix. Release-please handles the version bump.
-- If a hotfix must ship faster than the next release PR, we cherry-pick
-  the fix onto the previous release branch, tag it manually, and
-  document in the next release PR.
-
-## On-call / triage
-
-Weekly rotation (once there's more than one maintainer). The on-call
-person is responsible for:
-
-- Triage new issues within 2 business days.
-- Review Dependabot / Renovate PRs.
-- Address security findings from CodeQL / Trivy / gitleaks.
+See [`RELEASING.md`](../RELEASING.md) for the full release process,
+gates, and runbook.
 
 ## ADRs
 
@@ -70,5 +49,5 @@ person is responsible for:
 
 - Anything user-facing lives in `docs/` or a capability's `README.md`.
 - We don't ship feature docs only in release notes.
-- The README's "Two paths to running code" section must stay executable
-  at every release. CI runs it on a schedule.
+- Every topic has a single source of truth; other places link to it.
+  See the SoT table in [`RELEASING.md`](../RELEASING.md#documentation).

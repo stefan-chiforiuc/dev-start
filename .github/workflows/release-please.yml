@@ -1,5 +1,14 @@
 name: release-please
 
+# Stage 1 of 3 in the release pipeline. See RELEASING.md.
+# This workflow only maintains the Release PR and (on merge) creates the
+# tag + GitHub Release. It does NOT pack or publish.
+#
+# Stage 2 (release-build.yml) runs on `release: published` to attach the
+# .nupkg + SBOM + provenance to the Release and smoke-install them.
+# Stage 3 (release-publish.yml) is a manual workflow_dispatch that pushes
+# to NuGet via OIDC trusted publishing.
+
 on:
   push:
     branches: [main]
@@ -7,15 +16,12 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  id-token: write
-  attestations: write
-  packages: write
 
 jobs:
-  release:
+  release-please:
     runs-on: ubuntu-latest
     steps:
-      - uses: googleapis/release-please-action@v5
+      - uses: googleapis/release-please-action@v5 # TODO(supply-chain): pin to commit SHA
         id: release
         with:
           release-type: simple
@@ -23,11 +29,11 @@ jobs:
 
       - name: Checkout
         if: ${{ steps.release.outputs.release_created }}
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6 # TODO(supply-chain): pin to commit SHA
 
       - name: Setup .NET
         if: ${{ steps.release.outputs.release_created }}
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v5 # TODO(supply-chain): pin to commit SHA
         with:
           global-json-file: global.json
 
@@ -41,14 +47,14 @@ jobs:
 
       - name: Generate SBOM
         if: ${{ steps.release.outputs.release_created }}
-        uses: CycloneDX/gh-dotnet-generate-sbom@v2
+        uses: CycloneDX/gh-dotnet-generate-sbom@v2 # TODO(supply-chain): pin to commit SHA
         with:
           path: ./DevStart.sln
           github-bearer-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Attest build provenance
         if: ${{ steps.release.outputs.release_created }}
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@v4 # TODO(supply-chain): pin to commit SHA
         with:
           subject-path: "artifacts/*.nupkg"
 

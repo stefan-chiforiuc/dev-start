@@ -27,96 +27,31 @@ queue, or S3 in one command months later.
 
 ---
 
-## Two paths to running code
-
-### Fastest — GitHub Codespaces (zero local install)
-
-1. Click **Use this template** on the
-   [`dev-start-example`](https://github.com/stefan-chiforiuc/dev-start) repo.
-2. Click **Open in Codespaces**.
-3. In ~60 seconds: VS Code in the browser, stack running, seeded DB,
-   Swagger open, tests green.
-
-### Local
+## Quickstart
 
 ```sh
 dotnet tool install -g DevStart
 dev-start new my-app
 cd my-app
-just up         # brings up Postgres, Keycloak, Seq, Jaeger, Mailhog, MinIO
-just test       # Testcontainers-backed integration tests
+just up
 ```
 
-Then open the **dashboard at <http://localhost:4000>** for links to every
-running service.
+Full quickstart (Codespaces path, local path, troubleshooting, first
+real change): [`docs/golden-path.md`](./docs/golden-path.md).
 
 ---
 
-## What you get in a generated repo
+## Learn more
 
-```text
-my-app/
-  src/
-    My.Api/                 # minimal API host + composition root
-    My.Domain/              # aggregates, events, value objects
-    My.Application/         # CQRS handlers, validators
-    My.Infrastructure/      # EF Core, outbox, external clients
-  tests/
-    My.IntegrationTests/    # Testcontainers + full stack
-    My.ArchitectureTests/   # NetArchTest rules
-  .claude/                  # CLAUDE.md + skills + agents + MCP config
-  .devcontainer/            # Codespaces-ready
-  .devstart.json            # capability manifest
-  compose.yml, Tiltfile, justfile
-  .http/                    # VS Code REST Client requests
-  .github/workflows/        # build + test + CodeQL + Trivy + release-please
-  docs/adr/
-```
-
-Built-in capabilities (composable — add only what you need):
-
-| Capability | What it wires |
-|---|---|
-| `postgres` | EF Core + Npgsql + migrations + seed + Testcontainers harness |
-| `auth`     | OIDC client + in-compose Keycloak realm + sample secured endpoint |
-| `otel`     | OpenTelemetry traces/metrics/logs, Jaeger + Seq |
-| `queue`    | RabbitMQ + MassTransit + outbox pattern |
-| `cache`    | Redis + `IDistributedCache` wrapper |
-| `s3`       | MinIO + AWS SDK + signed-URL helper |
-| `mail`     | Mailhog + `IEmailSender` |
-| `sdk`      | TypeScript SDK generated from OpenAPI |
-| `flags`    | OpenFeature provider interface |
-| `gateway`  | YARP reverse proxy (for multi-service mode) |
-
----
-
-## The four CLI verbs
-
-```sh
-dev-start new <name>         # scaffold a new project (wizard)
-dev-start add <capability>   # add a capability to an existing project
-dev-start doctor             # diagnose drift, missing env, broken services
-dev-start upgrade            # open a PR with the delta against latest template
-```
-
-Same tool on day 0 and day 300.
-
----
-
-## Opinions
-
-These are intentional defaults. Every one has an ADR explaining *why* and a
-[`docs/when-to-leave-the-road.md`](./docs/when-to-leave-the-road.md) entry
-explaining how to swap it out.
-
-- **ASP.NET Core minimal APIs** over controllers.
-- **EF Core + Npgsql** over Dapper (for migrations + LINQ ergonomics).
-- **MediatR + FluentValidation** for CQRS handlers.
-- **Serilog (JSON) + OpenTelemetry** — structured from minute 0.
-- **xUnit + Testcontainers** — real DB in tests, no mocks for EF.
-- **Docker Compose + `just` + Tilt** — not Make.
-- **MIT licence**, conventional commits, release-please for releases.
-- **Modular monolith first** — multi-service mode exists but is not the default.
+- **[`docs/golden-path.md`](./docs/golden-path.md)** — how to run; CLI verbs.
+- **[`docs/paved-road.md`](./docs/paved-road.md)** — every default we ship
+  and why.
+- **[`docs/when-to-leave-the-road.md`](./docs/when-to-leave-the-road.md)** —
+  supported ways to deviate.
+- **[`capabilities/README.md`](./capabilities/README.md)** — the full
+  capability registry and how to author a new one.
+- **[`docs/adr/`](./docs/adr/)** — architecture decision records.
+- **[`ROADMAP.md`](./ROADMAP.md)** — version targets and scope boundaries.
 
 ---
 
@@ -128,5 +63,6 @@ relevant ADR — most disagreements are covered there, with escape hatches.
 - Bugs and feature requests: GitHub Issues.
 - Security reports: see [`SECURITY.md`](./SECURITY.md).
 - Contributing: [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+- Releases: [`RELEASING.md`](./RELEASING.md).
 
 Licence: MIT.
