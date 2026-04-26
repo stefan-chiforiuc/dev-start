@@ -86,10 +86,9 @@ jobs:
               echo "$actual" | grep -q "${{ steps.version.outputs.value }}"
               workdir="$(mktemp -d)"
               cd "$workdir"
-              # TODO(cli): once dev-start new supports --no-interactive, run it
-              # here against $workdir as the final smoke step. Until then we
-              # only verify the tool installs and reports its version.
-              dev-start --help > /dev/null
+              dev-start new smoke-app --with base --no-claude
+              cd smoke-app
+              dotnet build --nologo --configuration Release
             '
 
       - name: Upload artifacts to the Release
