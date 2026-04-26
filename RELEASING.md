@@ -27,8 +27,8 @@ per `.github/release-please-config.json`).
                            │ merge
                            ▼
               ┌────────────────────────┐
-              │  tag vX.Y.Z + draft    │
-              │   GitHub Release       │
+              │  tag vX.Y.Z + GitHub   │
+              │   Release (no assets)  │
               └────────────┬───────────┘
                            │ release: published
                            ▼
@@ -36,7 +36,7 @@ per `.github/release-please-config.json`).
               │  release-build.yml     │
               │   pack + SBOM +        │
               │   attest + smoke       │
-              │   upload artifacts to  │
+              │   attach artifacts to  │
               │   the GH Release       │
               └────────────┬───────────┘
                            │ green
@@ -45,19 +45,20 @@ per `.github/release-please-config.json`).
               │  release-publish.yml   │  ← workflow_dispatch
               │   (manual click)       │     by maintainer
               │   OIDC → NuGet push    │
-              │   un-draft Release     │
+              │   mark Release latest  │
               └────────────────────────┘
 ```
 
 Three workflows; one button click per release. The button exists so
-that if the smoke fails or the maintainer spots a problem in the draft
-Release, NuGet stays untouched. A bad tag is cheap to retract; a bad
-NuGet listing is forever (you can only unlist).
+that if the smoke fails or the maintainer spots a problem in the
+attached artifacts, NuGet stays untouched. A bad tag and a bad
+GitHub Release are both cheap to delete; a bad NuGet listing is
+forever (you can only unlist).
 
 ## The single button click — what to check before pushing it
 
-When `release-build.yml` finishes green, open the draft GitHub Release
-and confirm:
+When `release-build.yml` finishes green, open the GitHub Release for
+the new tag and confirm:
 
 - The packed `.nupkg` is attached.
 - The CycloneDX SBOM is attached.

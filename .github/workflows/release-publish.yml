@@ -1,0 +1,63 @@
+name: release-publish
+
+# Stage 3 of 3 in the release pipeline. See RELEASING.md.
+# Manual workflow_dispatch. The maintainer triggers this after reviewing
+# the artifacts attached by release-build.yml on the GitHub Release.
+#
+# Pushes the .nupkg to NuGet via OIDC trusted publishing. There is no
+# stored NUGET_API_KEY; nuget.org's trusted-publisher policy is bound to
+# this workflow filename + this repository (configured manually on
+# nuget.org — see RELEASING.md).
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish (e.g. v0.4.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write   # mark Release as latest after publish
+  id-token: write   # OIDC token for NuGet trusted publishing
+
+concurrency:
+  group: release-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4 # TODO(supply-chain): pin to commit SHA
+        with:
+          ref: ${{ inputs.tag }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4 # TODO(supply-chain): pin to commit SHA
+        with:
+          global-json-file: global.json
+
+      - name: Download .nupkg from the Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p artifacts
+          gh release download "${{ inputs.tag }}" \
+            --pattern "*.nupkg" \
+            --dir artifacts
+
+      - name: Push to NuGet (OIDC trusted publishing)
+        # The dotnet CLI honours NuGet's trusted-publisher exchange when run
+        # in a workflow with id-token: write and a configured policy on
+        # nuget.org. No --api-key is supplied; the OIDC token is exchanged
+        # for a short-lived publish token automatically.
+        run: |
+          dotnet nuget push artifacts/*.nupkg \
+            --source https://api.nuget.org/v3/index.json
+
+      - name: Mark Release as latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release edit "${{ inputs.tag }}" --latest
