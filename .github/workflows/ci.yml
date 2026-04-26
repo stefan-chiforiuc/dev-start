@@ -17,10 +17,10 @@ jobs:
     name: Build and test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # TODO(supply-chain): pin to commit SHA
+      - uses: actions/checkout@v6 # TODO(supply-chain): pin to commit SHA
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4 # TODO(supply-chain): pin to commit SHA
+        uses: actions/setup-dotnet@v5 # TODO(supply-chain): pin to commit SHA
         with:
           global-json-file: global.json
 
@@ -42,7 +42,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4 # TODO(supply-chain): pin to commit SHA
+        uses: actions/upload-artifact@v7 # TODO(supply-chain): pin to commit SHA
         with:
           name: test-results
           path: "**/TestResults/*.trx"
@@ -51,8 +51,8 @@ jobs:
     name: Lint markdown
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # TODO(supply-chain): pin to commit SHA
-      - uses: DavidAnson/markdownlint-cli2-action@v16 # TODO(supply-chain): pin to commit SHA
+      - uses: actions/checkout@v6 # TODO(supply-chain): pin to commit SHA
+      - uses: DavidAnson/markdownlint-cli2-action@v23 # TODO(supply-chain): pin to commit SHA
         with:
           globs: "**/*.md"
 
@@ -60,7 +60,7 @@ jobs:
     name: Secret scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # TODO(supply-chain): pin to commit SHA
+      - uses: actions/checkout@v6 # TODO(supply-chain): pin to commit SHA
         with:
           fetch-depth: 0
       - uses: gitleaks/gitleaks-action@v2 # TODO(supply-chain): pin to commit SHA
@@ -71,6 +71,6 @@ jobs:
     name: Lint workflows
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # TODO(supply-chain): pin to commit SHA
+      - uses: actions/checkout@v6 # TODO(supply-chain): pin to commit SHA
       - name: actionlint
         uses: raven-actions/actionlint@v2 # TODO(supply-chain): pin to commit SHA
