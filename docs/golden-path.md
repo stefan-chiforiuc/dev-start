@@ -1,48 +1,20 @@
 # Golden path
 
-The five minutes from zero to a running, tested, observable .NET API.
+The few minutes from zero to a running, tested, observable API.
 
-> If you have more than 60 seconds to spare, use Path A (Codespaces). If you
-> must work offline or inside a corporate network that blocks Codespaces,
-> use Path B.
+## Local
 
-## Path A — Codespaces (recommended)
-
-1. Navigate to the public `dev-start-example` repository.
-2. Click **Use this template → Create a new repository**.
-3. In your new repo, click **Code → Codespaces → Create codespace on main**.
-4. Wait ~60 seconds. The pre-warmed devcontainer pulls, then `postCreateCommand`
-   runs `just bootstrap` which spins up compose, runs migrations, seeds
-   data, and runs tests.
-5. The Codespaces "Ports" tab exposes:
-   - `5000` — the API (Scalar docs at `/docs`)
-   - `4000` — the local dashboard (links to everything)
-   - `5341` — Seq (logs)
-   - `16686` — Jaeger (traces)
-   - `8080` — Keycloak admin
-   - `8025` — Mailhog
-   - `9001` — MinIO console
-
-Try:
-
-```sh
-curl -s http://localhost:5000/orders | jq
-```
-
-You should see seeded orders returned through the full pipeline
-(minimal API → MediatR handler → EF Core → Postgres), with a trace in
-Jaeger and a structured log in Seq.
-
-## Path B — Local
-
-Prerequisites: Docker, .NET 8 SDK, [`just`](https://just.systems/),
-optionally [`mise`](https://mise.jdx.dev/) for toolchain pinning.
+Prerequisites: Docker, .NET 8 SDK (or Node 20+ for the TypeScript stack),
+[`just`](https://just.systems/), optionally
+[`mise`](https://mise.jdx.dev/) for toolchain pinning.
 
 ```sh
 # install the tool
-dotnet tool install -g DevStart
+# while 1.0.0-alpha is the current release, --prerelease is required.
+# drop the flag once 1.0.0 (non-alpha) is published.
+dotnet tool install -g DevStart --prerelease
 
-# create a project
+# create a project (.NET stack is the default; pass --stack typescript for TS)
 dev-start new my-app
 cd my-app
 
@@ -58,6 +30,31 @@ open http://localhost:4000
 
 `just up` is idempotent — re-running it after a pull is the right thing
 to do.
+
+Once running, services are exposed at:
+
+- `5000` — the API (Scalar docs at `/docs`)
+- `4000` — the local dashboard (links to everything)
+- `5341` — Seq (logs)
+- `16686` — Jaeger (traces)
+- `8080` — Keycloak admin
+- `8025` — Mailhog
+- `9001` — MinIO console
+
+Try:
+
+```sh
+curl -s http://localhost:5000/orders | jq
+```
+
+You should see seeded orders returned through the full pipeline
+(minimal API → MediatR handler → EF Core → Postgres), with a trace in
+Jaeger and a structured log in Seq.
+
+## Codespaces
+
+A "Use this template" + Codespaces flow is planned but the published
+template repository isn't live yet. Track this on the issues list.
 
 ## First real change
 

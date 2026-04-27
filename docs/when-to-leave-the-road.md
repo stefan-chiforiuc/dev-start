@@ -67,7 +67,9 @@ spent elsewhere — please don't open a PR for this.
 
 ## Deploy target: Kubernetes / ECS / Cloud Run
 
-**v1.1+ for k8s** — the `k8s` capability will add Helm + Kustomize.
+**Kubernetes is on the road.** `dev-start add k8s` ships Helm + Kustomize
+overlays plus the `dev-start promote <env>` verb. See the [k8s capability
+README](../capabilities/k8s/README.md).
 
 For ECS, Cloud Run, or other container platforms today:
 
@@ -78,9 +80,15 @@ For ECS, Cloud Run, or other container platforms today:
 
 ## Stack: Node / Go / Python instead of .NET
 
-**v1.2+** will add TypeScript + Fastify as a sibling capability tree. If
-you need it sooner, fork the `capabilities/` model and port the modules
-you need. The `.devstart.json` schema is deliberately language-agnostic.
+**TypeScript + Fastify is on the road** as a sibling stack: `dev-start new
+--stack typescript` ships the `ts-base` foundation and a parallel set of
+`ts-*` capabilities (`ts-postgres`, `ts-auth`, `ts-otel`, etc.) — see
+[ADR 0008](./adr/0008-ts-prefix-for-typescript-capabilities.md). The
+`frontend` capability is cross-stack.
+
+**Go and Python are not planned.** If you need them, fork the
+`capabilities/` model and port what you need. The `.devstart.json` schema
+is deliberately language-agnostic.
 
 ## The escape hatch of last resort
 

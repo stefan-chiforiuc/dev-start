@@ -11,7 +11,8 @@ body:
     id: version
     attributes:
       label: dev-start version
-      placeholder: "e.g. 0.3.2"
+      description: "Run `dev-start --version` to find out."
+      placeholder: "e.g. 1.0.0-alpha"
     validations:
       required: true
   - type: input

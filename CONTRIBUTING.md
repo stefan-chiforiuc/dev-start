@@ -24,7 +24,7 @@ document and the relevant ADR(s) in [`docs/adr/`](./docs/adr).
 ```sh
 # one-time
 dotnet tool restore
-just install-hooks   # pre-commit (gitleaks, dotnet format, markdownlint)
+just install-hooks   # copies platform/hooks/pre-commit → .git/hooks/pre-commit
 
 # day-to-day
 just build
@@ -32,12 +32,12 @@ just test
 just lint
 ```
 
-Multi-service testing uses Tilt:
-
-```sh
-cd examples/multi-service
-tilt up
-```
+The pre-commit hook runs `gitleaks` (secret scan, staged content only),
+`dotnet format --verify-no-changes`, and `markdownlint`. Each step is
+optional — missing tools are skipped with a warning so contributors aren't
+blocked by tooling drift. The hook source is checked in at
+[`platform/hooks/pre-commit`](./platform/hooks/pre-commit); edit there and
+re-run `just install-hooks`, never edit the installed copy in `.git/hooks/`.
 
 ## Commits and releases
 
@@ -61,7 +61,9 @@ tilt up
 
 ## What not to send
 
-- New stacks (TS, Go, Python) before v1.2 — see the roadmap.
-- Kubernetes manifests before v1.1 — see the roadmap.
+- New stacks (Go, Python, JVM) — the bar is high; open a discussion first.
+  TypeScript and .NET are in scope today; see [ADR
+  0008](./docs/adr/0008-ts-prefix-for-typescript-capabilities.md).
 - Vendor integrations that replace the default opinions — send an escape
-  hatch doc instead.
+  hatch doc instead (see
+  [`docs/when-to-leave-the-road.md`](./docs/when-to-leave-the-road.md)).

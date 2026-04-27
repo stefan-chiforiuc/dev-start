@@ -40,11 +40,24 @@ body:
     validations:
       required: true
   - type: dropdown
+    id: stack
+    attributes:
+      label: Target stack
+      options:
+        - .NET (default)
+        - TypeScript
+        - Cross-stack (works on both)
+      multiple: false
+    validations:
+      required: true
+  - type: dropdown
     id: depends
     attributes:
       label: Depends on
+      description: "Pick the foundation + any other capabilities. Use `ts-` prefix for the TypeScript stack."
       multiple: true
       options:
+        # .NET stack
         - base
         - postgres
         - auth
@@ -56,6 +69,20 @@ body:
         - flags
         - sdk
         - gateway
+        - k8s
+        - frontend
+        # TypeScript stack
+        - ts-base
+        - ts-postgres
+        - ts-auth
+        - ts-otel
+        - ts-queue
+        - ts-cache
+        - ts-s3
+        - ts-mail
+        - ts-flags
+        - ts-sdk
+        - ts-gateway
   - type: checkboxes
     id: checks
     attributes:

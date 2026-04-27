@@ -4,15 +4,23 @@ The default `.claude/` bundle copied into every generated project.
 
 Structure:
 
-- `CLAUDE.md.template` — briefing file. `{{ProjectName}}`, `{{CapabilitiesList}}`,
-  `{{AdrList}}`, `{{ConditionalServices}}` are filled in at generate time by
-  the CLI.
-- `skills/` — markdown skills invoked via `/add-endpoint`, `/add-migration`,
-  etc. Copied verbatim into the generated project's `.claude/skills/`.
-- `agents/` — advisory agents (`reviewer`, `migration-reviewer`,
-  `architect`). Called via Claude Code's Task tool.
-- `mcp-servers/` — MCP server configs pointing at the live compose stack
-  (`postgres`, `seq-logs`). Merged into the user's `.claude/settings.json`.
+- `CLAUDE.md.dotnet.template` / `CLAUDE.md.typescript.template` — briefing
+  files, one per stack. `{{ProjectName}}`, `{{CapabilitiesList}}`,
+  `{{AdrList}}`, `{{ConditionalServices}}` are filled in at generate time
+  by the CLI. `Planner` copies only the matching stack's template; the
+  other is not staged.
+- `skills/dotnet/`, `skills/typescript/` — markdown skills invoked via
+  `/add-endpoint`, `/add-migration`, etc. Stack-split. The `Planner` copies
+  only the installed stack's set, stripping the prefix so the file lands
+  at `.claude/skills/<name>.md` in the generated project.
+- `agents/` — advisory agents (`reviewer`, `architect`) plus stack-specific
+  agents under `agents/dotnet/` and `agents/typescript/` (e.g.
+  `migration-reviewer`). Called via Claude Code's Task tool.
+- `commands/dotnet/`, `commands/typescript/` — slash commands stack-split
+  the same way as skills.
+- MCP server configs are declared in each capability's `capability.json`
+  under `mcp: [{ name, command, args, env }]`. The CLI iterates over the
+  installed capabilities to write `.mcp.json`.
 
 ## Extension points
 

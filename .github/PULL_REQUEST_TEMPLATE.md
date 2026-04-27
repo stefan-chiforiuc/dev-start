@@ -8,10 +8,12 @@ Closes #
 
 - [ ] feat
 - [ ] fix
+- [ ] perf
 - [ ] docs
 - [ ] refactor
 - [ ] test
 - [ ] chore / ci
+- [ ] deps
 
 ## Checklist
 

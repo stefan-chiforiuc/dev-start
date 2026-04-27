@@ -3,7 +3,7 @@
 This roadmap is intentionally narrow. We'd rather do one thing excellently
 than ten things badly.
 
-## v1 — `.NET API starter + capabilities` (shipped in 1.0.0)
+## v1 — `.NET API starter + capabilities` (shipping in 1.0.0-alpha)
 
 The baseline release. Acceptance test from the design doc:
 
@@ -21,10 +21,13 @@ The baseline release. Acceptance test from the design doc:
 - Release pipeline signs containers (cosign), attaches SBOM (CycloneDX),
   produces SLSA L2 attestation.
 
-## Delivered in 1.1.0
+## Folded into 1.0.0-alpha (originally scoped as v1.1–v1.4)
 
-The items below landed together in 1.1.0 as a single release; see
-`CHANGELOG.md` for the concrete changes.
+The items below were originally planned as separate v1.1, v1.2, v1.3, and
+v1.4 releases. Before any version had actually been published to NuGet,
+they were consolidated into the first release as a single coherent MVP. See
+[ADR 0009](./docs/adr/0009-collapse-v1.1-v1.4-into-v1.0.0-alpha.md) for the
+rationale, and `CHANGELOG.md` for the concrete changes.
 
 ### k8s capability + `promote` verb
 
@@ -61,6 +64,6 @@ The items below landed together in 1.1.0 as a single release; see
 - Mobile, desktop, PWA scaffolds (different tool).
 - A plugin API before the capabilities list settles.
 - Multi-cloud deploy generators beyond Fly.io + Azure Container Apps in v1.
-  (k8s from 1.1 covers most real needs.)
+  (`k8s` capability covers most real needs.)
 
 Changes to this roadmap require an ADR.

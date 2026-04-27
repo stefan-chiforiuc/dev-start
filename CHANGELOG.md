@@ -5,8 +5,11 @@ All notable changes to this project are recorded here. The format follows
 [Semantic Versioning](https://semver.org/).
 
 This file is managed by [release-please](https://github.com/googleapis/release-please)
-from conventional-commit messages — don't edit by hand except for the
-"Unreleased" section below.
+from conventional-commit messages. **Don't hand-edit released sections**
+(`## [1.x.y]` blocks) — they're rewritten on every release. The
+`[Unreleased]` block below is allowed for hand-written notes that get
+**absorbed** into the next version's section when release-please cuts the
+next release PR; treat them as a draft, not a permanent home.
 
 The first published version will be `1.0.0-alpha`. Earlier `[1.0.0]` and
 `[v0.x]` references in this project's history did not produce a tag, a

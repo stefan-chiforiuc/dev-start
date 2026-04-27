@@ -9,10 +9,12 @@ architecture tests, and a pre-briefed `.claude/` AI assistant already wired.
 It also stays useful after day 1 — add capabilities, diagnose drift, and
 upgrade templates through the same CLI.
 
-> Status: **1.1.0 (unreleased)**. Stable surface — `new` / `add` / `doctor` /
+> Status: **1.0.0-alpha (unreleased)**. Pre-release; surface is opinions-locked
+> but subject to alpha-cycle adjustment. CLI verbs — `new` / `add` / `doctor` /
 > `upgrade --apply` / `promote` / `policy`. Supports both the .NET/ASP.NET
 > Core stack (default) and the TypeScript/Fastify stack (`--stack typescript`).
-> See [`CHANGELOG.md`](./CHANGELOG.md) for release notes and
+> See [`CHANGELOG.md`](./CHANGELOG.md) for release notes,
+> [`RELEASING.md`](./RELEASING.md) for the release pipeline, and
 > [`ROADMAP.md`](./ROADMAP.md) for what's next.
 
 ---
@@ -30,20 +32,10 @@ queue, or S3 in one command months later.
 
 ---
 
-## Two paths to running code
-
-### Fastest — GitHub Codespaces (zero local install)
-
-1. Click **Use this template** on the
-   [`dev-start-example`](https://github.com/stefan-chiforiuc/dev-start) repo.
-2. Click **Open in Codespaces**.
-3. In ~60 seconds: VS Code in the browser, stack running, seeded DB,
-   Swagger open, tests green.
-
-### Local
+## Getting started
 
 ```sh
-dotnet tool install -g DevStart
+dotnet tool install -g DevStart --prerelease   # pre-release while on 1.0.0-alpha
 dev-start new my-app
 cd my-app
 just up         # brings up Postgres, Keycloak, Seq, Jaeger, Mailhog, MinIO

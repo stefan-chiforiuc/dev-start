@@ -86,11 +86,16 @@ Injectors are **idempotent**: if the trimmed fragment body is already
 present in the target file, the injector skips. Rerunning
 `dev-start add <cap>` on a live project is safe.
 
-## v1 capabilities
+## Capabilities
+
+Auto-included by the foundation: `base` (.NET) and `ts-base` (TypeScript).
+Both are selected by `dev-start new` based on `--stack` and are not
+user-installable via `add`.
+
+### .NET stack
 
 | Capability | Depends on | What it wires |
 |---|---|---|
-| `base` | — | Minimal .NET 8 API + layered projects + Program.cs composition root |
 | `postgres` | `base` | EF Core + Npgsql + migrations + Testcontainers base + seed + sample Orders slice |
 | `auth` | `base` | OIDC + in-compose Keycloak realm + `/me` endpoint |
 | `otel` | `base` | OpenTelemetry traces/metrics/logs + OTLP exporter |
@@ -103,6 +108,33 @@ present in the target file, the injector skips. Rerunning
 | `gateway` | `base` | YARP reverse proxy for multi-service mode |
 | `deploy-fly` | `base` | `fly.toml` + Fly.io deploy workflow (auto-included with `--deploy fly`) |
 | `deploy-aca` | `base` | Bicep + `azure.yaml` + ACA deploy workflow (auto-included with `--deploy aca`) |
+| `k8s` | `base` | Helm chart + Kustomize overlays (`dev`, `stage`, `prod`); migration Job gated by `postgres`; ServiceMonitor gated by `otel` |
+
+### TypeScript stack
+
+See [ADR 0008](../docs/adr/0008-ts-prefix-for-typescript-capabilities.md)
+for the `ts-` prefix convention and stack gating.
+
+| Capability | Depends on | What it wires |
+|---|---|---|
+| `ts-postgres` | `ts-base` | Kysely + node-postgres + migrations + Testcontainers + sample Orders slice |
+| `ts-auth` | `ts-base` | OIDC via Keycloak; `@fastify/jwt` with `get-jwks` JWKS; `/me` route |
+| `ts-otel` | `ts-base` | OpenTelemetry traces/metrics/logs + OTLP exporter |
+| `ts-queue` | `ts-postgres` | RabbitMQ + amqplib + outbox |
+| `ts-cache` | `ts-base` | Redis + typed cache helper |
+| `ts-s3` | `ts-base` | MinIO + AWS SDK v3 + signed-URL helper |
+| `ts-mail` | `ts-base` | Mailhog + nodemailer wrapper |
+| `ts-flags` | `ts-base` | OpenFeature JS SDK + in-memory dev provider |
+| `ts-sdk` | `ts-base` | Auto-generated TypeScript SDK from the API's OpenAPI |
+| `ts-gateway` | `ts-base` | Fastify proxy for multi-service mode |
+| `ts-deploy-fly` | `ts-base` | `fly.toml` + Fly.io deploy workflow |
+| `ts-deploy-aca` | `ts-base` | Bicep + `azure.yaml` + ACA deploy workflow |
+
+### Cross-stack
+
+| Capability | Depends on (.NET) | Depends on (TypeScript) | What it wires |
+|---|---|---|---|
+| `frontend` | `sdk` | `ts-sdk` | Vite + React 19 + TanStack Router + TanStack Query; `web` service in compose; consumes the generated SDK |
 
 ## Writing a new capability
 
