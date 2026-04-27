@@ -110,9 +110,10 @@ so the next release PR proposes `1.0.0-alpha`.
 - `ROADMAP.md` retains the original v1.1–v1.4 breakdown under "Folded
   into 1.0.0-alpha", as historical context for anyone reading old issues
   or PRs that reference those versions.
-- The `plans/v1.1-backport.md` execution plan should move to
-  `docs/history/` as a retrospective, not stay in `plans/` (which implies
-  pending work).
+- The original execution plan (formerly `plans/v1.1-backport.md`) lives
+  in [`docs/history/v1.0.0-alpha-backport.md`](../history/v1.0.0-alpha-backport.md)
+  for traceability. The `plans/` directory is removed since there's no
+  longer a pending plan there.
 
 ## Alternatives considered
 
