@@ -125,11 +125,14 @@ explaining how to swap it out.
 
 ## Getting involved
 
-This is pre-v1 and opinionated on purpose. Before filing an issue, read the
-relevant ADR — most disagreements are covered there, with escape hatches.
+This is pre-1.0 and opinionated on purpose. Before filing an issue, read
+the relevant ADR — most disagreements are covered there, with escape
+hatches.
 
-- Bugs and feature requests: GitHub Issues.
-- Security reports: see [`SECURITY.md`](./SECURITY.md).
+- How to ask for help: [`SUPPORT.md`](./SUPPORT.md).
 - Contributing: [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+- Architecture (CLI internals): [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+- Release pipeline: [`RELEASING.md`](./RELEASING.md).
+- Security reports: [`SECURITY.md`](./SECURITY.md).
 
 Licence: MIT.
