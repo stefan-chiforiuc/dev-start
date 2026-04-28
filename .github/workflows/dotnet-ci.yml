@@ -83,7 +83,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: oasdiff/oasdiff-action/diff@f8cb9308b42121e793f835bd14c0b8090420430c # v0.0.39
+      - uses: oasdiff/oasdiff-action/diff@c002f996c3d084acf62ea6dd4f2e7a57b7bc2a35 # v0.0.43
         with:
           base: "git@main:${{ inputs.openapi-spec }}"
           revision: ${{ inputs.openapi-spec }}
