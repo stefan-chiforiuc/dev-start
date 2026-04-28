@@ -82,7 +82,7 @@ src/DevStart.Cli/
 
 ### Key types and their relationships
 
-```
+```text
 Manifest             .devstart.json on disk; loaded on every command.
   └─ Stack          dotnet | typescript
   └─ Capabilities   list of installed capability names

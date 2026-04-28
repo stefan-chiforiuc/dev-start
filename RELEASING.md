@@ -27,7 +27,7 @@ produced a tag, a GitHub Release, or a NuGet package.
 
 ### Pre-release graduation path
 
-```
+```text
 0.0.0  ─►  1.0.0-alpha  ─►  1.0.0-alpha.1, .2, .3 ...  ─►  1.0.0-rc.1, .2 ...  ─►  1.0.0  ─►  1.0.x / 1.x.0 ...
 ```
 

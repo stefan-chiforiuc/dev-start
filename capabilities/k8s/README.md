@@ -6,7 +6,7 @@ dev and k8s don't drift.
 
 ## Layout
 
-```
+```text
 k8s/
   helm/
     Chart.yaml

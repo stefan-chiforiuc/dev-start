@@ -3,5 +3,8 @@
   "MD013": false,
   "MD024": { "siblings_only": true },
   "MD033": false,
-  "MD041": false
+  "MD041": false,
+  // MD060 (table-column-style) is cosmetic and the project's tables
+  // intentionally use varied alignment for human readability. Disabled.
+  "MD060": false
 }

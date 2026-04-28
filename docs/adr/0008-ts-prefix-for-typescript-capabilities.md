@@ -6,9 +6,9 @@
 
 ## Context
 
-The 1.0.0-alpha scope includes a second stack alongside .NET: TypeScript
-+ Fastify (originally planned as v1.2 — see [ADR
-0009](0009-collapse-v1.1-v1.4-into-v1.0.0-alpha.md) for why it was
+The 1.0.0-alpha scope includes a second stack alongside .NET:
+TypeScript / Fastify (originally planned as v1.2 — see
+[ADR 0009](0009-collapse-v1.1-v1.4-into-v1.0.0-alpha.md) for why it was
 consolidated). The question is how to represent stack-specific
 capabilities in the capabilities tree.
 
