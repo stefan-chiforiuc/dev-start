@@ -9,7 +9,9 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>dev-start</ToolCommandName>
     <PackageId>DevStart</PackageId>
-    <Version>1.1.0</Version>
+    <!-- Version is stamped at pack time via -p:Version=... by release-please.yml.
+         Local `dotnet pack` without that flag produces a 1.0.0 dev build.
+         Source of truth: .github/release-please-manifest.json -->
     <Authors>dev-start contributors</Authors>
     <Description>Opinionated scaffolder + day-to-day companion for .NET services. See https://github.com/stefan-chiforiuc/dev-start.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

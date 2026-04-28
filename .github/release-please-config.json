@@ -2,10 +2,13 @@
   "packages": {
     ".": {
       "release-type": "simple",
-      "package-name": "dev-start",
+      "package-name": "DevStart",
       "bump-minor-pre-major": true,
-      "bump-patch-for-minor-pre-major": false,
-      "include-v-in-tag": true
+      "bump-patch-for-minor-pre-major": true,
+      "include-v-in-tag": true,
+      "prerelease": true,
+      "prerelease-type": "alpha",
+      "release-as": "1.0.0-alpha"
     }
   },
   "changelog-sections": [

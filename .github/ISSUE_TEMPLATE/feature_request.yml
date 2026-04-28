@@ -46,5 +46,5 @@ body:
       options:
         - label: I have read `CONTRIBUTING.md` and the relevant ADR.
           required: true
-        - label: I'm not asking for a new language/framework stack before v1.2.
+        - label: "I'm not proposing a new language stack beyond .NET and TypeScript (see ROADMAP)."
           required: true

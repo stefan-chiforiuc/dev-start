@@ -16,5 +16,7 @@ Features included:
 - `just` (task runner)
 - `mise` (toolchain pinning via `.tool-versions`)
 
-We publish a pre-warmed image to `ghcr.io/dev-start/devcontainer` via a
-release workflow (TODO) so that Codespaces start times are under 60s.
+Generated projects build the devcontainer on first Codespace launch.
+Pre-warming via `ghcr.io/dev-start/devcontainer` is under consideration
+once usage justifies the publish cadence — track it on the repo issues
+list rather than this file.

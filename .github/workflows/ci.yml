@@ -55,7 +55,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: DavidAnson/markdownlint-cli2-action@b4c9feab76d8025d1e83c653fa3990936df0e6c8 # v16
         with:
-          globs: "**/*.md"
+          # docs/history/ holds frozen retrospectives (see .markdownlintignore + ADR 0009).
+          globs: |
+            **/*.md
+            #docs/history
+            #node_modules
+            #bin
+            #obj
 
   gitleaks:
     name: Secret scan
@@ -75,6 +81,52 @@ jobs:
       - uses: actions/checkout@v4
       - name: actionlint
         uses: raven-actions/actionlint@205b530c5d9fa8f44ae9ed59f341a0db994aa6f8 # v2
+
+  pin-check:
+    # Enforces this repo's action-pinning policy on its own CI:
+    #   * actions/* and github/* may use tags (first-party, trusted owner)
+    #   * everything else must be pinned to a 40-char commit SHA
+    # Catches Dependabot PRs that silently drop SHA pins on third-party
+    # actions (e.g. release-please-action, gitleaks-action).
+    #
+    # Scope is intentionally .github/workflows/ only. Workflow templates
+    # under capabilities/** and policies/** ship to user projects and
+    # have their own pinning lifecycle.
+    name: Verify action SHA pins
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          violations=0
+          for f in .github/workflows/*.yml .github/workflows/*.yaml; do
+            while IFS= read -r match; do
+              ref="${match##*uses:}"
+              ref="${ref#"${ref%%[![:space:]]*}"}"  # ltrim
+              ref="${ref%%[[:space:]]*}"            # rtrim at first space
+              # Skip local actions and reusable workflows in this repo
+              [[ "$ref" == ./* || "$ref" == .github/* ]] && continue
+              owner="${ref%%/*}"
+              version="${ref##*@}"
+              # First-party owners may use tags
+              [[ "$owner" == "actions" || "$owner" == "github" ]] && continue
+              # Everything else: must be a 40-char hex SHA
+              if [[ ! "$version" =~ ^[0-9a-f]{40}$ ]]; then
+                echo "::error file=$f::third-party action '$ref' is not pinned to a SHA"
+                violations=$((violations + 1))
+              fi
+            done < <(grep -nE '^\s*-?\s*uses:\s' "$f" || true)
+          done
+          if (( violations > 0 )); then
+            echo ""
+            echo "Found $violations unpinned third-party action reference(s)."
+            echo "Pin to a 40-char SHA with a trailing '# v<n>' comment, e.g."
+            echo "  uses: owner/repo@1234567890abcdef1234567890abcdef12345678 # v1.2.3"
+            exit 1
+          fi
 
   pack-smoke:
     # Proves that `dotnet pack` produces a NuGet tool a user could

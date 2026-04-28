@@ -2,16 +2,18 @@
 
 ## Supported versions
 
-`dev-start` is **pre-v1**. Only the `main` branch is supported. Once v1
-ships, the latest minor will be supported with security fixes for at least
-6 months.
+`dev-start` has not yet shipped a stable release. Only the `main` branch
+and the latest pre-release published to NuGet are supported. Once `1.0.0`
+(non-alpha) ships, the latest minor will be supported with security fixes
+for at least 6 months.
 
 ## Reporting a vulnerability
 
 **Do not file a public issue for security problems.**
 
-Email `security@dev-start.dev` (TODO: real inbox once domain is set up),
-or use GitHub's **Private Vulnerability Reporting** on this repository.
+Use [GitHub Private Vulnerability
+Reporting](https://github.com/stefan-chiforiuc/dev-start/security/advisories/new)
+on this repository. It's the only supported channel.
 
 Please include:
 

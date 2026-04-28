@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# dev-start: managed pre-commit
+# Mirrors the gates that ci.yml runs on PRs, against staged content only.
+# To update, edit this file and re-run `just install-hooks`.
+set -euo pipefail
+
+fail=0
+
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --redact --no-banner || fail=1
+else
+  echo "warning: gitleaks not on PATH — skipping secret scan" >&2
+fi
+
+if command -v dotnet >/dev/null 2>&1; then
+  dotnet format --verify-no-changes --verbosity quiet || fail=1
+else
+  echo "warning: dotnet not on PATH — skipping format check" >&2
+fi
+
+if command -v markdownlint-cli2 >/dev/null 2>&1; then
+  markdownlint-cli2 '**/*.md' '#node_modules' || fail=1
+elif command -v markdownlint >/dev/null 2>&1; then
+  markdownlint '**/*.md' || fail=1
+else
+  echo "warning: no markdownlint on PATH — skipping markdown lint" >&2
+fi
+
+exit "$fail"

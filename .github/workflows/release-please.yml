@@ -5,42 +5,50 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
-  pull-requests: write
-  id-token: write
-  attestations: write
-  packages: write
+  contents: read
 
 jobs:
-  release:
+  release-please:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
     steps:
       - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4
         id: release
         with:
-          release-type: simple
-          package-name: dev-start
+          config-file: .github/release-please-config.json
+          manifest-file: .github/release-please-manifest.json
 
-      - name: Checkout
-        if: ${{ steps.release.outputs.release_created }}
-        uses: actions/checkout@v4
+  build:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
 
-      - name: Setup .NET
-        if: ${{ steps.release.outputs.release_created }}
-        uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
 
       - name: Pack global tool
-        if: ${{ steps.release.outputs.release_created }}
         run: |
           dotnet pack src/DevStart.Cli/DevStart.Cli.csproj \
             --configuration Release \
-            -p:Version=${{ steps.release.outputs.version }} \
+            -p:Version=${{ needs.release-please.outputs.version }} \
             -o artifacts
 
       - name: Generate SBOM
-        if: ${{ steps.release.outputs.release_created }}
         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
         with:
           path: ./artifacts
@@ -48,15 +56,124 @@ jobs:
           output-file: sbom.cdx.json
 
       - name: Attest build provenance
-        if: ${{ steps.release.outputs.release_created }}
         uses: actions/attest-build-provenance@v1
         with:
           subject-path: "artifacts/*.nupkg"
 
-      - name: Publish to NuGet
-        if: ${{ steps.release.outputs.release_created }}
+      - name: Upload nupkg
+        uses: actions/upload-artifact@v4
+        with:
+          name: nupkg
+          path: artifacts/*.nupkg
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.cdx.json
+          retention-days: 30
+          if-no-files-found: error
+
+  verify:
+    needs: [release-please, build]
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Download nupkg
+        uses: actions/download-artifact@v4
+        with:
+          name: nupkg
+          path: artifacts
+
+      - name: Download SBOM
+        uses: actions/download-artifact@v4
+        with:
+          name: sbom
+          path: sbom
+
+      - name: Trivy SBOM scan (release artifact)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          scan-type: sbom
+          scan-ref: sbom/sbom.cdx.json
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          ignore-unfixed: true
+
+      - name: Install global tool from local artifact
+        run: |
+          dotnet tool install --global \
+            --add-source ./artifacts \
+            --version ${{ needs.release-please.outputs.version }} \
+            DevStart
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      - name: Verify reported version
+        run: |
+          installed=$(dev-start --version | tr -d '[:space:]')
+          expected="${{ needs.release-please.outputs.version }}"
+          if [ "$installed" != "$expected" ]; then
+            echo "::error::version mismatch — expected $expected, got $installed"
+            exit 1
+          fi
+
+      - name: Smoke — scaffold and build
+        working-directory: ${{ runner.temp }}
+        run: |
+          dev-start new smoke-app --no-claude --with postgres auth otel
+          cd smoke-app
+          dotnet build --configuration Release
+
+  deploy:
+    needs: [release-please, build, verify]
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: nuget-production
+      url: https://www.nuget.org/packages/DevStart/${{ needs.release-please.outputs.version }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Download nupkg
+        uses: actions/download-artifact@v4
+        with:
+          name: nupkg
+          path: artifacts
+
+      # TODO: replace api-key auth with NuGet.org Trusted Publishing (OIDC)
+      # once the trusted publisher is registered for DevStart against this
+      # repo + the nuget-production environment. See RELEASING.md.
+      - name: Push to NuGet
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
           dotnet nuget push artifacts/*.nupkg \
-            --api-key ${{ secrets.NUGET_API_KEY }} \
-            --source https://api.nuget.org/v3/index.json \
-            --skip-duplicate
+            --api-key "$NUGET_API_KEY" \
+            --source https://api.nuget.org/v3/index.json
+
+      - name: Verify package is live on NuGet
+        run: |
+          version="${{ needs.release-please.outputs.version }}"
+          for i in 1 2 3 4 5 6; do
+            if curl -fsSL "https://api.nuget.org/v3-flatcontainer/devstart/index.json" \
+                 | grep -q "\"$version\""; then
+              echo "DevStart $version is live on NuGet."
+              exit 0
+            fi
+            echo "attempt $i: $version not yet visible, sleeping 30s..."
+            sleep 30
+          done
+          echo "::error::DevStart $version did not appear on NuGet within 3 minutes"
+          exit 1

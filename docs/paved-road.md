@@ -95,8 +95,9 @@ Dependencies flow inward only: `Api → Application → Domain`;
 
 ## Deploy
 
-- **Fly.io** or **Azure Container Apps** recipes for v1 (pick at
-  generate-time). Kubernetes from v1.1.
+- **Fly.io** (`deploy-fly`), **Azure Container Apps** (`deploy-aca`), or
+  **Kubernetes** (`k8s` — Helm + Kustomize overlays per env, with
+  `dev-start promote <env>`). Pick at generate-time.
 - 12-factor config from env vars only; no appsettings secrets.
 
 ## AI

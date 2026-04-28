@@ -1,0 +1,3 @@
+# Frozen historical retrospectives — read-only by convention.
+# See docs/adr/0009 for context on the v1.0.0-alpha consolidation.
+docs/history/

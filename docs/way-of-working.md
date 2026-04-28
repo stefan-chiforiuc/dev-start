@@ -29,10 +29,16 @@ reasonable default for projects generated from it.
 
 ## Releases
 
+The release pipeline is documented end-to-end in
+[`RELEASING.md`](../RELEASING.md). Summary:
+
 - Release-please opens a release PR on every merge to `main`.
-- Merging the release PR creates a tag, publishes the NuGet package,
-  attaches the SBOM, and signs the artifact.
-- Patch: any `fix:` merged to `main`.
+- Merging the release PR triggers `build` → `verify` (automated) → `deploy`
+  (manual approval in the `nuget-production` GitHub Environment). Deploy
+  pushes to NuGet only after the maintainer approves.
+- Pre-1.0: `bump-patch-for-minor-pre-major: true`, so `fix:` and `perf:`
+  ship patches without waiting for the next feature.
+- Patch: any `fix:` / `perf:` merged to `main`.
 - Minor: any `feat:` or `deps:` group update.
 - Major: any `BREAKING CHANGE:`.
 
