@@ -29,7 +29,6 @@ jobs:
 
       - name: Format check
         run: dotnet format --verify-no-changes
-        continue-on-error: true
 
       - name: Build
         run: dotnet build --no-restore --configuration Release

@@ -4,14 +4,14 @@
 
 `dev-start` is **pre-v1**. Only the `main` branch is supported. Once v1
 ships, the latest minor will be supported with security fixes for at least
-6 months.
+6 months via the `release/0.x` branch (see [`RELEASING.md`](./RELEASING.md)).
 
 ## Reporting a vulnerability
 
 **Do not file a public issue for security problems.**
 
-Email `security@dev-start.dev` (TODO: real inbox once domain is set up),
-or use GitHub's **Private Vulnerability Reporting** on this repository.
+Use GitHub's **Private Vulnerability Reporting** on this repository, or
+email `security@dev-start.dev` (TODO: real inbox once domain is set up).
 
 Please include:
 
@@ -52,8 +52,14 @@ Out of scope:
 
 ## Our own posture
 
-- All container images signed with `cosign`.
-- SBOM (CycloneDX) attached to every release.
-- SLSA L2 provenance via `actions/attest-build-provenance`.
-- CodeQL + Trivy gates on every PR.
-- Pre-commit `gitleaks` + CI secret scanning.
+The `dev-start` package itself:
+
+- Published to NuGet via OIDC trusted publishing (no long-lived API key).
+- SBOM (CycloneDX) attached to every GitHub Release.
+- SLSA-style build provenance via `actions/attest-build-provenance`.
+- CodeQL + Trivy + gitleaks gates on every PR; `actionlint` on workflows.
+- Pre-commit `gitleaks` for contributors.
+
+The posture defaults shipped *into generated projects* (cosign-signed
+container images, CodeQL/Trivy on user PRs, k6 perf smoke, etc.) live in
+[`docs/paved-road.md`](./docs/paved-road.md).

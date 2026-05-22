@@ -2,19 +2,18 @@
 
 The five minutes from zero to a running, tested, observable .NET API.
 
-> If you have more than 60 seconds to spare, use Path A (Codespaces). If you
-> must work offline or inside a corporate network that blocks Codespaces,
-> use Path B.
-
 ## Path A — Codespaces (recommended)
 
-1. Navigate to the public `dev-start-example` repository.
-2. Click **Use this template → Create a new repository**.
-3. In your new repo, click **Code → Codespaces → Create codespace on main**.
-4. Wait ~60 seconds. The pre-warmed devcontainer pulls, then `postCreateCommand`
-   runs `just bootstrap` which spins up compose, runs migrations, seeds
-   data, and runs tests.
-5. The Codespaces "Ports" tab exposes:
+> Note: the `dev-start-example` template repository is not yet published.
+> Until it is, use Path B below.
+
+When the template is published, the flow will be:
+
+1. Use the template to create a new repository.
+2. Open it in Codespaces from the **Code → Codespaces** menu.
+3. Wait ~60 seconds while the devcontainer pulls and `postCreateCommand`
+   runs `just bootstrap` (compose up, migrations, seed, tests).
+4. The Codespaces "Ports" tab exposes:
    - `5000` — the API (Scalar docs at `/docs`)
    - `4000` — the local dashboard (links to everything)
    - `5341` — Seq (logs)
@@ -22,16 +21,6 @@ The five minutes from zero to a running, tested, observable .NET API.
    - `8080` — Keycloak admin
    - `8025` — Mailhog
    - `9001` — MinIO console
-
-Try:
-
-```sh
-curl -s http://localhost:5000/orders | jq
-```
-
-You should see seeded orders returned through the full pipeline
-(minimal API → MediatR handler → EF Core → Postgres), with a trace in
-Jaeger and a structured log in Seq.
 
 ## Path B — Local
 
@@ -58,6 +47,31 @@ open http://localhost:4000
 
 `just up` is idempotent — re-running it after a pull is the right thing
 to do.
+
+Try:
+
+```sh
+curl -s http://localhost:5000/orders | jq
+```
+
+You should see seeded orders returned through the full pipeline
+(minimal API → MediatR handler → EF Core → Postgres), with a trace in
+Jaeger and a structured log in Seq.
+
+## CLI verbs
+
+The same tool covers day 0 and day 300.
+
+| Verb | What it does |
+|---|---|
+| `dev-start new <name>` | Scaffold a new project (interactive wizard). |
+| `dev-start add <capability>` | Add a capability to an existing project. |
+| `dev-start doctor` | Diagnose drift, missing env, broken services. |
+| `dev-start upgrade` | Open a PR with the delta against the latest template. |
+| `dev-start list` | List available capabilities. |
+
+The capability registry lives in
+[`capabilities/README.md`](../capabilities/README.md).
 
 ## First real change
 
@@ -88,6 +102,7 @@ house style. Review the diff, run `just test`, commit.
 
 ## What next
 
-- `docs/paved-road.md` — the opinions, one page.
-- `docs/when-to-leave-the-road.md` — supported escape hatches.
-- `docs/adr/` — full rationale for each default.
+- [`paved-road.md`](./paved-road.md) — the opinions, one page.
+- [`when-to-leave-the-road.md`](./when-to-leave-the-road.md) — supported
+  escape hatches.
+- [`adr/`](./adr/) — full rationale for each default.

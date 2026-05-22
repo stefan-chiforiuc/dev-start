@@ -17,7 +17,9 @@ document and the relevant ADR(s) in [`docs/adr/`](./docs/adr).
    than add a second opinion.
 4. **Capabilities, not templates.** New features generally land as a
    capability module under `capabilities/<name>/` that can be added to an
-   existing project, not as a new monolithic template.
+   existing project, not as a new monolithic template. See
+   [`capabilities/README.md`](./capabilities/README.md) for the authoring
+   guide.
 
 ## Development loop
 
@@ -39,15 +41,13 @@ cd examples/multi-service
 tilt up
 ```
 
-## Commits and releases
+## How we work
 
-- **Conventional commits.** `feat:`, `fix:`, `docs:`, `refactor:`, `test:`,
-  `chore:`, `ci:`. Scope optional (e.g. `feat(postgres): add row-level
-  security helper`).
-- We use **release-please** to produce tagged releases and changelogs from
-  commit messages. Don't bump versions by hand.
-- **Breaking changes** require a `BREAKING CHANGE:` footer and an ADR
-  explaining the migration.
+Branching, commits, reviews, ADR policy, tests, docs:
+[`docs/way-of-working.md`](./docs/way-of-working.md).
+
+Releases (cadence, gates, runbook, v1 cut criteria):
+[`RELEASING.md`](./RELEASING.md).
 
 ## PR checklist
 
