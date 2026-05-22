@@ -141,6 +141,7 @@ jobs:
       url: https://www.nuget.org/packages/DevStart/${{ needs.release-please.outputs.version }}
     permissions:
       contents: read
+      id-token: write   # OIDC token exchange for NuGet trusted publishing
     steps:
       - uses: actions/setup-dotnet@v4
         with:
@@ -152,15 +153,16 @@ jobs:
           name: nupkg
           path: artifacts
 
-      # TODO: replace api-key auth with NuGet.org Trusted Publishing (OIDC)
-      # once the trusted publisher is registered for DevStart against this
-      # repo + the nuget-production environment. See RELEASING.md.
+      - name: Authenticate to NuGet (OIDC trusted publishing)
+        id: nuget-login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: ${{ vars.NUGET_USER }}
+
       - name: Push to NuGet
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
           dotnet nuget push artifacts/*.nupkg \
-            --api-key "$NUGET_API_KEY" \
+            --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" \
             --source https://api.nuget.org/v3/index.json
 
       - name: Verify package is live on NuGet

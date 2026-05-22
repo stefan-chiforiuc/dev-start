@@ -154,15 +154,17 @@ and is configured.
 - Add rule: `main` (branch).
 - Add rule: `v*` (tag) — for the rare case we re-trigger a deploy from a tag.
 
-### 4. Environment secrets (NOT repository secrets)
+### 4. NuGet trusted publishing — no API key
 
-Move these from repository secrets → environment secrets so they only exist
-for jobs that pass the approval gate:
+The `deploy` job authenticates to NuGet.org via OIDC trusted publishing
+(see the section below); there is no `NUGET_API_KEY` secret to manage.
+The only configuration is a repository variable:
 
-- `NUGET_API_KEY` — scope: Push new packages and package versions (will be
-  replaced by NuGet Trusted Publishing once that flow is set up; see below).
+- `NUGET_USER` — the NuGet.org account username that owns the `DevStart`
+  package. Set it under Settings → Secrets and variables → Actions →
+  Variables.
 
-After moving, delete the repository-level `NUGET_API_KEY`.
+If a `NUGET_API_KEY` secret still exists from an earlier setup, delete it.
 
 ### 5. Branch protection on `main`
 
@@ -198,8 +200,8 @@ After applying, run these from a fresh terminal:
 
 - `gh api repos/stefan-chiforiuc/dev-start/environments/nuget-production` —
   should return JSON, not 404.
-- `gh api repos/stefan-chiforiuc/dev-start/environments/nuget-production/secrets` —
-  should list `NUGET_API_KEY`.
+- `gh api repos/stefan-chiforiuc/dev-start/actions/variables/NUGET_USER` —
+  should return the NuGet account username.
 - `gh api repos/stefan-chiforiuc/dev-start/rulesets` — should list
   `main-protection` and `release-tag-protection`.
 
@@ -214,20 +216,25 @@ After applying, run these from a fresh terminal:
 ### 9. Post-setup audit (every 6 months)
 
 - Confirm reviewer list is current (no ex-maintainers).
-- Confirm secrets are still scoped to environment, not repo.
-- Rotate `NUGET_API_KEY` if not yet on Trusted Publishing.
+- Confirm the `nuget-production` environment still gates the deploy job.
+- Confirm the nuget.org trusted-publisher policy still matches this repo,
+  workflow, and environment.
 
 ---
 
-## NuGet.org Trusted Publishing (recommended — replaces the API key)
+## NuGet.org trusted publishing (OIDC)
 
-Once the environment above is set up, migrate to OIDC-based Trusted
-Publishing so no long-lived API key is involved:
+The `deploy` job publishes via OIDC trusted publishing — GitHub's
+short-lived OIDC token is exchanged for a temporary NuGet key by the
+`NuGet/login` action. No long-lived `NUGET_API_KEY` is stored anywhere.
 
-1. On nuget.org → Account → Trusted Publishing → register a new publisher.
-2. Repository: `stefan-chiforiuc/dev-start`.
-3. Workflow: `.github/workflows/release-please.yml`.
-4. Environment: `nuget-production`.
-5. Once registered, swap the `Push to NuGet` step in `release-please.yml`
-   to use the OIDC exchange (no API key) and delete the `NUGET_API_KEY`
-   secret. The deploy job already requests `id-token: write`.
+One-time setup on nuget.org (Account → Trusted Publishing → register a
+new publisher):
+
+1. Repository: `stefan-chiforiuc/dev-start`.
+2. Workflow: `.github/workflows/release-please.yml`.
+3. Environment: `nuget-production`.
+
+Then set the `NUGET_USER` repository variable (section 4) to the NuGet
+account username. Until both the publisher policy and `NUGET_USER` are
+in place, the deploy job's `Push to NuGet` step will fail.
