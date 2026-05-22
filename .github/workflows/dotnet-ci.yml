@@ -50,8 +50,8 @@ jobs:
           --health-interval 5s
           --health-retries 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
 
@@ -71,7 +71,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results
           path: "**/TestResults/*.trx"
@@ -80,7 +80,7 @@ jobs:
     runs-on: ubuntu-latest
     if: inputs.openapi-spec != ''
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: oasdiff/oasdiff-action/diff@f8cb9308b42121e793f835bd14c0b8090420430c # v0.0.39
@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ inputs.run-perf-smoke }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install k6
         run: |
           sudo gpg -k
