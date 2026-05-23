@@ -1,8 +1,8 @@
 # 0008 — `ts-` prefix for TypeScript-stack capabilities
 
-- Status: Accepted
+- Status: Accepted (filesystem layout); user-facing surface superseded by [ADR 0010](0010-flat-capability-names-and-families.md)
 - Date: 2026-04-24
-- Relates to: [ADR 0006](0006-capabilities-not-templates.md), [ADR 0007](0007-injectors-over-fork-templates.md)
+- Relates to: [ADR 0006](0006-capabilities-not-templates.md), [ADR 0007](0007-injectors-over-fork-templates.md), [ADR 0010](0010-flat-capability-names-and-families.md)
 
 ## Context
 

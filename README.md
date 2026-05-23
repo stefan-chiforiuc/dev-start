@@ -68,35 +68,48 @@ my-app/
   docs/adr/
 ```
 
-Built-in capabilities (composable — add only what you need):
+Built-in capabilities (composable — add only what you need). Type the
+**flat name** in any stack; the CLI resolves it to the right
+implementation based on the project's stack (see
+[ADR 0010](./docs/adr/0010-flat-capability-names-and-families.md)).
 
-| Capability | .NET stack | TypeScript stack | What it wires |
-|---|---|---|---|
-| postgres      | `postgres`  | `ts-postgres` | EF Core / Kysely + migrations + Orders slice |
-| auth          | `auth`      | `ts-auth`     | OIDC via Keycloak |
-| otel          | `otel`      | `ts-otel`     | Traces/metrics/logs via OTLP + Jaeger + Seq |
-| queue         | `queue`     | `ts-queue`    | RabbitMQ publisher/consumer |
-| cache         | `cache`     | `ts-cache`    | Redis wrapper |
-| s3            | `s3`        | `ts-s3`       | MinIO + signed-URL helper |
-| mail          | `mail`      | `ts-mail`     | Mailhog + mailer |
-| flags         | `flags`     | `ts-flags`    | OpenFeature |
-| sdk           | `sdk`       | `ts-sdk`      | TS SDK generated from OpenAPI |
-| gateway       | `gateway`   | `ts-gateway`  | Reverse proxy for multi-service mode |
-| k8s           | `k8s`       | `k8s`         | Helm chart + Kustomize overlays (dev/stage/prod) |
-| frontend      | `frontend`  | `frontend`    | Vite + React 19 + TanStack — consumes the SDK |
-| deploy-fly    | `deploy-fly`    | `ts-deploy-fly`    | Fly.io target |
-| deploy-aca    | `deploy-aca`    | `ts-deploy-aca`    | Azure Container Apps target |
+| Capability | What it wires |
+|---|---|
+| postgres      | EF Core / Kysely + migrations + Orders slice |
+| auth          | OIDC via Keycloak |
+| otel          | Traces/metrics/logs via OTLP + Jaeger + Seq |
+| queue         | RabbitMQ publisher/consumer |
+| cache         | Redis wrapper |
+| s3            | MinIO + signed-URL helper |
+| mail          | Mailhog + mailer |
+| flags         | OpenFeature |
+| sdk           | TS SDK generated from OpenAPI |
+| gateway       | Reverse proxy for multi-service mode |
+| k8s           | Helm chart + Kustomize overlays (dev/stage/prod) |
+| frontend      | Vite + React 19 + TanStack — consumes the SDK |
+| deploy        | Pick a target: `dev-start add deploy --target fly` or `--target aca` |
+
+```sh
+dev-start add cache                  # resolves to cache / ts-cache per stack
+dev-start add deploy --target fly    # resolves to deploy-fly / ts-deploy-fly
+```
+
+The on-disk folders still carry the `ts-` prefix for contributor
+clarity; typing them explicitly (`dev-start add ts-auth`) remains an
+escape hatch.
 
 ---
 
 ## The CLI verbs
 
 ```sh
-dev-start new <name> [--stack dotnet|typescript]   # scaffold a new project
+dev-start new <name>                                # interactive wizard (stack, backend, extras, deploy)
+dev-start new <name> --no-interactive               # use defaults; flags act as overrides
 dev-start add <capability>                          # add a capability to an existing project
+dev-start add deploy --target fly|aca               # pick a deploy target as a parameter
 dev-start doctor [--fix]                            # diagnose drift, missing env, broken services
 dev-start upgrade [--apply]                         # refresh the project from latest templates
-dev-start list                                      # list capabilities (filtered if in a project)
+dev-start list                                      # list capabilities, grouped by family
 dev-start promote <env>                             # emit k8s values for dev | stage | prod
 dev-start policy list|apply|remove|validate         # org-level policy bundles
 dev-start capability new <name>                     # author a new capability from the skeleton

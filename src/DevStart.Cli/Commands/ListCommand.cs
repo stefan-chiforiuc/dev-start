@@ -44,26 +44,44 @@ public static class ListCommand
     {
         var table = new Table()
             .AddColumn("status")
+            .AddColumn("family")
             .AddColumn("name")
             .AddColumn("version")
             .AddColumn("depends on")
             .AddColumn("description");
 
+        // Group rows by family so backend/deploy variants cluster together.
+        var loaded = new List<Capability>();
         foreach (var name in Capability.AvailableNames())
         {
-            try
-            {
-                var c = Capability.LoadEmbedded(name);
-                var status = installed.Contains(name) ? "[green]●[/]" : "[grey]○[/]";
-                var deps = c.DependsOn.Count > 0
-                    ? string.Join(", ", c.DependsOn)
-                    : "[grey]—[/]";
-                table.AddRow(status, c.Name, c.Version, deps, c.Description);
-            }
+            try { loaded.Add(Capability.LoadEmbedded(name)); }
             catch (Exception ex)
             {
-                table.AddRow("[red]![/]", name, "-", "-", $"[red]{ex.Message}[/]");
+                table.AddRow("[red]![/]", "[grey]—[/]", name, "-", "-", $"[red]{ex.Message}[/]");
             }
+        }
+
+        var ordered = loaded
+            .OrderBy(c => c.Family is null ? 1 : 0)     // family rows first
+            .ThenBy(c => c.Family ?? "", StringComparer.Ordinal)
+            .ThenBy(c => c.Framework ?? "", StringComparer.Ordinal)
+            .ThenByDescending(c => c.FrameworkVersion ?? "", StringComparer.Ordinal)
+            .ThenBy(c => c.Name, StringComparer.Ordinal);
+
+        foreach (var c in ordered)
+        {
+            var status = installed.Contains(c.Name) ? "[green]●[/]" : "[grey]○[/]";
+            var family = c.Family is null
+                ? "[grey]—[/]"
+                : c.Framework is null
+                    ? c.Family
+                    : c.FrameworkVersion is null
+                        ? $"{c.Family}/{c.Framework}"
+                        : $"{c.Family}/{c.Framework} {c.FrameworkVersion}";
+            var deps = c.DependsOn.Count > 0
+                ? string.Join(", ", c.DependsOn)
+                : "[grey]—[/]";
+            table.AddRow(status, family, c.Name, c.Version, deps, c.Description);
         }
 
         AnsiConsole.Write(table);

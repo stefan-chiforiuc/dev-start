@@ -10,7 +10,7 @@ namespace DevStart;
 /// </summary>
 public sealed class Manifest
 {
-    public const int CurrentSchemaVersion = 2;
+    public const int CurrentSchemaVersion = 3;
 
     [JsonPropertyName("schemaVersion")]
     public int SchemaVersion { get; set; } = CurrentSchemaVersion;
@@ -35,6 +35,20 @@ public sealed class Manifest
 
     [JsonPropertyName("policies")]
     public List<string> Policies { get; set; } = [];
+
+    /// <summary>
+    /// Backend framework + version the project was scaffolded against. Lets
+    /// `add`/`upgrade`/`doctor` rebuild the capability alias map without
+    /// re-asking the user. Populated by the wizard or `--framework` flag.
+    /// </summary>
+    [JsonPropertyName("backend")]
+    public BackendSelection? Backend { get; set; }
+
+    public sealed class BackendSelection
+    {
+        [JsonPropertyName("framework")] public string Framework { get; set; } = "";
+        [JsonPropertyName("version")] public string Version { get; set; } = "";
+    }
 
     private static readonly JsonSerializerOptions Json = new()
     {
@@ -64,8 +78,11 @@ public sealed class Manifest
     }
 
     /// <summary>
-    /// Bring an older manifest up to the current schema. v1 manifests predate
-    /// the <c>stack</c> and <c>policies</c> fields; default them and bump.
+    /// Bring an older manifest up to the current schema.
+    /// v1 → v2: defaults <c>stack</c> and <c>policies</c>.
+    /// v2 → v3: infers a <c>backend</c> selection from <c>stack</c> +
+    /// installed capabilities. Existing projects ran against a single
+    /// backend variant so the inference is unambiguous.
     /// </summary>
     private static Manifest Migrate(Manifest m)
     {
@@ -73,8 +90,23 @@ public sealed class Manifest
         {
             if (string.IsNullOrEmpty(m.Stack)) m.Stack = "dotnet-api";
             m.Policies ??= [];
-            m.SchemaVersion = CurrentSchemaVersion;
+            m.SchemaVersion = 2;
+        }
+        if (m.SchemaVersion < 3)
+        {
+            m.Backend ??= InferBackend(m);
+            m.SchemaVersion = 3;
         }
         return m;
+    }
+
+    private static BackendSelection InferBackend(Manifest m)
+    {
+        // Pre-v3 projects had exactly one backend variant per stack.
+        if (m.Stack == "typescript-fastify")
+        {
+            return new BackendSelection { Framework = "fastify", Version = "5" };
+        }
+        return new BackendSelection { Framework = "aspnet", Version = "8" };
     }
 }
