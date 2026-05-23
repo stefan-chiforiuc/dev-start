@@ -30,6 +30,16 @@ public static class CapabilityResolver
     /// </summary>
     public static string? Resolve(Selection sel)
     {
+        // 0. If the user pinned a family parameter (engine, target,
+        //    framework, version), family resolution takes precedence over
+        //    exact-name match. Otherwise `add cache --engine memory` would
+        //    short-circuit to the bare `cache` folder via rule 2.
+        if (sel.FamilyTarget is not null || sel.FamilyVersion is not null)
+        {
+            var pinned = ResolveFamily(sel);
+            if (pinned is not null) return pinned;
+        }
+
         // 1. In TS projects, the prefixed sibling wins over the bare name
         //    (bare `auth` is the .NET capability — we don't want to install
         //    it into a TS project). Typing `ts-auth` explicitly still works
@@ -178,7 +188,11 @@ public static class CapabilityResolver
 
     private static string? ResolveFamily(Selection sel)
     {
-        Capability? best = null;
+        // Collect every candidate in the family that matches stack +
+        // optional target/version filters, then pick the best per the
+        // documented tie-break rules: explicit `default: true` wins;
+        // otherwise the highest framework version.
+        var candidates = new List<Capability>();
         foreach (var name in Capability.AvailableNames())
         {
             Capability cap;
@@ -204,17 +218,26 @@ public static class CapabilityResolver
                 && !string.Equals(cap.FrameworkVersion, sel.FamilyVersion, StringComparison.OrdinalIgnoreCase))
                 continue;
 
-            best = cap;
-            // Prefer the highest version when no version is pinned.
-            if (sel.FamilyVersion is null && best is not null)
-            {
-                if (CompareVersions(cap.FrameworkVersion, best.FrameworkVersion) > 0)
-                {
-                    best = cap;
-                }
-            }
+            candidates.Add(cap);
         }
-        return best?.Name;
+
+        if (candidates.Count == 0) return null;
+        if (candidates.Count == 1) return candidates[0].Name;
+
+        // No version pinned — prefer an explicit default, fall back to the
+        // highest version. Picking the LTS as default is the convention.
+        var explicitDefault = candidates.FirstOrDefault(c => c.Default);
+        if (explicitDefault is not null) return explicitDefault.Name;
+
+        return candidates
+            .OrderByDescending(c => c.FrameworkVersion, VersionComparer.Instance)
+            .First().Name;
+    }
+
+    private sealed class VersionComparer : IComparer<string?>
+    {
+        public static readonly VersionComparer Instance = new();
+        public int Compare(string? a, string? b) => CompareVersions(a, b);
     }
 
     private static int CompareVersions(string? a, string? b)

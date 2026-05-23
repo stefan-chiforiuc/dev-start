@@ -16,12 +16,14 @@ public static class NewCommand
         var stackOpt = new Option<string?>("--stack", "Stack: dotnet (default) | typescript.");
         var frameworkOpt = new Option<string?>("--framework", "Backend framework variant (e.g. aspnet, fastify).");
         var versionOpt = new Option<string?>("--framework-version", "Backend framework version (e.g. 8, 9, 5).");
+        var cacheEngineOpt = new Option<string?>("--cache-engine", "Cache variant when --with cache is selected (e.g. redis, memory).");
+        var frontendOpt = new Option<string?>("--frontend-framework", "Frontend variant when --with frontend is selected (e.g. react).");
         var noInteractiveOpt = new Option<bool>("--no-interactive", "Skip the wizard; use flag values + defaults.");
 
         var cmd = new Command("new", "Scaffold a new dev-start project.")
         {
             nameArg, multiOpt, capsOpt, deployOpt, noClaudeOpt, stackOpt,
-            frameworkOpt, versionOpt, noInteractiveOpt,
+            frameworkOpt, versionOpt, cacheEngineOpt, frontendOpt, noInteractiveOpt,
         };
 
         cmd.SetHandler(async ctx =>
@@ -34,14 +36,12 @@ public static class NewCommand
             var stackRaw = ctx.ParseResult.GetValueForOption(stackOpt);
             var framework = ctx.ParseResult.GetValueForOption(frameworkOpt);
             var version = ctx.ParseResult.GetValueForOption(versionOpt);
+            var cacheEngine = ctx.ParseResult.GetValueForOption(cacheEngineOpt);
+            var frontendFw = ctx.ParseResult.GetValueForOption(frontendOpt);
             var noInteractive = ctx.ParseResult.GetValueForOption(noInteractiveOpt);
 
             var interactive = !noInteractive && !Console.IsInputRedirected;
 
-            // Build the preset: any flag the user passed becomes a pre-answer.
-            // `--with` and `--no-claude` are special — their presence is the
-            // signal. For `--with` we treat any value as "you've already
-            // chosen extras."
             var preset = new NewWizard.Preset(
                 Stack: stackRaw,
                 Framework: framework,
@@ -49,9 +49,19 @@ public static class NewCommand
                 Extras: caps.Length > 0 ? caps : null,
                 DeployTarget: deploy,
                 IncludeClaude: noClaude ? false : (bool?)null,
-                MultiService: multi);
+                MultiService: multi,
+                CacheEngine: cacheEngine,
+                FrontendFramework: frontendFw);
 
             var answers = new NewWizard().Run(preset, interactive);
+
+            // Plumb variant choices (cache→memory, frontend→react) through to
+            // the resolver so "cache" in extras becomes "cache-memory" etc.
+            var familyChoices = new Dictionary<string, string>(StringComparer.Ordinal);
+            if (!string.IsNullOrEmpty(answers.CacheEngine))
+                familyChoices["cache"] = answers.CacheEngine;
+            if (!string.IsNullOrEmpty(answers.FrontendFramework))
+                familyChoices["frontend"] = answers.FrontendFramework;
 
             var planner = new Planner(
                 name: name,
@@ -61,7 +71,8 @@ public static class NewCommand
                 includeClaude: answers.IncludeClaude,
                 stack: answers.Stack,
                 backendFramework: string.IsNullOrEmpty(answers.Framework) ? null : answers.Framework,
-                backendVersion: string.IsNullOrEmpty(answers.FrameworkVersion) ? null : answers.FrameworkVersion);
+                backendVersion: string.IsNullOrEmpty(answers.FrameworkVersion) ? null : answers.FrameworkVersion,
+                familyChoices: familyChoices);
 
             AnsiConsole.MarkupLine($"[bold]dev-start new[/] [grey]—[/] [cyan]{name}[/]");
             AnsiConsole.MarkupLine($"stack:         [yellow]{answers.Stack}[/]");

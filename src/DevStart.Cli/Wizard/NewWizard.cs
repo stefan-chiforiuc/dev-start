@@ -17,7 +17,9 @@ public sealed class NewWizard
         IReadOnlyList<string> Extras,
         string DeployTarget,
         bool IncludeClaude,
-        bool MultiService);
+        bool MultiService,
+        string? CacheEngine = null,
+        string? FrontendFramework = null);
 
     public sealed record Preset(
         string? Stack = null,
@@ -26,7 +28,9 @@ public sealed class NewWizard
         IReadOnlyList<string>? Extras = null,
         string? DeployTarget = null,
         bool? IncludeClaude = null,
-        bool? MultiService = null);
+        bool? MultiService = null,
+        string? CacheEngine = null,
+        string? FrontendFramework = null);
 
     private readonly IAnsiConsole _console;
 
@@ -49,6 +53,20 @@ public sealed class NewWizard
 
         var extras = preset.Extras ?? (interactive ? AskExtras(stack) : DefaultExtras(stack));
 
+        // Variant prompts only fire when the user opted into the relevant
+        // extra. Silent when only one variant exists in the family.
+        var cacheEngine = preset.CacheEngine;
+        if (cacheEngine is null && ExtrasContain(extras, "cache"))
+        {
+            cacheEngine = ResolveFamilyChoice("cache", stack, interactive, "Cache engine");
+        }
+
+        var frontendFramework = preset.FrontendFramework;
+        if (frontendFramework is null && ExtrasContain(extras, "frontend"))
+        {
+            frontendFramework = ResolveFamilyChoice("frontend", stack, interactive, "Frontend framework");
+        }
+
         var deploy = preset.DeployTarget ?? (interactive ? AskDeploy() : "none");
 
         var includeClaude = preset.IncludeClaude ?? (interactive ? AskIncludeClaude() : true);
@@ -56,7 +74,42 @@ public sealed class NewWizard
         // multi-service is rare; only ask in interactive mode.
         var multi = preset.MultiService ?? (interactive ? AskMultiService() : false);
 
-        return new Answers(stack, framework, version, extras, deploy, includeClaude, multi);
+        return new Answers(stack, framework, version, extras, deploy, includeClaude, multi, cacheEngine, frontendFramework);
+    }
+
+    private static bool ExtrasContain(IReadOnlyList<string> extras, string name)
+        => extras.Any(e => e.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// Generic family-variant chooser. Used for cache (redis vs memory) and
+    /// frontend (react vs future angular/vue). Returns the picked
+    /// <c>framework</c> name (which the resolver later maps to a concrete
+    /// capability folder via the alias map). Returns null when no variants
+    /// exist; returns the single variant silently when only one exists.
+    /// </summary>
+    private string? ResolveFamilyChoice(string family, string stack, bool interactive, string promptTitle)
+    {
+        var variants = CapabilityResolver.ListFamily(family, stack);
+        if (variants.Count == 0) return null;
+
+        var frameworks = variants
+            .Select(v => v.Framework ?? "")
+            .Where(f => f.Length > 0)
+            .Distinct()
+            .ToList();
+        if (frameworks.Count <= 1) return frameworks.FirstOrDefault();
+
+        if (!interactive)
+        {
+            var byDefault = variants.FirstOrDefault(v => v.Default);
+            return byDefault?.Framework ?? frameworks.First();
+        }
+
+        var defaultByFlag = variants.FirstOrDefault(v => v.Default)?.Framework;
+        return _console.Prompt(new SelectionPrompt<string>()
+            .Title($"[bold]{promptTitle}[/]")
+            .AddChoices(frameworks)
+            .UseConverter(f => f == defaultByFlag ? $"{f}  (default)" : f));
     }
 
     private string AskStack()
@@ -132,20 +185,30 @@ public sealed class NewWizard
 
     private string AskVersion(IReadOnlyList<Capability> variants)
     {
-        var versions = variants
-            .Select(v => v.FrameworkVersion ?? "")
-            .Where(v => v.Length > 0)
-            .OrderByDescending(v => v, StringComparer.Ordinal)
+        var ordered = variants
+            .Where(v => !string.IsNullOrEmpty(v.FrameworkVersion))
+            .OrderByDescending(v => v.FrameworkVersion, StringComparer.Ordinal)
             .ToList();
-        if (versions.Count == 0) return "";
+        if (ordered.Count == 0) return "";
+
+        var versions = ordered.Select(v => v.FrameworkVersion!).ToList();
+        var defaultByFlag = ordered.FirstOrDefault(v => v.Default)?.FrameworkVersion;
 
         return _console.Prompt(new SelectionPrompt<string>()
-            .Title("[bold]Framework version[/] — newest is the default")
-            .AddChoices(versions));
+            .Title("[bold]Framework version[/]")
+            .AddChoices(versions)
+            .UseConverter(v => v == defaultByFlag ? $"{v}  (default / LTS)" : v));
     }
 
     private string DefaultVersion(IReadOnlyList<Capability> variants)
     {
+        // Prefer an explicit `default: true` (typically the LTS); fall back
+        // to the highest version if no variant declares itself default.
+        var explicitDefault = variants.FirstOrDefault(v => v.Default);
+        if (explicitDefault is not null)
+        {
+            return explicitDefault.FrameworkVersion ?? "";
+        }
         return variants
             .Select(v => v.FrameworkVersion ?? "")
             .Where(v => v.Length > 0)

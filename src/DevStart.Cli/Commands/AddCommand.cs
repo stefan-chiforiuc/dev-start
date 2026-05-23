@@ -10,27 +10,38 @@ public static class AddCommand
         var capArg = new Argument<string>("capability", "Capability to add (e.g. auth, cache, queue, s3, deploy).");
         var projectOpt = new Option<string>(["--project", "-p"], () => ".", "Path to the target project.");
         var targetOpt = new Option<string?>("--target",
-            "For family capabilities like `deploy`: which variant to install (e.g. fly, aca).");
+            "For `deploy`: which target to install (e.g. fly, aca).");
+        var engineOpt = new Option<string?>("--engine",
+            "For engine-swappable families like `cache`: which engine (e.g. redis, memory).");
         var frameworkOpt = new Option<string?>("--framework",
-            "For `backend`: which framework variant (e.g. aspnet, fastify).");
+            "For `backend` / `frontend`: which framework variant (e.g. aspnet, fastify, react).");
         var versionOpt = new Option<string?>("--framework-version",
-            "For `backend`: which framework version (e.g. 8, 9, 5).");
+            "For `backend` / `frontend`: which framework version (e.g. 8, 9, 19).");
 
         var cmd = new Command("add", "Add a capability to an existing project.")
         {
-            capArg, projectOpt, targetOpt, frameworkOpt, versionOpt,
+            capArg, projectOpt, targetOpt, engineOpt, frameworkOpt, versionOpt,
         };
 
-        cmd.SetHandler((capName, projectPath, target, framework, version) =>
+        cmd.SetHandler(ctx =>
         {
+            var capName = ctx.ParseResult.GetValueForArgument(capArg);
+            var projectPath = ctx.ParseResult.GetValueForOption(projectOpt) ?? ".";
+            var target = ctx.ParseResult.GetValueForOption(targetOpt);
+            var engine = ctx.ParseResult.GetValueForOption(engineOpt);
+            var framework = ctx.ParseResult.GetValueForOption(frameworkOpt);
+            var version = ctx.ParseResult.GetValueForOption(versionOpt);
+
             var root = Path.GetFullPath(projectPath);
             var manifest = Manifest.Load(root);
 
             // Resolve the user-typed name to a concrete capability folder.
-            // The resolver normalizes flat names (e.g. `auth` → `ts-auth` in
-            // a TS project) and family selections (`deploy --target fly` →
-            // `deploy-fly`).
-            var familyTarget = target;
+            // The resolver normalizes flat names (`auth` → `ts-auth` in a TS
+            // project) and family selections (`deploy --target fly` →
+            // `deploy-fly`, `cache --engine memory` → `cache-memory`).
+            // `--engine` and `--target` are surface-level aliases for the
+            // same underlying "pick a variant inside this family" concept.
+            var familyTarget = engine ?? target ?? framework;
             if (capName.Equals("deploy", StringComparison.Ordinal))
             {
                 var resolvedDeploy = CapabilityResolver.ResolveDeploy(manifest.Stack, target ?? "");
@@ -144,7 +155,7 @@ public static class AddCommand
                 }
                 AnsiConsole.MarkupLine("[grey]Run the above if you haven't already.[/]");
             }
-        }, capArg, projectOpt, targetOpt, frameworkOpt, versionOpt);
+        });
 
         return cmd;
     }

@@ -87,6 +87,27 @@ public sealed class Capability
     [JsonPropertyName("provides")]
     public List<string> Provides { get; set; } = [];
 
+    /// <summary>
+    /// Optional shared file set to overlay before this capability's own
+    /// <c>files/</c> directory. Path is relative to <c>capabilities/</c>
+    /// (e.g. <c>_shared/backend-aspnet</c>). Files in the extends source
+    /// are copied first; the variant's own files override on conflict.
+    /// Used so per-version backend variants don't duplicate the 30+
+    /// version-agnostic template files. <c>_</c>-prefixed folders are
+    /// hidden from <c>list</c> and <c>add</c>.
+    /// </summary>
+    [JsonPropertyName("extends")]
+    public string? Extends { get; set; }
+
+    /// <summary>
+    /// When multiple variants live in the same family, the one flagged
+    /// <c>default: true</c> is picked when the user doesn't specify a
+    /// version. Typically the LTS choice. Falls back to highest version
+    /// if no variant declares itself the default.
+    /// </summary>
+    [JsonPropertyName("default")]
+    public bool Default { get; set; }
+
     public sealed class EnvAddition
     {
         [JsonPropertyName("key")] public string Key { get; set; } = "";

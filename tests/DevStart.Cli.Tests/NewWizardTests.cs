@@ -50,4 +50,40 @@ public class NewWizardTests
         answers.IncludeClaude.Should().BeFalse();
         answers.MultiService.Should().BeTrue();
     }
+
+    [Fact]
+    public void Cache_engine_preset_is_preserved()
+    {
+        var wizard = new NewWizard();
+        var answers = wizard.Run(new NewWizard.Preset(
+            Stack: "dotnet",
+            Extras: ["cache"],
+            CacheEngine: "memory"), interactive: false);
+
+        answers.CacheEngine.Should().Be("memory");
+    }
+
+    [Fact]
+    public void Cache_in_extras_without_preset_falls_back_to_redis_default_non_interactive()
+    {
+        // No `default: true` flag on cache → the non-interactive picker
+        // returns the first registered variant. Today that's redis; the
+        // test locks in the contract that "no preset, non-interactive,
+        // multiple variants" doesn't crash.
+        var wizard = new NewWizard();
+        var answers = wizard.Run(new NewWizard.Preset(
+            Stack: "dotnet",
+            Extras: ["cache"]), interactive: false);
+
+        answers.CacheEngine.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public void Backend_version_default_is_LTS_not_highest()
+    {
+        // base (.NET 8) is flagged default; base-aspnet-9 isn't.
+        var wizard = new NewWizard();
+        var answers = wizard.Run(new NewWizard.Preset(Stack: "dotnet"), interactive: false);
+        answers.FrameworkVersion.Should().Be("8");
+    }
 }

@@ -75,11 +75,12 @@ implementation based on the project's stack (see
 
 | Capability | What it wires |
 |---|---|
+| backend       | Pick a framework + version: `aspnet 8` (LTS, default), `aspnet 9`, `fastify 5` |
 | postgres      | EF Core / Kysely + migrations + Orders slice |
 | auth          | OIDC via Keycloak |
 | otel          | Traces/metrics/logs via OTLP + Jaeger + Seq |
 | queue         | RabbitMQ publisher/consumer |
-| cache         | Redis wrapper |
+| cache         | Pick an engine: `--engine redis` (default) or `--engine memory` |
 | s3            | MinIO + signed-URL helper |
 | mail          | Mailhog + mailer |
 | flags         | OpenFeature |
@@ -87,11 +88,13 @@ implementation based on the project's stack (see
 | gateway       | Reverse proxy for multi-service mode |
 | k8s           | Helm chart + Kustomize overlays (dev/stage/prod) |
 | frontend      | Vite + React 19 + TanStack — consumes the SDK |
-| deploy        | Pick a target: `dev-start add deploy --target fly` or `--target aca` |
+| deploy        | Pick a target: `--target fly` or `--target aca` |
 
 ```sh
-dev-start add cache                  # resolves to cache / ts-cache per stack
-dev-start add deploy --target fly    # resolves to deploy-fly / ts-deploy-fly
+dev-start new my-app                              # interactive wizard
+dev-start new my-app --framework-version 9        # scaffold against .NET 9
+dev-start add cache --engine memory               # in-process cache, no Redis
+dev-start add deploy --target fly                 # resolves per stack
 ```
 
 The on-disk folders still carry the `ts-` prefix for contributor

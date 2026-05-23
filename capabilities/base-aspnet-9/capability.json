@@ -1,17 +1,16 @@
 {
   "$schema": "https://dev-start.dev/schemas/capability/1.json",
-  "name": "base",
+  "name": "base-aspnet-9",
   "version": "0.1.0",
-  "description": "Minimum viable .NET 8 API: layered projects, minimal API host, Problem+JSON errors, health checks, OpenAPI, justfile, Dockerfile.",
+  "description": "ASP.NET Core 9 API foundation. Same layered shape as `base`, targeting .NET 9.",
   "family": "backend",
   "framework": "aspnet",
-  "frameworkVersion": "8",
-  "default": true,
+  "frameworkVersion": "9",
   "provides": ["base"],
   "extends": "_shared/backend-aspnet",
   "stacks": ["dotnet-api"],
   "dependsOn": [],
-  "conflictsWith": [],
+  "conflictsWith": ["base"],
   "addsServices": [],
   "envAdditions": [
     { "key": "ASPNETCORE_URLS", "example": "http://+:5000" },
@@ -22,7 +21,7 @@
     "dotnet build -c Debug"
   ],
   "doctor": [
-    { "check": "dotnet-version", "min": "8.0" },
+    { "check": "dotnet-version", "min": "9.0" },
     { "check": "file", "path": "src/{{Name}}.Api/Program.cs" }
   ]
 }

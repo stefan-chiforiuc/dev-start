@@ -128,4 +128,60 @@ public class CapabilityResolverTests
         var tsDeploy = CapabilityResolver.ListFamily("deploy", Planner.StackTypescript);
         tsDeploy.Select(c => c.Name).Should().BeEquivalentTo(["ts-deploy-fly", "ts-deploy-aca"]);
     }
+
+    [Fact]
+    public void ResolveBackend_with_no_version_picks_the_LTS_default_not_the_highest()
+    {
+        // base (.NET 8) flags `default: true`; base-aspnet-9 doesn't.
+        // Without an explicit version, the resolver must pick the LTS.
+        CapabilityResolver.ResolveBackend(Planner.StackDotnet, null, null).Should().Be("base");
+        CapabilityResolver.ResolveBackend(Planner.StackDotnet, "aspnet", null).Should().Be("base");
+    }
+
+    [Fact]
+    public void ResolveBackend_with_explicit_version_picks_that_variant()
+    {
+        CapabilityResolver.ResolveBackend(Planner.StackDotnet, "aspnet", "9").Should().Be("base-aspnet-9");
+        CapabilityResolver.ResolveBackend(Planner.StackDotnet, "aspnet", "8").Should().Be("base");
+    }
+
+    [Fact]
+    public void ListFamily_backend_dotnet_returns_both_versions()
+    {
+        var variants = CapabilityResolver.ListFamily("backend", Planner.StackDotnet)
+            .Select(c => c.Name).ToList();
+        variants.Should().Contain(["base", "base-aspnet-9"]);
+    }
+
+    [Fact]
+    public void Cache_engine_memory_resolves_to_cache_memory_for_dotnet()
+    {
+        var sel = new CapabilityResolver.Selection("cache", Planner.StackDotnet, FamilyTarget: "memory");
+        CapabilityResolver.Resolve(sel).Should().Be("cache-memory");
+    }
+
+    [Fact]
+    public void Cache_engine_memory_resolves_to_ts_cache_memory_for_typescript()
+    {
+        var sel = new CapabilityResolver.Selection("cache", Planner.StackTypescript, FamilyTarget: "memory");
+        CapabilityResolver.Resolve(sel).Should().Be("ts-cache-memory");
+    }
+
+    [Fact]
+    public void Cache_with_no_engine_resolves_to_redis_default()
+    {
+        // Both `cache` (redis) and `cache-memory` are in the cache family;
+        // `cache` ships with no `default: true` flag — falls back to the
+        // first registered variant. Bare `add cache` still picks Redis
+        // because the no-pin path goes through stack-prefix / exact match.
+        var sel = new CapabilityResolver.Selection("cache", Planner.StackDotnet);
+        CapabilityResolver.Resolve(sel).Should().Be("cache");
+    }
+
+    [Fact]
+    public void Cache_with_engine_redis_resolves_to_cache_dotnet()
+    {
+        var sel = new CapabilityResolver.Selection("cache", Planner.StackDotnet, FamilyTarget: "redis");
+        CapabilityResolver.Resolve(sel).Should().Be("cache");
+    }
 }

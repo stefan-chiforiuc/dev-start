@@ -126,20 +126,44 @@ the wizard skips any prompt whose value was provided by a flag.
   per slice, easy comparison) is preserved; only the public surface
   changes.
 
-## Out of scope for this round
+## Follow-up landed
 
-Acknowledging the user's broader wish list — these are explicitly
-deferred so this change stays reviewable:
+The follow-up commit on this branch ships three of the deferred items.
+All three reuse the family/variant model defined above with one
+additional schema field (`extends`) and one default-selection flag
+(`default: true`).
 
-- **Per-version backend folders** (`base-aspnet-9`, `ts-base-fastify-5`).
-  The metadata supports them today; the folder-split happens in a
-  follow-up that ships with the first second-version variant.
-- **`_shared/backend-aspnet/`** boilerplate extraction via a new
-  `extends` field — needed only once per-version folders exist.
-- **Frontend framework variants** (React / Angular / Vue) — same
-  mechanism; ships when the first non-React frontend lands.
-- **Database / cache / queue engine swaps** (Postgres vs MySQL, Redis vs
-  in-memory). The wizard's "extras" multiselect already separates them;
-  a future variant lets each be a family.
-- **`dev-start migrate`** verb for major framework bumps. The current
-  `upgrade` handles minor/patch within a variant.
+- **Per-version backend folders.** `_shared/backend-aspnet/` holds the
+  30 version-agnostic template files; `base/` ships only 5
+  version-pinned files (`Directory.Build.props`, `Directory.Packages.props`,
+  `global.json`, `Dockerfile`, `.vscode/launch.json`) and declares
+  `extends: "_shared/backend-aspnet"`. The new `base-aspnet-9/` variant
+  follows the same pattern — 5 .NET-9 files, same `extends`. The
+  installer's overlay rule is "shared first, variant overrides on path
+  conflict."
+- **`default: true` flag** on `base/capability.json` so `dev-start new`
+  with no version flag stays on the .NET 8 LTS rather than the highest
+  version. `dev-start new --framework-version 9` switches to
+  `base-aspnet-9`.
+- **Cache engine swap.** `cache-memory/` (`.NET`) and
+  `ts-cache-memory/` (TS) ship an `IMemoryCache` / `Map<>` implementation
+  of the same `ITypedCache` / `app.cache` surface as the Redis-backed
+  `cache` / `ts-cache`. Picked via the wizard or
+  `dev-start add cache --engine memory`. Both pairs declare mutual
+  `conflictsWith`.
+- **Frontend metadata.** The existing `frontend/` capability is tagged
+  `family: "frontend"`, `framework: "react"`, `frameworkVersion: "19"`,
+  `provides: ["frontend"]`. The wizard fires a frontend-variant prompt
+  when multiple variants exist; today there's one (React) so it's
+  silent. Adding `frontend-angular/` etc. is now a metadata + files
+  contribution — no CLI code changes.
+
+## Still out of scope
+
+- **Database engine swap** (Postgres vs MySQL vs SQLite). Same
+  mechanism; ships when a real second engine is committed to.
+- **Non-React frontend implementations.** Metadata is ready; the file
+  set isn't.
+- **`dev-start migrate`** for major framework bumps (aspnet-8 →
+  aspnet-9 across a live project). The current `upgrade` handles
+  minor/patch within a variant.

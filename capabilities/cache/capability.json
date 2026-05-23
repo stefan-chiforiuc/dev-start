@@ -3,8 +3,12 @@
   "name": "cache",
   "version": "0.1.0",
   "description": "Redis distributed cache via IDistributedCache, with a typed wrapper and cache-aside helpers.",
+  "family": "cache",
+  "framework": "redis",
+  "provides": ["cache"],
+  "stacks": ["dotnet-api"],
   "dependsOn": ["base"],
-  "conflictsWith": [],
+  "conflictsWith": ["cache-memory"],
   "addsServices": ["redis"],
   "envAdditions": [
     { "key": "Redis__Connection", "example": "localhost:6379" }

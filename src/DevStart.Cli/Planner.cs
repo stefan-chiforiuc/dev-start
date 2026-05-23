@@ -32,7 +32,8 @@ public sealed class Planner
         bool includeClaude,
         string stack = StackDotnet,
         string? backendFramework = null,
-        string? backendVersion = null)
+        string? backendVersion = null,
+        IReadOnlyDictionary<string, string>? familyChoices = null)
     {
         RawName = name;
         Tokens = new Tokens(name);
@@ -49,10 +50,14 @@ public sealed class Planner
         // Collect the user-requested set plus auto-added gateway / deploy caps.
         // Each user-typed name goes through the resolver so flat names
         // ("auth", "s3") in a TS project map to "ts-auth" / "ts-s3".
+        // `familyChoices` lets the wizard pick variants — e.g. cache→memory
+        // resolves "cache" to "cache-memory" before the alias map runs.
         var requested = new List<string> { baseCap };
         foreach (var raw in capabilities)
         {
-            var resolved = CapabilityResolver.Resolve(new CapabilityResolver.Selection(raw, Stack)) ?? raw;
+            string? familyTarget = null;
+            familyChoices?.TryGetValue(raw, out familyTarget);
+            var resolved = CapabilityResolver.Resolve(new CapabilityResolver.Selection(raw, Stack, familyTarget)) ?? raw;
             if (!requested.Contains(resolved, StringComparer.Ordinal)) requested.Add(resolved);
         }
         if (multiService && !requested.Contains(gatewayCap, StringComparer.Ordinal))

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "cache-memory",
+  "version": "0.1.0",
+  "description": "In-process IMemoryCache implementation of ITypedCache. No Redis, no docker service — suitable for single-instance apps and tests.",
+  "family": "cache",
+  "framework": "memory",
+  "provides": ["cache"],
+  "stacks": ["dotnet-api"],
+  "dependsOn": ["base"],
+  "conflictsWith": ["cache"],
+  "addsServices": [],
+  "envAdditions": [],
+  "postInstall": ["dotnet restore"],
+  "doctor": [
+    { "check": "file", "path": "src/{{Name}}.Infrastructure/Caching/ITypedCache.cs" }
+  ]
+}

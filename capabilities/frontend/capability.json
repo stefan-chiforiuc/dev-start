@@ -3,6 +3,10 @@
   "name": "frontend",
   "version": "0.1.0",
   "description": "Vite + React 19 + TanStack Router + TanStack Query. Consumes the generated SDK from sdk / ts-sdk.",
+  "family": "frontend",
+  "framework": "react",
+  "frameworkVersion": "19",
+  "provides": ["frontend"],
   "dependsOn": [],
   "dependsOnByStack": {
     "typescript-fastify": ["ts-base", "ts-sdk"],

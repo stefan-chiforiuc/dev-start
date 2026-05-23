@@ -28,13 +28,71 @@ public static class CapabilityInstaller
         ApplyInjectors(capability, targetRoot, tokens, baselines);
     }
 
+    /// <summary>
+    /// Represents one source of files in an overlay chain. Either a real
+    /// capability (read via <see cref="Capability.ReadFile"/>) or a shared
+    /// resource folder (read directly off the embedded resource index).
+    /// </summary>
+    private sealed record FileSource(string Name, bool IsShared)
+    {
+        public byte[]? Read(string relativePath) => IsShared
+            ? DevStart.Capability.ReadBytes($"capabilities/{Name}/files/{relativePath}")
+            : DevStart.Capability.ReadFile(Name, relativePath);
+
+        public string Capability => Name;
+    }
+
+    /// <summary>
+    /// Compute the final path → source map for a capability, walking the
+    /// <c>extends</c> chain. Later sources (the capability itself) override
+    /// earlier ones (shared overlays) on path conflict.
+    /// </summary>
+    private static Dictionary<string, FileSource> BuildOverlayMap(string capability)
+    {
+        var map = new Dictionary<string, FileSource>(StringComparer.Ordinal);
+
+        Capability? cap;
+        try { cap = Capability.LoadEmbedded(capability); }
+        catch { cap = null; }
+
+        if (cap?.Extends is { Length: > 0 } sharedPath)
+        {
+            var source = new FileSource(sharedPath, IsShared: true);
+            foreach (var rel in EnumerateSharedFiles(sharedPath))
+            {
+                map[rel] = source;
+            }
+        }
+
+        var ownSource = new FileSource(capability, IsShared: false);
+        foreach (var rel in Capability.FilesFor(capability))
+        {
+            map[rel] = ownSource;
+        }
+
+        return map;
+    }
+
+    private static IEnumerable<string> EnumerateSharedFiles(string sharedPath)
+    {
+        var prefix = $"capabilities/{sharedPath}/files/";
+        return Capability.ResourceNamesUnder(prefix);
+    }
+
     public static void CopyFiles(
         string capability, string targetRoot, Tokens tokens, Baselines? baselines = null)
     {
-        foreach (var rel in Capability.FilesFor(capability))
+        // Honor `extends` overlay: shared files first (e.g. _shared/backend-aspnet),
+        // then the variant's own files. The variant overrides on path conflict
+        // so a `Directory.Build.props` shipped by base-aspnet-9 wins over the
+        // shared one even though it'd otherwise be a "skip — already exists".
+        var fileMap = BuildOverlayMap(capability);
+
+        foreach (var rel in fileMap.Keys.OrderBy(p => p, StringComparer.Ordinal))
         {
-            var bytes = Capability.ReadFile(capability, rel)
-                ?? throw new InvalidOperationException($"Missing resource for {capability}/{rel}");
+            var source = fileMap[rel];
+            var bytes = source.Read(rel)
+                ?? throw new InvalidOperationException($"Missing resource for {source.Capability}/{rel}");
 
             var relativeOutPath = tokens.Apply(rel);
             var dest = Path.Join(targetRoot, relativeOutPath);
