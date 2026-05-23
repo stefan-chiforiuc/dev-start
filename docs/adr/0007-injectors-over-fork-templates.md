@@ -14,7 +14,7 @@ The question is how.
 Options considered:
 
 1. **Marker-based string injection.** Base files carry comment markers
-   (`// devstart:api-services`). Capabilities ship fragment files plus
+   (`// dev-start-dotnet:api-services`). Capabilities ship fragment files plus
    a JSON spec that says "insert this fragment at marker X in file Y."
 2. **Morph-based patching** (e.g. Roslyn for C#, XDocument for XML).
    Each capability ships a `Patch(project)` function that mutates the
@@ -49,7 +49,7 @@ Good:
 
 Bad:
 
-- **Comment markers live in your production code.** A stray `// devstart:*`
+- **Comment markers live in your production code.** A stray `// dev-start-dotnet:*`
   line stays in Program.cs forever; it's harmless but cosmetically
   unusual.
 - **Textual replacement is fragile.** Reformatting a base file that

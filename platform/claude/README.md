@@ -29,7 +29,7 @@ Each generated project can:
 - Edit its copy freely — it's just markdown and JSON.
 - Override a skill by putting the same filename in the project's own
   `.claude/skills/` directory (project overrides platform default).
-- Disable a skill by deleting the file; `dev-start doctor` will not
+- Disable a skill by deleting the file; `dev-start-dotnet doctor` will not
   reinstall it unless `--force`.
 
 ## Why ship this in every repo

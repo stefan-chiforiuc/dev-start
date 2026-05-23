@@ -9,10 +9,10 @@
 
 The original roadmap planned four post-1.0 releases as separate cuts:
 
-- **v1.1** — `k8s` capability + `dev-start promote <env>`.
+- **v1.1** — `k8s` capability + `dev-start-dotnet promote <env>`.
 - **v1.2** — TypeScript / Fastify second stack with the `ts-*` family.
 - **v1.3** — `frontend` capability (Vite + React + TanStack), cross-stack.
-- **v1.4** — `dev-start policy` verb + `default-open-source` /
+- **v1.4** — `dev-start-dotnet policy` verb + `default-open-source` /
   `org-strict` policy bundles.
 
 Before any version reached NuGet, the v1.0 release attempt stalled

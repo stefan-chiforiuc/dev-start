@@ -1,4 +1,4 @@
-# Shared defaults. Env-specific files override. `dev-start promote <env>` writes
+# Shared defaults. Env-specific files override. `dev-start-dotnet promote <env>` writes
 # `values.generated.yaml` siblings that override these from the current manifest.
 
 image:

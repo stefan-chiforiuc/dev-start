@@ -11,7 +11,7 @@ description: Scaffold an event publisher + consumer pair.
    `queue.publish('<topic>', payload)` after the DB write in the same
    transaction (or outbox — see ADR 0005 equivalent).
 3. Consumer: add `apps/api/src/events/consumers/<name>.ts` with a
-   handler; register it at `// devstart:app-consumers` in `app.ts`.
+   handler; register it at `// dev-start-dotnet:app-consumers` in `app.ts`.
 4. Integration test that publishes + asserts side effects.
 
 Never log the full payload if it contains PII; redact via pino.

@@ -1,5 +1,5 @@
-@authority = http://localhost:8080/realms/devstart
-@client_id = devstart-api
+@authority = http://localhost:8080/realms/dev-start-dotnet
+@client_id = dev-start-dotnet-api
 @client_secret = dev-only-not-for-production
 @username = dev
 @password = dev

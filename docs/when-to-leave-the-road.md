@@ -19,7 +19,7 @@ or teams with deep SQL culture.
 3. Update `docs/adr/` with the rationale; update architecture tests so
    the new namespace is allowed to reference `Npgsql` directly.
 
-**What breaks.** `dev-start upgrade` may conflict with your Dapper
+**What breaks.** `dev-start-dotnet upgrade` may conflict with your Dapper
 queries if we change the EF schema-generation conventions. Treat upgrade
 PRs as a review checkpoint, not a rubber-stamp.
 
@@ -31,7 +31,7 @@ with strict ordering).
 
 **How.**
 
-1. Remove the `queue` capability entries from `.devstart.json`.
+1. Remove the `queue` capability entries from `.dev-start-dotnet.json`.
 2. Add your chosen package(s); follow their docs for handler registration.
 3. Reimplement the outbox with your library of choice, or accept the
    consistency trade-off if you don't.
@@ -67,8 +67,8 @@ spent elsewhere — please don't open a PR for this.
 
 ## Deploy target: Kubernetes / ECS / Cloud Run
 
-**Kubernetes is on the road.** `dev-start add k8s` ships Helm + Kustomize
-overlays plus the `dev-start promote <env>` verb. See the [k8s capability
+**Kubernetes is on the road.** `dev-start-dotnet add k8s` ships Helm + Kustomize
+overlays plus the `dev-start-dotnet promote <env>` verb. See the [k8s capability
 README](../capabilities/k8s/README.md).
 
 For ECS, Cloud Run, or other container platforms today:
@@ -80,22 +80,22 @@ For ECS, Cloud Run, or other container platforms today:
 
 ## Stack: Node / Go / Python instead of .NET
 
-**TypeScript + Fastify is on the road** as a sibling stack: `dev-start new
+**TypeScript + Fastify is on the road** as a sibling stack: `dev-start-dotnet new
 --stack typescript` ships the `ts-base` foundation and a parallel set of
 `ts-*` capabilities (`ts-postgres`, `ts-auth`, `ts-otel`, etc.) — see
 [ADR 0008](./adr/0008-ts-prefix-for-typescript-capabilities.md). The
 `frontend` capability is cross-stack.
 
 **Go and Python are not planned.** If you need them, fork the
-`capabilities/` model and port what you need. The `.devstart.json` schema
+`capabilities/` model and port what you need. The `.dev-start-dotnet.json` schema
 is deliberately language-agnostic.
 
 ## The escape hatch of last resort
 
-Delete `.devstart.json`. The tool will no longer manage the project.
+Delete `.dev-start-dotnet.json`. The tool will no longer manage the project.
 Everything the tool generated is plain .NET, plain Docker, plain YAML —
 it keeps working. You lose `add`, `doctor`, and `upgrade`; you keep the
 code.
 
-We consider this a successful outcome. The goal is that `dev-start` is
+We consider this a successful outcome. The goal is that `dev-start-dotnet` is
 useful, not sticky.

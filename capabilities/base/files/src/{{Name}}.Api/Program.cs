@@ -10,18 +10,18 @@ builder.Host.UseSerilog((ctx, lc) => lc
     .Enrich.FromLogContext()
     .WriteTo.Console(new Serilog.Formatting.Compact.CompactJsonFormatter()));
 
-// devstart:program-before-services
+// dev-start-dotnet:program-before-services
 
 builder.Services
     .AddApiServices(builder.Configuration)
     .AddApplicationServices()
     .AddInfrastructureServices(builder.Configuration);
 
-// devstart:program-after-services
+// dev-start-dotnet:program-after-services
 
 var app = builder.Build();
 
-// devstart:program-before-middleware
+// dev-start-dotnet:program-before-middleware
 
 app.UseSerilogRequestLogging();
 app.UseProblemDetailsErrorHandling();
@@ -35,7 +35,7 @@ app.MapHealthChecks("/healthz").AllowAnonymous();
 app.MapHealthChecks("/readyz",
     new() { Predicate = h => h.Tags.Contains("ready", StringComparer.Ordinal) }).AllowAnonymous();
 
-// devstart:program-endpoints
+// dev-start-dotnet:program-endpoints
 app.MapEndpoints();
 
 await app.RunAsync();

@@ -43,11 +43,11 @@ kubectl apply -k k8s/kustomize/overlays/dev
 ## Generating env values
 
 ```bash
-dev-start promote dev    # writes k8s/overlays/dev/values.generated.yaml
-dev-start promote dev --render   # shells out to `helm template` for a full render
+dev-start-dotnet promote dev    # writes k8s/overlays/dev/values.generated.yaml
+dev-start-dotnet promote dev --render   # shells out to `helm template` for a full render
 ```
 
-`promote` reads `.devstart.json` (services, capabilities, deploy target) and
+`promote` reads `.dev-start-dotnet.json` (services, capabilities, deploy target) and
 writes env-specific overrides: replica count, image tag pattern, whether to
 enable the migration Job (if `postgres`/`ts-postgres` is installed), whether to
 enable the OTel collector (if `otel`/`ts-otel` is installed), and a

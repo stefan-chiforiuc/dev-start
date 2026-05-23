@@ -11,7 +11,7 @@ from the template: best practices change, dependencies get CVEs,
 idioms evolve. Users end up maintaining a snapshot of a 2-year-old
 template.
 
-We want `dev-start` to stay useful for the life of the project, not
+We want `dev-start-dotnet` to stay useful for the life of the project, not
 just day 0.
 
 ## Decision
@@ -19,11 +19,11 @@ just day 0.
 - The unit of composition is a **capability module**: a small,
   self-contained folder under `capabilities/` describing what it
   changes and how.
-- `dev-start new` is equivalent to `dev-start add base` followed by
+- `dev-start-dotnet new` is equivalent to `dev-start-dotnet add base` followed by
   the user's selected capabilities.
-- Every capability mutation updates `.devstart.json` in the target
+- Every capability mutation updates `.dev-start-dotnet.json` in the target
   project, so the tool always knows what's installed.
-- `dev-start upgrade` compares the target's `.devstart.json` against
+- `dev-start-dotnet upgrade` compares the target's `.dev-start-dotnet.json` against
   the latest capability versions and proposes a PR with the delta.
 
 Each capability provides:

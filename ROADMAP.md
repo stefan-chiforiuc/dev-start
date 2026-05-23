@@ -9,11 +9,11 @@ The baseline release. Acceptance test from the design doc:
 
 - **Path A (Codespaces):** template → "Open in Codespaces" → < 60 s to a
   running stack, seeded DB, green tests.
-- **Path B (local):** `dotnet tool install -g DevStart` → `dev-start new` →
+- **Path B (local):** `dotnet tool install -g DevStartDotnet` → `dev-start-dotnet new` →
   `just up` → < 2 min to same result.
-- `dev-start add <cap>` works idempotently for: `postgres`, `auth`, `otel`,
+- `dev-start-dotnet add <cap>` works idempotently for: `postgres`, `auth`, `otel`,
   `queue`, `cache`, `s3`, `mail`, `sdk`, `flags`, `gateway`.
-- `dev-start doctor` and `dev-start upgrade` pass smoke tests.
+- `dev-start-dotnet doctor` and `dev-start-dotnet upgrade` pass smoke tests.
 - Generated `.claude/` bundle answers `/add-endpoint <name>` with a full
   slice (aggregate, handler, migration, test) respecting house style.
 - CI includes CodeQL, Trivy, gitleaks, architecture tests, API-diff, k6
@@ -31,32 +31,32 @@ rationale, and `CHANGELOG.md` for the concrete changes.
 
 ### k8s capability + `promote` verb
 
-- `dev-start add k8s` → Helm chart + Kustomize overlays (`dev`, `stage`,
+- `dev-start-dotnet add k8s` → Helm chart + Kustomize overlays (`dev`, `stage`,
   `prod`) mirroring the compose stack.
-- `dev-start promote <env>` reads `.devstart.json` and writes matching
+- `dev-start-dotnet promote <env>` reads `.dev-start-dotnet.json` and writes matching
   manifest values (service count, ports, env bindings, migration job).
 
 ### Second stack: TypeScript + Fastify
 
-- `dev-start new --stack typescript` — Fastify + TS skeleton.
+- `dev-start-dotnet new --stack typescript` — Fastify + TS skeleton.
 - Ten `ts-*` capabilities at parity with the .NET set; shared module
   shapes for `auth`, `otel`, `queue`, `sdk`, `flags`. The abstraction
   held up; no rework needed.
 
 ### Frontend companion
 
-- Optional React + TanStack Query starter via `dev-start add frontend`.
+- Optional React + TanStack Query starter via `dev-start-dotnet add frontend`.
   Consumes the generated TS SDK on the TS stack, or the generated .NET
   SDK on the .NET stack. Intentionally loose coupling: any frontend can
   consume the SDK.
 
-### `dev-start policy`
+### `dev-start-dotnet policy`
 
 - Org-level policy bundles ship in-repo and layer on top of the OSS
   defaults: required CodeQL/Trivy/gitleaks workflows, base-image
   allowlist, required k8s labels, etc. Two starter bundles ship:
   `default-open-source` and `org-strict`.
-- Enforced in CI by calling `dev-start policy validate`.
+- Enforced in CI by calling `dev-start-dotnet policy validate`.
 
 ## Explicitly not planned
 

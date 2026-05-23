@@ -130,7 +130,7 @@ jobs:
 
   pack-smoke:
     # Proves that `dotnet pack` produces a NuGet tool a user could
-    # actually install and run `dev-start new` with. Runs after
+    # actually install and run `dev-start-dotnet new` with. Runs after
     # build-test so we never pack a broken CLI.
     name: Pack + scaffold smoke
     runs-on: ubuntu-latest
@@ -145,25 +145,25 @@ jobs:
 
       - name: Pack the CLI tool
         run: >
-          dotnet pack src/DevStart.Cli/DevStart.Cli.csproj
+          dotnet pack src/DevStartDotnet.Cli/DevStartDotnet.Cli.csproj
           --configuration Release
           -o "$GITHUB_WORKSPACE/artifacts"
 
       - name: Install packed tool globally
         run: |
-          dotnet tool install --global --add-source "$GITHUB_WORKSPACE/artifacts" DevStart
+          dotnet tool install --global --add-source "$GITHUB_WORKSPACE/artifacts" DevStartDotnet
           echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
 
       - name: Sanity-check the installed tool
         run: |
-          dev-start list
+          dev-start-dotnet list
 
       - name: Scaffold a project from the packed tool
         working-directory: ${{ runner.temp }}
         run: |
-          dev-start new demo-project --no-claude --with postgres auth otel
-          test -f demo-project/.devstart.json
-          test -f demo-project/.devstart/baselines.json
+          dev-start-dotnet new demo-project --no-claude --with postgres auth otel
+          test -f demo-project/.dev-start-dotnet.json
+          test -f demo-project/.dev-start-dotnet/baselines.json
           test -f demo-project/.mcp.json
           test -f demo-project/src/DemoProject.Api/Program.cs
           test -f demo-project/tests/DemoProject.ArchitectureTests/LayeringTests.cs

@@ -25,8 +25,8 @@ tax.
    under `src/*.Domain/<Context>/`, `...Application/<Context>/`, etc.
    If references leak across contexts, fix those first **inside the
    monolith** before extracting.
-2. Run `dev-start add gateway` on the monolith if not already present.
-3. Use `dev-start new <context-service> --from-monolith=<this-repo>` to
+2. Run `dev-start-dotnet add gateway` on the monolith if not already present.
+3. Use `dev-start-dotnet new <context-service> --from-monolith=<this-repo>` to
    scaffold a new service that reuses the same capability config.
 4. Move the context's code across, preserving namespaces as
    `<ServiceName>.Domain` / `.Application` / `.Infrastructure`.

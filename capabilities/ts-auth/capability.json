@@ -1,5 +1,5 @@
 {
-  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "$schema": "https://dev-start-dotnet.dev/schemas/capability/1.json",
   "name": "ts-auth",
   "version": "0.1.0",
   "description": "OIDC via @fastify/jwt + openid-client. Keycloak as the local provider.",
@@ -8,8 +8,8 @@
   "conflictsWith": [],
   "addsServices": ["keycloak"],
   "envAdditions": [
-    { "key": "OIDC_ISSUER", "example": "http://localhost:8080/realms/devstart" },
-    { "key": "OIDC_AUDIENCE", "example": "devstart-api" }
+    { "key": "OIDC_ISSUER", "example": "http://localhost:8080/realms/dev-start-dotnet" },
+    { "key": "OIDC_AUDIENCE", "example": "dev-start-dotnet-api" }
   ],
   "postInstall": ["pnpm install"],
   "doctor": [

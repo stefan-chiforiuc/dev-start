@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   build-test:
-    uses: stefan-chiforiuc/dev-start/.github/workflows/dotnet-ci.yml@main
+    uses: stefan-chiforiuc/dev-start-dotnet/.github/workflows/dotnet-ci.yml@main
     with:
       solution: {{Name}}.sln
       openapi-spec: src/{{Name}}.Api/openapi.json

@@ -8,7 +8,7 @@
     },
     {
       "file": "src/{{Name}}.Infrastructure/DependencyInjection.cs",
-      "marker": "// devstart:infrastructure-services",
+      "marker": "// dev-start-dotnet:infrastructure-services",
       "placement": "after",
       "fragment": "infrastructure-services.fragment"
     },
@@ -26,7 +26,7 @@
     },
     {
       "file": "src/{{Name}}.Api/DependencyInjection.cs",
-      "marker": "// devstart:api-endpoints",
+      "marker": "// dev-start-dotnet:api-endpoints",
       "placement": "after",
       "fragment": "api-endpoints.fragment"
     },

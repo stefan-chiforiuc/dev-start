@@ -12,7 +12,7 @@ public static class DependencyInjection
         services.AddMediatR(c => c.RegisterServicesFromAssembly(asm));
         services.AddValidatorsFromAssembly(asm);
         services.AddSingleton(TimeProvider.System);
-        // devstart:application-services
+        // dev-start-dotnet:application-services
         return services;
     }
 }

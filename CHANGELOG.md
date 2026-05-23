@@ -18,6 +18,17 @@ have been folded into the `[Unreleased]` block below.
 
 ## [Unreleased]
 
+### Changed
+
+- **Project rebranded** from `dev-start` / `DevStart` to
+  `dev-start-dotnet` / `DevStartDotnet`. The NuGet package id is now
+  `DevStartDotnet`, the CLI command is `dev-start-dotnet`, namespaces
+  use `DevStartDotnet.*`, and the on-disk manifest moved from
+  `.devstart.json` / `.devstart/` to `.dev-start-dotnet.json` /
+  `.dev-start-dotnet/`. The GitHub repo has been renamed to
+  `stefan-chiforiuc/dev-start-dotnet`; GitHub auto-redirects from the
+  old URL.
+
 ### Added — CLI
 
 - **CLI verbs:** `dev-start new`, `add`, `doctor`, `upgrade`, `list`,

@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-`dev-start` has not yet shipped a stable release. Only the `main` branch
+`dev-start-dotnet` has not yet shipped a stable release. Only the `main` branch
 and the latest pre-release published to NuGet are supported. Once `1.0.0`
 (non-alpha) ships, the latest minor will be supported with security fixes
 for at least 6 months.
@@ -12,7 +12,7 @@ for at least 6 months.
 **Do not file a public issue for security problems.**
 
 Use [GitHub Private Vulnerability
-Reporting](https://github.com/stefan-chiforiuc/dev-start/security/advisories/new)
+Reporting](https://github.com/stefan-chiforiuc/dev-start-dotnet/security/advisories/new)
 on this repository. It's the only supported channel.
 
 Please include:
@@ -33,7 +33,7 @@ Please include:
 
 ## What we care about
 
-Because `dev-start` is a scaffolder, the threat model includes both the
+Because `dev-start-dotnet` is a scaffolder, the threat model includes both the
 tool itself *and* the defaults it embeds into generated projects. We treat
 the following as in-scope:
 

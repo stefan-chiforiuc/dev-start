@@ -1,4 +1,4 @@
-# dev-start — self-hosted justfile.
+# dev-start-dotnet — self-hosted justfile.
 # Used by contributors working on this repo.
 
 set shell := ["bash", "-cu"]
@@ -7,24 +7,24 @@ default:
     @just --list
 
 build:
-    dotnet build DevStart.sln --configuration Debug
+    dotnet build DevStartDotnet.sln --configuration Debug
 
 test:
-    dotnet test DevStart.sln --configuration Debug
+    dotnet test DevStartDotnet.sln --configuration Debug
 
 fmt:
-    dotnet format DevStart.sln
+    dotnet format DevStartDotnet.sln
 
 lint:
-    dotnet format DevStart.sln --verify-no-changes
+    dotnet format DevStartDotnet.sln --verify-no-changes
 
 pack:
-    dotnet pack src/DevStart.Cli/DevStart.Cli.csproj -c Release -o artifacts
+    dotnet pack src/DevStartDotnet.Cli/DevStartDotnet.Cli.csproj -c Release -o artifacts
 
 install-local:
     just pack
-    dotnet tool uninstall -g DevStart 2>/dev/null || true
-    dotnet tool install -g --add-source ./artifacts DevStart
+    dotnet tool uninstall -g DevStartDotnet 2>/dev/null || true
+    dotnet tool install -g --add-source ./artifacts DevStartDotnet
 
 # Install pre-commit hooks: gitleaks + dotnet format + markdownlint.
 # Reads from platform/hooks/pre-commit so the installed hook stays in sync
@@ -34,7 +34,7 @@ install-hooks:
     set -euo pipefail
     src="platform/hooks/pre-commit"
     dst="$(git rev-parse --git-path hooks)/pre-commit"
-    if [ -e "$dst" ] && ! grep -q "dev-start: managed pre-commit" "$dst"; then
+    if [ -e "$dst" ] && ! grep -q "dev-start-dotnet: managed pre-commit" "$dst"; then
       echo "Refusing to overwrite existing $dst." >&2
       echo "Move it aside or merge its contents, then re-run 'just install-hooks'." >&2
       exit 1
@@ -44,4 +44,4 @@ install-hooks:
     echo "Tools used: gitleaks, dotnet, markdownlint-cli2 (install any that are missing)."
 
 list-caps:
-    dotnet run --project src/DevStart.Cli -- list
+    dotnet run --project src/DevStartDotnet.Cli -- list

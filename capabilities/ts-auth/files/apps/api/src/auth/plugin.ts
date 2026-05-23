@@ -17,7 +17,7 @@ declare module "fastify" {
 
 const plugin: FastifyPluginAsync = async (app) => {
   const issuer = process.env.OIDC_ISSUER;
-  const audience = process.env.OIDC_AUDIENCE ?? "devstart-api";
+  const audience = process.env.OIDC_AUDIENCE ?? "dev-start-dotnet-api";
   if (!issuer) throw new Error("OIDC_ISSUER is required by ts-auth");
 
   const getJwks = buildGetJwks({ max: 10, providerDiscovery: true });

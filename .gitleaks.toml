@@ -1,4 +1,4 @@
-title = "dev-start gitleaks configuration"
+title = "dev-start-dotnet gitleaks configuration"
 
 # Start from the default gitleaks ruleset.
 [extend]

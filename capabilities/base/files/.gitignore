@@ -17,4 +17,4 @@ node_modules/
 *.pem
 *.key
 
-.devstart.state.json
+.dev-start-dotnet.state.json

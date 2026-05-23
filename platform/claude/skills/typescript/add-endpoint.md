@@ -12,8 +12,8 @@ Produce a full vertical slice for a new endpoint:
    schemas; export the inferred TS types.
 3. Register the route in `apps/api/src/<domain>/routes.ts` (or create it).
 4. Register the plugin in `apps/api/src/app.ts` at the
-   `// devstart:app-plugins` marker, and mount its prefix at
-   `// devstart:app-routes`.
+   `// dev-start-dotnet:app-plugins` marker, and mount its prefix at
+   `// dev-start-dotnet:app-routes`.
 5. Add a Vitest test in `apps/api/test/<domain>.test.ts` that boots the
    Fastify app via the helper in `apps/api/test/helpers.ts` and hits the
    new route.

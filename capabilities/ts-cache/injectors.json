@@ -13,7 +13,7 @@
     },
     {
       "file": "apps/api/src/app.ts",
-      "marker": "// devstart:app-plugins",
+      "marker": "// dev-start-dotnet:app-plugins",
       "fragment": "app-plugins.fragment"
     }
   ]

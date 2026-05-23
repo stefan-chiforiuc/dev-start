@@ -1,9 +1,9 @@
-# dev-start
+# dev-start-dotnet
 
 An opinionated, fast on-ramp for new .NET projects — plus the tooling to keep
 them healthy for the rest of their lives.
 
-`dev-start` is a .NET global tool that scaffolds a production-shaped ASP.NET
+`dev-start-dotnet` is a .NET global tool that scaffolds a production-shaped ASP.NET
 Core project with database, auth, observability, CI/CD, security gates,
 architecture tests, and a pre-briefed `.claude/` AI assistant already wired.
 It also stays useful after day 1 — add capabilities, diagnose drift, and
@@ -26,7 +26,7 @@ connection strings, migrations, auth stub, logs, traces, CI, pre-commit,
 branching docs. Then the team never cleans it up, never standardises, and
 each project drifts.
 
-`dev-start` collapses that week into minutes, commits to one good set of
+`dev-start-dotnet` collapses that week into minutes, commits to one good set of
 opinions, and makes the opinions **composable** so you can add a cache, a
 queue, or S3 in one command months later.
 
@@ -35,8 +35,8 @@ queue, or S3 in one command months later.
 ## Getting started
 
 ```sh
-dotnet tool install -g DevStart --prerelease   # pre-release while on 1.0.0-alpha
-dev-start new my-app
+dotnet tool install -g DevStartDotnet --prerelease   # pre-release while on 1.0.0-alpha
+dev-start-dotnet new my-app
 cd my-app
 just up         # brings up Postgres, Keycloak, Seq, Jaeger, Mailhog, MinIO
 just test       # Testcontainers-backed integration tests
@@ -61,7 +61,7 @@ my-app/
     My.ArchitectureTests/   # NetArchTest rules
   .claude/                  # CLAUDE.md + skills + agents + MCP config
   .devcontainer/            # Codespaces-ready
-  .devstart.json            # capability manifest
+  .dev-start-dotnet.json            # capability manifest
   compose.yml, Tiltfile, justfile
   .http/                    # VS Code REST Client requests
   .github/workflows/        # build + test + CodeQL + Trivy + release-please
@@ -92,14 +92,14 @@ Built-in capabilities (composable — add only what you need):
 ## The CLI verbs
 
 ```sh
-dev-start new <name> [--stack dotnet|typescript]   # scaffold a new project
-dev-start add <capability>                          # add a capability to an existing project
-dev-start doctor [--fix]                            # diagnose drift, missing env, broken services
-dev-start upgrade [--apply]                         # refresh the project from latest templates
-dev-start list                                      # list capabilities (filtered if in a project)
-dev-start promote <env>                             # emit k8s values for dev | stage | prod
-dev-start policy list|apply|remove|validate         # org-level policy bundles
-dev-start capability new <name>                     # author a new capability from the skeleton
+dev-start-dotnet new <name> [--stack dotnet|typescript]   # scaffold a new project
+dev-start-dotnet add <capability>                          # add a capability to an existing project
+dev-start-dotnet doctor [--fix]                            # diagnose drift, missing env, broken services
+dev-start-dotnet upgrade [--apply]                         # refresh the project from latest templates
+dev-start-dotnet list                                      # list capabilities (filtered if in a project)
+dev-start-dotnet promote <env>                             # emit k8s values for dev | stage | prod
+dev-start-dotnet policy list|apply|remove|validate         # org-level policy bundles
+dev-start-dotnet capability new <name>                     # author a new capability from the skeleton
 ```
 
 Same tool on day 0 and day 300.

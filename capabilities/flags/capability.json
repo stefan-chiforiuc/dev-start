@@ -1,5 +1,5 @@
 {
-  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "$schema": "https://dev-start-dotnet.dev/schemas/capability/1.json",
   "name": "flags",
   "version": "0.1.0",
   "description": "Feature-flag abstraction via OpenFeature. In-memory provider in dev; swap for LaunchDarkly/Unleash/GrowthBook in prod.",

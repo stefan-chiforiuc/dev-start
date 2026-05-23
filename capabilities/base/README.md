@@ -13,7 +13,7 @@ Every other capability depends on it.
 - `Program.cs` composition root with health checks and OpenAPI.
 - `Dockerfile` (multi-stage, chiselled runtime).
 - `.editorconfig`, `.gitignore`, `justfile`, `compose.yml`.
-- `.devstart.json` manifest.
+- `.dev-start-dotnet.json` manifest.
 
 ## Opinions
 

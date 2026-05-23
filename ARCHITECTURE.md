@@ -1,13 +1,13 @@
 # Architecture
 
-A one-page map of the `dev-start` CLI internals. Per-decision rationale
+A one-page map of the `dev-start-dotnet` CLI internals. Per-decision rationale
 lives in [`docs/adr/`](./docs/adr); this document is the index.
 
 ## Two artifacts, two consumers
 
 | Artifact | Source | Consumer | Cadence |
 |---|---|---|---|
-| The CLI (`DevStart` on NuGet) | `src/DevStart.Cli/` | Developers running `dotnet tool install -g DevStart` | Per [`RELEASING.md`](./RELEASING.md) — release-please → build → verify → deploy |
+| The CLI (`DevStartDotnet` on NuGet) | `src/DevStartDotnet.Cli/` | Developers running `dotnet tool install -g DevStartDotnet` | Per [`RELEASING.md`](./RELEASING.md) — release-please → build → verify → deploy |
 | The reusable CI workflow | `.github/workflows/dotnet-ci.yml` | Generated projects pinning `@workflow-vN` | Manual `release-workflow` dispatch |
 
 They version independently so a CLI bump doesn't invalidate downstream
@@ -16,26 +16,26 @@ workflow pins, and vice versa.
 ## CLI internals
 
 ```text
-src/DevStart.Cli/
+src/DevStartDotnet.Cli/
 ├─ Program.cs                  System.CommandLine root; wires the verbs.
 ├─ Commands/
-│  ├─ NewCommand.cs            dev-start new — invokes Planner, then
+│  ├─ NewCommand.cs            dev-start-dotnet new — invokes Planner, then
 │  │                            CapabilityInstaller for each capability.
-│  ├─ AddCommand.cs            dev-start add <cap> — single-capability
+│  ├─ AddCommand.cs            dev-start-dotnet add <cap> — single-capability
 │  │                            install into an existing project.
-│  ├─ DoctorCommand.cs         dev-start doctor — runs each installed
+│  ├─ DoctorCommand.cs         dev-start-dotnet doctor — runs each installed
 │  │                            capability's doctor checks; --fix
 │  │                            populates missing env from examples.
-│  ├─ UpgradeCommand.cs        dev-start upgrade [--apply] — diffs
+│  ├─ UpgradeCommand.cs        dev-start-dotnet upgrade [--apply] — diffs
 │  │                            against latest templates; --apply runs
 │  │                            the 3-way merge in Upgrader.cs.
-│  ├─ ListCommand.cs           dev-start list [--tree] — lists
+│  ├─ ListCommand.cs           dev-start-dotnet list [--tree] — lists
 │  │                            available + installed capabilities.
-│  ├─ CapabilityCommand.cs     dev-start capability new — seeds a new
+│  ├─ CapabilityCommand.cs     dev-start-dotnet capability new — seeds a new
 │  │                            capability folder from the skeleton.
-│  ├─ PromoteCommand.cs        dev-start promote <env> — emits
+│  ├─ PromoteCommand.cs        dev-start-dotnet promote <env> — emits
 │  │                            k8s/overlays/<env>/values.generated.yaml.
-│  └─ PolicyCommand.cs         dev-start policy list|apply|remove|validate.
+│  └─ PolicyCommand.cs         dev-start-dotnet policy list|apply|remove|validate.
 │
 ├─ Capability.cs               Capability metadata + discovery from
 │                              the embedded resource index.
@@ -46,7 +46,7 @@ src/DevStart.Cli/
 │                              on Manifest.Stack to pick the right
 │                              base, gateway, deploy capability, and
 │                              Claude briefing template.
-├─ Manifest.cs                 .devstart.json schema + migrations
+├─ Manifest.cs                 .dev-start-dotnet.json schema + migrations
 │                              (v1 → v2 added Stack and Policies).
 ├─ Tokens.cs                   {{Name}} (PascalCase), {{name}} (kebab),
 │                              {{nameCamel}} (camelCase),
@@ -63,7 +63,7 @@ src/DevStart.Cli/
 │                              `extends` chain bases-first; reuses
 │                              the same injector pipeline as
 │                              capabilities.
-├─ Baselines.cs                .devstart/baselines.json — per-file
+├─ Baselines.cs                .dev-start-dotnet/baselines.json — per-file
 │                              hashes captured at install time, used
 │                              by upgrade --apply to distinguish
 │                              unmodified / user-edited / divergent.
@@ -83,7 +83,7 @@ src/DevStart.Cli/
 ### Key types and their relationships
 
 ```text
-Manifest             .devstart.json on disk; loaded on every command.
+Manifest             .dev-start-dotnet.json on disk; loaded on every command.
   └─ Stack          dotnet | typescript
   └─ Capabilities   list of installed capability names
   └─ Policies       list of installed policy bundle names
@@ -107,12 +107,12 @@ CapabilityInstaller.Apply(plan, projectRoot)
   → ApplyInjectors(capability, projectRoot, fragmentReader)
     └─ each injector is idempotent: skips if the trimmed fragment body
        is already present at the target marker/anchor
-  → records baselines (file hashes) to .devstart/baselines.json
+  → records baselines (file hashes) to .dev-start-dotnet/baselines.json
 ```
 
 ## How the scaffolder packs
 
-`DevStart.Cli.csproj` declares MSBuild `<EmbeddedResource>` items that
+`DevStartDotnet.Cli.csproj` declares MSBuild `<EmbeddedResource>` items that
 glob `capabilities/**`, `platform/compose/**`, `platform/claude/**`,
 `platform/devcontainer/**`, and `policies/**` into the `.nupkg`. The
 `.csproj` does **not** carry a hard-coded `<Version>` — it is stamped
@@ -132,7 +132,7 @@ summary:
 > push to `main` → release-please opens release PR → maintainer merges
 > → **build** packs the `.nupkg`, generates SBOM, attests provenance →
 > **verify** installs the packed `.nupkg` from the workflow artifact
-> and runs `dev-start new` end-to-end + Trivy on the SBOM → **deploy**
+> and runs `dev-start-dotnet new` end-to-end + Trivy on the SBOM → **deploy**
 > waits for manual approval in the `nuget-production` GitHub Environment
 > and pushes to NuGet.org.
 

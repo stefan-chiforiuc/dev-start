@@ -8,7 +8,7 @@
     },
     {
       "file": "src/{{Name}}.Api/DependencyInjection.cs",
-      "marker": "// devstart:api-services",
+      "marker": "// dev-start-dotnet:api-services",
       "placement": "after",
       "fragment": "api-services.fragment"
     }

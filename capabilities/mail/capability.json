@@ -1,5 +1,5 @@
 {
-  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "$schema": "https://dev-start-dotnet.dev/schemas/capability/1.json",
   "name": "mail",
   "version": "0.1.0",
   "description": "SMTP email abstraction. Mailhog in dev, any SMTP provider in prod.",

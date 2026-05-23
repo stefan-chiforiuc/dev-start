@@ -16,7 +16,7 @@ public static class DependencyInjection
         // target framework stays on the LTS .NET 8.
         services.AddSwaggerGen();
         services.AddProblemDetails();
-        // devstart:api-services
+        // dev-start-dotnet:api-services
         return services;
     }
 
@@ -29,7 +29,7 @@ public static class DependencyInjection
 
     public static WebApplication MapEndpoints(this WebApplication app)
     {
-        // devstart:api-endpoints
+        // dev-start-dotnet:api-endpoints
         return app;
     }
 }

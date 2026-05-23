@@ -10,7 +10,7 @@ helm upgrade --install {{name}} ./helm \
   --namespace {{name}}-dev --create-namespace
 ```
 
-Each env has a `values-<env>.yaml`. `dev-start promote <env>` writes a
+Each env has a `values-<env>.yaml`. `dev-start-dotnet promote <env>` writes a
 `values.generated.yaml` that you can add to the `-f` chain.
 
 ## Kustomize

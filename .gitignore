@@ -44,5 +44,5 @@ Thumbs.db
 *.pem
 *.key
 
-# dev-start state (never ship local state)
-.devstart.state.json
+# dev-start-dotnet state (never ship local state)
+.dev-start-dotnet.state.json

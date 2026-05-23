@@ -19,7 +19,7 @@ the Orders sample:
 4. **Wire it** — in `apps/api/src/app.ts`:
    - Add `import { $ARGUMENTSRoutes } from "./$ARGUMENTS/routes.js";` after
      the `@fastify/cors` import.
-   - Inside `buildApp`, register at `// devstart:app-routes`:
+   - Inside `buildApp`, register at `// dev-start-dotnet:app-routes`:
      `await app.register($ARGUMENTSRoutes, { prefix: "/$ARGUMENTS" });`
 5. **Migration** — invoke `/add-migration create-$ARGUMENTS` and review
    before applying.

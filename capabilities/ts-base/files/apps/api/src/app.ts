@@ -17,10 +17,10 @@ export async function buildApp() {
 
   app.setErrorHandler(problemDetailsHook);
 
-  // devstart:app-plugins
-  // Capabilities register plugins here via dev-start injectors.
+  // dev-start-dotnet:app-plugins
+  // Capabilities register plugins here via dev-start-dotnet injectors.
 
-  // devstart:app-routes
+  // dev-start-dotnet:app-routes
   await app.register(healthRoutes);
 
   return app;

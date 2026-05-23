@@ -8,8 +8,8 @@ via file copies and injectors into `apps/api/src/app.ts`.
 
 - `package.json` + `pnpm-workspace.yaml`
 - `apps/api/` — Fastify 5, Node 22, strict TypeScript, ESM
-- `apps/api/src/app.ts` with the `// devstart:app-plugins` and
-  `// devstart:app-routes` injection markers
+- `apps/api/src/app.ts` with the `// dev-start-dotnet:app-plugins` and
+  `// dev-start-dotnet:app-routes` injection markers
 - Vitest config and a smoke test
 - `Dockerfile` (multi-stage, distroless)
 - `justfile` with `bootstrap / up / test / build`

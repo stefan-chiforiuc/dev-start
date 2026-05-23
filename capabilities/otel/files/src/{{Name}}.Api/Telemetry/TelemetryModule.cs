@@ -8,7 +8,7 @@ namespace {{Name}}.Api.Telemetry;
 
 internal static class TelemetryModule
 {
-    public static IServiceCollection AddDevStartTelemetry(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddDevStartDotnetTelemetry(this IServiceCollection services, IConfiguration config)
     {
         var serviceName = config["OTEL_SERVICE_NAME"] ?? "{{name}}";
         var endpoint = config["OTEL_EXPORTER_OTLP_ENDPOINT"];

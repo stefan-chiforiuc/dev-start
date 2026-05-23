@@ -12,10 +12,10 @@ Prerequisites: Docker, .NET 8 SDK (or Node 20+ for the TypeScript stack),
 # install the tool
 # while 1.0.0-alpha is the current release, --prerelease is required.
 # drop the flag once 1.0.0 (non-alpha) is published.
-dotnet tool install -g DevStart --prerelease
+dotnet tool install -g DevStartDotnet --prerelease
 
 # create a project (.NET stack is the default; pass --stack typescript for TS)
-dev-start new my-app
+dev-start-dotnet new my-app
 cd my-app
 
 # spin everything up

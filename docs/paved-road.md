@@ -1,6 +1,6 @@
 # The paved road
 
-One page. Everything `dev-start` commits to by default.
+One page. Everything `dev-start-dotnet` commits to by default.
 
 ## Runtime
 
@@ -97,7 +97,7 @@ Dependencies flow inward only: `Api → Application → Domain`;
 
 - **Fly.io** (`deploy-fly`), **Azure Container Apps** (`deploy-aca`), or
   **Kubernetes** (`k8s` — Helm + Kustomize overlays per env, with
-  `dev-start promote <env>`). Pick at generate-time.
+  `dev-start-dotnet promote <env>`). Pick at generate-time.
 - 12-factor config from env vars only; no appsettings secrets.
 
 ## AI

@@ -8,19 +8,19 @@
     },
     {
       "file": "src/{{Name}}.Api/DependencyInjection.cs",
-      "marker": "// devstart:api-services",
+      "marker": "// dev-start-dotnet:api-services",
       "placement": "after",
       "fragment": "api-services.fragment"
     },
     {
       "file": "src/{{Name}}.Api/DependencyInjection.cs",
-      "marker": "// devstart:api-endpoints",
+      "marker": "// dev-start-dotnet:api-endpoints",
       "placement": "after",
       "fragment": "api-endpoints.fragment"
     },
     {
       "file": "src/{{Name}}.Api/Program.cs",
-      "marker": "// devstart:program-before-middleware",
+      "marker": "// dev-start-dotnet:program-before-middleware",
       "placement": "after",
       "fragment": "program-middleware.fragment"
     },

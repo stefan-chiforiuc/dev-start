@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# dev-start: managed pre-commit
+# dev-start-dotnet: managed pre-commit
 # Mirrors the gates that ci.yml runs on PRs, against staged content only.
 # To update, edit this file and re-run `just install-hooks`.
 set -euo pipefail

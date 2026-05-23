@@ -1,6 +1,6 @@
 # Way of working
 
-This is how the `dev-start` maintainers work on `dev-start`. It's also a
+This is how the `dev-start-dotnet` maintainers work on `dev-start-dotnet`. It's also a
 reasonable default for projects generated from it.
 
 ## Branching

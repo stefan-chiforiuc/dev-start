@@ -43,7 +43,7 @@ jobs:
 
       - name: Pack global tool
         run: |
-          dotnet pack src/DevStart.Cli/DevStart.Cli.csproj \
+          dotnet pack src/DevStartDotnet.Cli/DevStartDotnet.Cli.csproj \
             --configuration Release \
             -p:Version=${{ needs.release-please.outputs.version }} \
             -o artifacts
@@ -113,12 +113,12 @@ jobs:
           dotnet tool install --global \
             --add-source ./artifacts \
             --version ${{ needs.release-please.outputs.version }} \
-            DevStart
+            DevStartDotnet
           echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
 
       - name: Verify reported version
         run: |
-          installed=$(dev-start --version | tr -d '[:space:]')
+          installed=$(dev-start-dotnet --version | tr -d '[:space:]')
           expected="${{ needs.release-please.outputs.version }}"
           if [ "$installed" != "$expected" ]; then
             echo "::error::version mismatch — expected $expected, got $installed"
@@ -128,7 +128,7 @@ jobs:
       - name: Smoke — scaffold and build
         working-directory: ${{ runner.temp }}
         run: |
-          dev-start new smoke-app --no-claude --with postgres auth otel
+          dev-start-dotnet new smoke-app --no-claude --with postgres auth otel
           cd smoke-app
           dotnet build --configuration Release
 
@@ -138,7 +138,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: nuget-production
-      url: https://www.nuget.org/packages/DevStart/${{ needs.release-please.outputs.version }}
+      url: https://www.nuget.org/packages/DevStartDotnet/${{ needs.release-please.outputs.version }}
     permissions:
       contents: read
       id-token: write   # OIDC token exchange for NuGet trusted publishing
@@ -169,13 +169,13 @@ jobs:
         run: |
           version="${{ needs.release-please.outputs.version }}"
           for i in 1 2 3 4 5 6; do
-            if curl -fsSL "https://api.nuget.org/v3-flatcontainer/devstart/index.json" \
+            if curl -fsSL "https://api.nuget.org/v3-flatcontainer/devstartdotnet/index.json" \
                  | grep -q "\"$version\""; then
-              echo "DevStart $version is live on NuGet."
+              echo "DevStartDotnet $version is live on NuGet."
               exit 0
             fi
             echo "attempt $i: $version not yet visible, sleeping 30s..."
             sleep 30
           done
-          echo "::error::DevStart $version did not appear on NuGet within 3 minutes"
+          echo "::error::DevStartDotnet $version did not appear on NuGet within 3 minutes"
           exit 1

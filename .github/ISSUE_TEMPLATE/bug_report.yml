@@ -1,17 +1,17 @@
 name: Bug report
-description: Something in dev-start is broken.
+description: Something in dev-start-dotnet is broken.
 labels: ["bug", "triage"]
 body:
   - type: markdown
     attributes:
       value: |
         Thanks for taking the time to file a bug. Before you continue,
-        please run `dev-start doctor` and paste the output below.
+        please run `dev-start-dotnet doctor` and paste the output below.
   - type: input
     id: version
     attributes:
-      label: dev-start version
-      description: "Run `dev-start --version` to find out."
+      label: dev-start-dotnet version
+      description: "Run `dev-start-dotnet --version` to find out."
       placeholder: "e.g. 1.0.0-alpha"
     validations:
       required: true
@@ -35,7 +35,7 @@ body:
       label: Reproduction steps
       description: Minimal steps that trigger the bug.
       placeholder: |
-        1. dev-start new foo
+        1. dev-start-dotnet new foo
         2. cd foo && just up
         3. ...
     validations:
@@ -55,5 +55,5 @@ body:
   - type: textarea
     id: doctor
     attributes:
-      label: "`dev-start doctor` output"
+      label: "`dev-start-dotnet doctor` output"
       render: shell

@@ -1,7 +1,7 @@
-# Backing services used by dev-start-generated projects.
+# Backing services used by dev-start-dotnet-generated projects.
 # Start with `just up` from the target project root.
 
-name: devstart
+name: dev-start-dotnet
 
 services:
   postgres:
@@ -81,7 +81,7 @@ services:
       timeout: 3s
       retries: 10
 
-  # Enabled by `dev-start add queue`.
+  # Enabled by `dev-start-dotnet add queue`.
   # Used by the `queue` capability. Remove if you haven't installed queue
   # and don't want the extra container footprint.
   rabbitmq:
@@ -105,8 +105,8 @@ services:
     volumes:
       - ./dashboard:/usr/share/nginx/html:ro
 
-  # devstart:web-service
-  # Enabled by `dev-start add frontend`. Serves the Vite dev server.
+  # dev-start-dotnet:web-service
+  # Enabled by `dev-start-dotnet add frontend`. Serves the Vite dev server.
 
 volumes:
   postgres-data:

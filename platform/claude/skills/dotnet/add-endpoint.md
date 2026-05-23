@@ -79,7 +79,7 @@ already present — don't add a new test harness.
 
 - `just test` — green.
 - `just lint` — green.
-- `dev-start doctor` — green.
+- `dev-start-dotnet doctor` — green.
 - Hit the endpoints from `.http/<name>.http`; confirm a trace appears in
   Jaeger and structured logs in Seq.
 

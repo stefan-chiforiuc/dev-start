@@ -1,4 +1,4 @@
-// k6 smoke test. Runs in CI via the reusable dev-start workflow.
+// k6 smoke test. Runs in CI via the reusable dev-start-dotnet workflow.
 // Budget: p95 latency < 200ms, error rate < 1%.
 // Tune for your app and explain the change in an ADR.
 

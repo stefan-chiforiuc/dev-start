@@ -1,0 +1,15 @@
+using System.CommandLine;
+using DevStartDotnet.Commands;
+
+var root = new RootCommand("dev-start-dotnet — opinionated .NET scaffolder and day-to-day companion.");
+
+root.AddCommand(NewCommand.Build());
+root.AddCommand(AddCommand.Build());
+root.AddCommand(DoctorCommand.Build());
+root.AddCommand(UpgradeCommand.Build());
+root.AddCommand(ListCommand.Build());
+root.AddCommand(CapabilityCommand.Build());
+root.AddCommand(PromoteCommand.Build());
+root.AddCommand(PolicyCommand.Build());
+
+return await root.InvokeAsync(args);

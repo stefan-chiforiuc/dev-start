@@ -2,8 +2,8 @@
 
 Two artifacts ship from this repo on independent cadences:
 
-1. **The CLI** — published to NuGet.org as `DevStart`. Consumers install with
-   `dotnet tool install -g DevStart`.
+1. **The CLI** — published to NuGet.org as `DevStartDotnet`. Consumers install with
+   `dotnet tool install -g DevStartDotnet`.
 2. **The reusable CI workflow** — `.github/workflows/dotnet-ci.yml`.
    Consumers reference it by tag from generated projects.
 
@@ -32,7 +32,7 @@ produced a tag, a GitHub Release, or a NuGet package.
 ```
 
 - **alpha** — APIs may change without notice. NuGet treats it as pre-release;
-  consumers only get it with `dotnet tool install -g DevStart --prerelease`.
+  consumers only get it with `dotnet tool install -g DevStartDotnet --prerelease`.
 - **rc** — feature-frozen, soak period. Bug fixes only.
 - **stable** — `1.0.0`. After this, semver applies.
 
@@ -49,8 +49,8 @@ in `release-please-config.json` and let release-please open the next PR.
    - **build** — packs the `.nupkg`, generates a CycloneDX SBOM, attests
      build provenance, uploads both as workflow artifacts.
    - **verify** — installs the just-built `.nupkg` from the local artifact
-     into a clean runner, asserts `dev-start --version` matches, runs
-     `dev-start new smoke-app …` end-to-end (`dotnet build`), and runs
+     into a clean runner, asserts `dev-start-dotnet --version` matches, runs
+     `dev-start-dotnet new smoke-app …` end-to-end (`dotnet build`), and runs
      Trivy against the SBOM (HIGH/CRITICAL, unfixed ignored).
    - **deploy** — gated on the **`nuget-production` GitHub Environment**.
      Will not run until a required reviewer (currently the maintainer)
@@ -84,7 +84,7 @@ NuGet.org does not support unpublishing. If a bad release ships:
 1. Revert the offending commits on `main`.
 2. Land a `fix:` (or `feat!:` if behaviour changed) describing the rollback.
 3. Merge the next Release PR — this ships a higher version that supersedes
-   the bad one. Consumers running `dotnet tool update -g DevStart` get the
+   the bad one. Consumers running `dotnet tool update -g DevStartDotnet` get the
    fix automatically.
 4. If the bad release is dangerous, also
    [deprecate the broken version on nuget.org](https://learn.microsoft.com/en-us/nuget/nuget-org/policies/deleting-packages)
@@ -103,7 +103,7 @@ NuGet.org does not support unpublishing. If a bad release ships:
 Generated projects should pin the floating tag for unattended bumps:
 
 ```yaml
-uses: stefan-chiforiuc/dev-start/.github/workflows/dotnet-ci.yml@workflow-v1
+uses: stefan-chiforiuc/dev-start-dotnet/.github/workflows/dotnet-ci.yml@workflow-v1
 ```
 
 …or pin the immutable tag if they want to opt out of floating updates.
@@ -160,7 +160,7 @@ The `deploy` job authenticates to NuGet.org via OIDC trusted publishing
 (see the section below); there is no `NUGET_API_KEY` secret to manage.
 The only configuration is a repository variable:
 
-- `NUGET_USER` — the NuGet.org account username that owns the `DevStart`
+- `NUGET_USER` — the NuGet.org account username that owns the `DevStartDotnet`
   package. Set it under Settings → Secrets and variables → Actions →
   Variables.
 
@@ -198,11 +198,11 @@ Settings → Rules → Rulesets → New tag ruleset → name: `release-tag-prote
 
 After applying, run these from a fresh terminal:
 
-- `gh api repos/stefan-chiforiuc/dev-start/environments/nuget-production` —
+- `gh api repos/stefan-chiforiuc/dev-start-dotnet/environments/nuget-production` —
   should return JSON, not 404.
-- `gh api repos/stefan-chiforiuc/dev-start/actions/variables/NUGET_USER` —
+- `gh api repos/stefan-chiforiuc/dev-start-dotnet/actions/variables/NUGET_USER` —
   should return the NuGet account username.
-- `gh api repos/stefan-chiforiuc/dev-start/rulesets` — should list
+- `gh api repos/stefan-chiforiuc/dev-start-dotnet/rulesets` — should list
   `main-protection` and `release-tag-protection`.
 
 ### 8. Smoke-test the gate (do this before the first real release)
@@ -231,7 +231,7 @@ short-lived OIDC token is exchanged for a temporary NuGet key by the
 One-time setup on nuget.org (Account → Trusted Publishing → register a
 new publisher):
 
-1. Repository: `stefan-chiforiuc/dev-start`.
+1. Repository: `stefan-chiforiuc/dev-start-dotnet`.
 2. Workflow: `.github/workflows/release-please.yml`.
 3. Environment: `nuget-production`.
 

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "$schema": "https://dev-start-dotnet.dev/schemas/capability/1.json",
   "name": "s3",
   "version": "0.1.0",
   "description": "S3-compatible object storage via MinIO in dev, any S3 in prod. Signed-URL helper.",

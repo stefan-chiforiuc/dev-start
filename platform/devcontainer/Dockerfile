@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-# Pre-warmed devcontainer for dev-start-generated projects.
+# Pre-warmed devcontainer for dev-start-dotnet-generated projects.
 
 FROM mcr.microsoft.com/devcontainers/dotnet:1-8.0-bookworm
 

@@ -1,8 +1,8 @@
 {
-  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "$schema": "https://dev-start-dotnet.dev/schemas/capability/1.json",
   "name": "k8s",
   "version": "0.1.0",
-  "description": "Helm chart + Kustomize overlays (dev/stage/prod) mirroring the compose stack. Pair with `dev-start promote <env>` to emit env-specific values.",
+  "description": "Helm chart + Kustomize overlays (dev/stage/prod) mirroring the compose stack. Pair with `dev-start-dotnet promote <env>` to emit env-specific values.",
   "dependsOn": ["base"],
   "conflictsWith": [],
   "addsServices": [],

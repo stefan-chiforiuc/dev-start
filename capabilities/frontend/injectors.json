@@ -2,13 +2,13 @@
   "injectors": [
     {
       "file": "docker-compose.yml",
-      "anchor": "# devstart:web-service",
+      "anchor": "# dev-start-dotnet:web-service",
       "placement": "after",
       "fragment": "compose-web.fragment"
     },
     {
       "file": "justfile",
-      "marker": "# devstart:just-targets",
+      "marker": "# dev-start-dotnet:just-targets",
       "fragment": "justfile-web.fragment"
     }
   ]

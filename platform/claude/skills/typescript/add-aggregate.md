@@ -12,5 +12,5 @@ description: Add a new domain module (aggregate + zod schema + repo).
 3. Create `apps/api/src/<name>/<name>.repo.ts` with a Kysely-backed repo:
    one function per use case (don't expose the raw query builder).
 4. Create a migration (`/add-migration`) for the new table.
-5. Register a plugin (`routes.ts`) at `// devstart:app-plugins`.
+5. Register a plugin (`routes.ts`) at `// dev-start-dotnet:app-plugins`.
 6. Unit-test the pure functions; integration-test the repo + routes.

@@ -2,7 +2,7 @@
   "injectors": [
     {
       "file": "src/{{Name}}.Infrastructure/DependencyInjection.cs",
-      "marker": "// devstart:infrastructure-services",
+      "marker": "// dev-start-dotnet:infrastructure-services",
       "placement": "after",
       "fragment": "infrastructure-services.fragment"
     },

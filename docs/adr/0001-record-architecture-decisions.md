@@ -5,7 +5,7 @@ Status: Accepted
 
 ## Context
 
-`dev-start` is an opinionated scaffolder. Opinions rot when no one
+`dev-start-dotnet` is an opinionated scaffolder. Opinions rot when no one
 remembers why they were made. We need a cheap, append-only record of
 every non-trivial default — both for maintainers and for users who
 want to know whether an opinion still applies to them.

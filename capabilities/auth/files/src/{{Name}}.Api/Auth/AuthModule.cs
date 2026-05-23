@@ -7,7 +7,7 @@ namespace {{Name}}.Api.Auth;
 
 internal static class AuthModule
 {
-    public static IServiceCollection AddDevStartAuth(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddDevStartDotnetAuth(this IServiceCollection services, IConfiguration config)
     {
         var authority = config["Auth:Authority"]
             ?? throw new InvalidOperationException("Missing Auth:Authority");

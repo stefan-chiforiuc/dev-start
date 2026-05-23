@@ -1,5 +1,5 @@
 {
-  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "$schema": "https://dev-start-dotnet.dev/schemas/capability/1.json",
   "name": "ts-gateway",
   "version": "0.1.0",
   "description": "Fastify-based reverse proxy (@fastify/http-proxy) for multi-service TS layouts.",

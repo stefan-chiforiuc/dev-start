@@ -1,5 +1,5 @@
 {
-  "realm": "devstart",
+  "realm": "dev-start-dotnet",
   "enabled": true,
   "sslRequired": "none",
   "registrationAllowed": false,
@@ -7,7 +7,7 @@
   "accessTokenLifespan": 3600,
   "clients": [
     {
-      "clientId": "devstart-api",
+      "clientId": "dev-start-dotnet-api",
       "enabled": true,
       "protocol": "openid-connect",
       "publicClient": false,
@@ -30,7 +30,7 @@
       "credentials": [
         { "type": "password", "value": "dev", "temporary": false }
       ],
-      "realmRoles": ["default-roles-devstart"]
+      "realmRoles": ["default-roles-dev-start-dotnet"]
     }
   ]
 }

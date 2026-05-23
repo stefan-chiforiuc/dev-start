@@ -1,6 +1,6 @@
 name: {{name}}
 metadata:
-  template: dev-start@0.1.0
+  template: dev-start-dotnet@0.1.0
 
 services:
   api:

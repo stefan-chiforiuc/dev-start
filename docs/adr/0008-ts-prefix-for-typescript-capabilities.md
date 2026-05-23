@@ -39,7 +39,7 @@ Good:
 - **One folder per slice** — reading a capability's implementation is
   still "look at this directory." No mental bookkeeping of "which
   subfolder applies."
-- **`dev-start list` is legible** — `ts-auth` obviously pairs with
+- **`dev-start-dotnet list` is legible** — `ts-auth` obviously pairs with
   `ts-base`, and a new contributor can guess the naming of future
   additions.
 - **The stack gate is a one-liner** — `AddCommand` checks
@@ -53,8 +53,8 @@ Good:
 Bad:
 
 - **Name duplication** — `postgres` and `ts-postgres` are two entries in
-  `dev-start list`. Users need to know which stack they're on. We mitigate
-  by stamping the stack on `dev-start new` output and in the Claude
+  `dev-start-dotnet list`. Users need to know which stack they're on. We mitigate
+  by stamping the stack on `dev-start-dotnet new` output and in the Claude
   briefing.
 - **Cross-stack slices need a convention** — `frontend` isn't `ts-`
   prefixed because it's cross-stack. We accept the small inconsistency

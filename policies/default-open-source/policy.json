@@ -1,5 +1,5 @@
 {
-  "$schema": "https://dev-start.dev/schemas/policy/1.json",
+  "$schema": "https://dev-start-dotnet.dev/schemas/policy/1.json",
   "name": "default-open-source",
   "version": "0.1.0",
   "description": "Baseline policy for OSS projects: required security workflows, base-image allowlist, conventional commits.",

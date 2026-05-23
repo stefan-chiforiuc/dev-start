@@ -21,4 +21,4 @@ build:
 lint:
     pnpm -r lint
 
-# devstart:just-targets
+# dev-start-dotnet:just-targets

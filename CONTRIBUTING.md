@@ -1,4 +1,4 @@
-# Contributing to dev-start
+# Contributing to dev-start-dotnet
 
 Thanks for considering a contribution. This project is **pre-v1** and
 opinionated on purpose — before opening an issue or PR, please read this

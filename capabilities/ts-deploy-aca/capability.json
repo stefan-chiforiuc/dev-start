@@ -1,5 +1,5 @@
 {
-  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "$schema": "https://dev-start-dotnet.dev/schemas/capability/1.json",
   "name": "ts-deploy-aca",
   "version": "0.1.0",
   "description": "Azure Container Apps deploy target for the TypeScript/Fastify stack. Bicep + GitHub Actions.",

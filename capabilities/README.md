@@ -1,6 +1,6 @@
 # Capabilities
 
-The unit of composition in `dev-start`. See
+The unit of composition in `dev-start-dotnet`. See
 [ADR 0006](../docs/adr/0006-capabilities-not-templates.md) for why
 capabilities are opinions-sized, and
 [ADR 0007](../docs/adr/0007-injectors-over-fork-templates.md) for how
@@ -33,7 +33,7 @@ base files by inserting fragments at named markers or literal anchors.
 
 ```jsonc
 {
-  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "$schema": "https://dev-start-dotnet.dev/schemas/capability/1.json",
   "name": "postgres",
   "version": "1.0.0",
   "description": "EF Core + Npgsql + migrations + Testcontainers harness",
@@ -64,7 +64,7 @@ base files by inserting fragments at named markers or literal anchors.
       "file": "src/{{Name}}.Infrastructure/DependencyInjection.cs",
 
       // Either a marker comment (preferred) or a literal anchor. One is required.
-      "marker": "// devstart:infrastructure-services",
+      "marker": "// dev-start-dotnet:infrastructure-services",
 
       // before | after | replace. Default: "after".
       "placement": "after",
@@ -84,12 +84,12 @@ widely-known fixed point.
 
 Injectors are **idempotent**: if the trimmed fragment body is already
 present in the target file, the injector skips. Rerunning
-`dev-start add <cap>` on a live project is safe.
+`dev-start-dotnet add <cap>` on a live project is safe.
 
 ## Capabilities
 
 Auto-included by the foundation: `base` (.NET) and `ts-base` (TypeScript).
-Both are selected by `dev-start new` based on `--stack` and are not
+Both are selected by `dev-start-dotnet new` based on `--stack` and are not
 user-installable via `add`.
 
 ### .NET stack
@@ -138,14 +138,14 @@ for the `ts-` prefix convention and stack gating.
 
 ## Writing a new capability
 
-1. Seed it: `dev-start capability new <name>` (from a dev-start checkout).
+1. Seed it: `dev-start-dotnet capability new <name>` (from a dev-start-dotnet checkout).
 2. Fill in `capability.json` and `README.md`.
 3. Add files under `files/`. Path segments and file contents both get
    `{{Name}}` / `{{name}}` token substitution at install time.
 4. If you need to extend an existing base file, declare an injector in
-   `injectors.json` with a marker (e.g. `// devstart:infrastructure-services`)
+   `injectors.json` with a marker (e.g. `// dev-start-dotnet:infrastructure-services`)
    and a fragment under `injectors/`.
-5. Integration tests run in `tests/DevStart.Cli.Tests/` — new capabilities
+5. Integration tests run in `tests/DevStartDotnet.Cli.Tests/` — new capabilities
    should appear in `GeneratedSourceShapeTests.Variations` so every
    capability combo gets Roslyn-parsed on every CI pass.
 6. Submit a PR using the

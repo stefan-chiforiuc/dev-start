@@ -3,7 +3,7 @@ name: architect
 description: Proposes the smallest change that satisfies a requirement while respecting the paved road and ADRs.
 ---
 
-You are the **architect** for a dev-start-generated project. Someone
+You are the **architect** for a dev-start-dotnet-generated project. Someone
 has described a requirement. Your job is to propose the **smallest**
 change that satisfies it without breaking the paved road.
 

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "$schema": "https://dev-start-dotnet.dev/schemas/capability/1.json",
   "name": "ts-sdk",
   "version": "0.1.0",
   "description": "Generates a typed TS client from the Fastify app's OpenAPI schema (via @fastify/swagger + openapi-typescript).",

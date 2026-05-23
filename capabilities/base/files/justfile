@@ -45,7 +45,7 @@ fmt:
     dotnet format
 
 doctor:
-    @dev-start doctor || echo "Install dev-start: dotnet tool install -g DevStart"
+    @dev-start-dotnet doctor || echo "Install dev-start-dotnet: dotnet tool install -g DevStartDotnet"
 
 # Install local dotnet global tools (dotnet-ef) if missing.
 tools-install:
@@ -59,4 +59,4 @@ bootstrap:
     -just db-migrate
     just test
 
-# devstart:just-targets
+# dev-start-dotnet:just-targets
