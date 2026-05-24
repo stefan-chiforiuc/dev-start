@@ -12,6 +12,11 @@
     <!-- Version is stamped at pack time via -p:Version=... by release-please.yml.
          Local `dotnet pack` without that flag produces a 1.0.0 dev build.
          Source of truth: .github/release-please-manifest.json -->
+    <!-- Stop MSBuild appending +<commitSha> to InformationalVersion so the
+         value System.CommandLine prints for `dev-start --version` matches the
+         NuGet package version exactly. SourceLink itself does not depend on
+         this suffix. -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <Authors>dev-start contributors</Authors>
     <Description>Opinionated scaffolder + day-to-day companion for .NET services. See https://github.com/stefan-chiforiuc/dev-start.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
