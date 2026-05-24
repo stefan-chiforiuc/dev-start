@@ -89,6 +89,10 @@ jobs:
     permissions:
       contents: read
     steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
@@ -149,6 +153,10 @@ jobs:
       contents: read
       id-token: write   # OIDC token exchange for NuGet trusted publishing
     steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
