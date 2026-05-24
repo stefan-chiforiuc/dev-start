@@ -77,6 +77,34 @@ Before clicking Approve in the `nuget-production` environment, check:
 - The `CHANGELOG.md` diff in the Release PR matches what you expect to ship.
 - The Security tab has no fresh CodeQL alerts on the tagged commit.
 
+### Testing a release without pushing to NuGet
+
+Three layers, cheapest first. Pick whichever matches the change you're
+validating.
+
+**Layer A — pure local.** Mirrors the CI version stamp exactly:
+
+```bash
+just install-version 1.0.0-alpha.dev
+dev-start --version
+dev-start new smoke-app --no-claude --with postgres auth otel
+(cd smoke-app && dotnet build)
+```
+
+**Layer B — full CI dry-run.** `release-please.yml` accepts a
+`workflow_dispatch` with a `dry_run` boolean input. When checked, the
+workflow runs `release-please` → `build` → `verify` end to end, but the
+`deploy` job is skipped (so nothing is pushed to NuGet). Use this for
+workflow YAML changes, SBOM/attestation changes, or OIDC config tweaks.
+
+Trigger from the Actions tab: **release-please → Run workflow →** check
+**dry_run** → Run.
+
+**Layer C — local release-please dry-run.** `just release-dry-run` calls
+`npx release-please release-pr --dry-run` against this repo, prints the
+PR title/body/files it *would* create, and exits. Requires a `GITHUB_TOKEN`
+env var with read access (a fine-grained PAT is enough).
+
 ### Rollback
 
 NuGet.org does not support unpublishing. If a bad release ships:
@@ -136,6 +164,22 @@ ambiguous between the CLI and the workflow.
 Apply these settings in the GitHub UI exactly once. The release pipeline
 (deploy job) will refuse to publish to NuGet until this environment exists
 and is configured.
+
+### 0. Repo-level workflow permissions (do this first)
+
+Without these toggles, `release-please` fails with **"GitHub Actions is
+not permitted to create or approve pull requests"** before it ever gets a
+chance to open the Release PR. Job-level `permissions:` blocks cannot
+override these — they are a hard repo/org gate.
+
+Settings → **Actions** → **General** → **Workflow permissions**:
+
+- ✓ **Read and write permissions** (the default `GITHUB_TOKEN` scope).
+- ✓ **Allow GitHub Actions to create and approve pull requests**.
+
+If the org enforces stricter defaults, the same toggles must also be on at
+Org Settings → Actions → General → Workflow permissions, otherwise the repo
+setting is ignored.
 
 ### 1. Create the environment
 
