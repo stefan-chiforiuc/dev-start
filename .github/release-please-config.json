@@ -7,8 +7,7 @@
       "bump-patch-for-minor-pre-major": true,
       "include-v-in-tag": true,
       "prerelease": true,
-      "prerelease-type": "alpha",
-      "release-as": "1.0.0-alpha"
+      "prerelease-type": "alpha"
     }
   },
   "changelog-sections": [
