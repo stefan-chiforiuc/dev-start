@@ -16,6 +16,39 @@ The first published version will be `1.0.0-alpha`. Earlier `[1.0.0]` and
 GitHub Release, or a NuGet package — they are pre-publication drafts and
 have been folded into the `[Unreleased]` block below.
 
+## 1.0.0-alpha (2026-05-24)
+
+
+### Features
+
+* .mcp.json is generated dynamically from installed capabilities ([#17](https://github.com/stefan-chiforiuc/dev-start/issues/17)) ([33d4141](https://github.com/stefan-chiforiuc/dev-start/commit/33d4141f755478f174fb5f85fe7dc16b8add9fe5))
+* auto-register new csproj files in the solution ([#10](https://github.com/stefan-chiforiuc/dev-start/issues/10)) ([e79ca0a](https://github.com/stefan-chiforiuc/dev-start/commit/e79ca0a89f14b5b067e8b5ee9cd8f1c74a6de929))
+* backport v1.1-v1.4 roadmap into 1.1.0 (k8s, TS stack, frontend, policy) ([8e8d169](https://github.com/stefan-chiforiuc/dev-start/commit/8e8d16980bf17bc0efededa22f82489257599f12))
+* backport v1.1–v1.4 roadmap into 1.1.0 (k8s, TS stack, frontend, policy) ([fdb129f](https://github.com/stefan-chiforiuc/dev-start/commit/fdb129ff8f0b960637ccfc09ddcaab15fa59bfe2))
+* **capabilities:** per-version backend, cache engine swap, frontend metadata ([7c770b0](https://github.com/stefan-chiforiuc/dev-start/commit/7c770b067ede19b4b6c7e414b0ede5859379affc))
+* **cli:** flat capability names + deploy --target + new wizard ([7c8d84c](https://github.com/stefan-chiforiuc/dev-start/commit/7c8d84cdd719e6a450487979185baa08475c690a))
+* dev-start doctor --fix auto-populates missing env keys ([#16](https://github.com/stefan-chiforiuc/dev-start/issues/16)) ([12bb93e](https://github.com/stefan-chiforiuc/dev-start/commit/12bb93ebf2167e2f0dd7fcd6b3079de97ff2ca5e))
+* dev-start upgrade --apply with baseline tracking ([#9](https://github.com/stefan-chiforiuc/dev-start/issues/9)) ([6a3b342](https://github.com/stefan-chiforiuc/dev-start/commit/6a3b342bab9483e4649ba83b4deeadde4d0d0686))
+* flat capability names, family/variant model, and interactive `new` wizard ([edec7dd](https://github.com/stefan-chiforiuc/dev-start/commit/edec7dd2f7108ddea35c8a30eab19f621348c5b8))
+* initial dev-start scaffold ([987aef7](https://github.com/stefan-chiforiuc/dev-start/commit/987aef7efb55a0f5ea8675d2dcb5180aab8460f0))
+* normalize Windows backslash paths in resource lookups ([#11](https://github.com/stefan-chiforiuc/dev-start/issues/11)) ([0e4c542](https://github.com/stefan-chiforiuc/dev-start/commit/0e4c542098935e96aef390531c73ccbb9862e8c3))
+* stamp .devstart.json templateVersion from the CLI assembly ([#13](https://github.com/stefan-chiforiuc/dev-start/issues/13)) ([44b5e36](https://github.com/stefan-chiforiuc/dev-start/commit/44b5e36f93987eadf61a35910038e2ee803c701e))
+
+
+### Bug Fixes
+
+* address post-review bugs + design improvements (1.1.0) ([9014d6e](https://github.com/stefan-chiforiuc/dev-start/commit/9014d6e246acc59d0b90b5afef5f56677412a029))
+* bump OpenTelemetry to 1.15.3 (CVE-2026-42191) so scaffolds build ([241a9cb](https://github.com/stefan-chiforiuc/dev-start/commit/241a9cb58a488efc9d33548d0daca0e9226a6e75))
+* revert breaking dependabot bumps so build succeeds again ([d2a0fd1](https://github.com/stefan-chiforiuc/dev-start/commit/d2a0fd18de15ddfc8966b6c3ca084bc3b9fe5a58))
+
+
+### Documentation
+
+* add ADR 0009, ARCHITECTURE.md, SUPPORT.md ([0923a1f](https://github.com/stefan-chiforiuc/dev-start/commit/0923a1fa3be1be2c9eaac359701abac641be7879))
+* add v1.1-v1.4 backport plan folding k8s, TS stack, frontend, and policy verb into 1.1.0 ([902386e](https://github.com/stefan-chiforiuc/dev-start/commit/902386e8411aa5745320a7a984afdc8333fb1b5e))
+* align all docs to 1.0.0-alpha + add install-hooks ([4f208b3](https://github.com/stefan-chiforiuc/dev-start/commit/4f208b389b2f9bc066cc68c70333422bf01bced9))
+* retire stale planning content ([4902cb6](https://github.com/stefan-chiforiuc/dev-start/commit/4902cb675865932669f08e30c3e3431a5d6b7e58))
+
 ## [Unreleased]
 
 ### Added — CLI
