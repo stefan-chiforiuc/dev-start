@@ -81,10 +81,18 @@ public static class CapabilityResolver
         return null;
     }
 
+    /// <summary>
+    /// Best-effort load — returns null when the capability is missing
+    /// (<see cref="InvalidOperationException"/>) or has invalid JSON
+    /// (<see cref="System.Text.Json.JsonException"/>). Used by the resolver
+    /// to fan out across all known capability folders without aborting on
+    /// a single malformed one.
+    /// </summary>
     private static Capability? TryLoad(string name)
     {
         try { return Capability.LoadEmbedded(name); }
-        catch { return null; }
+        catch (InvalidOperationException) { return null; }
+        catch (System.Text.Json.JsonException) { return null; }
     }
 
     /// <summary>
@@ -142,16 +150,12 @@ public static class CapabilityResolver
         var aliases = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var name in installedNames)
         {
-            Capability cap;
-            try { cap = Capability.LoadEmbedded(name); }
-            catch { continue; }
+            var cap = TryLoad(name);
+            if (cap is null) continue;
 
             foreach (var alias in cap.Provides)
             {
-                if (!aliases.ContainsKey(alias))
-                {
-                    aliases[alias] = name;
-                }
+                aliases.TryAdd(alias, name);
             }
         }
         return aliases;
@@ -172,18 +176,13 @@ public static class CapabilityResolver
     /// </summary>
     public static IReadOnlyList<Capability> ListFamily(string family, string stack)
     {
-        var matches = new List<Capability>();
-        foreach (var name in Capability.AvailableNames())
-        {
-            Capability cap;
-            try { cap = Capability.LoadEmbedded(name); }
-            catch { continue; }
-
-            if (!string.Equals(cap.Family, family, StringComparison.Ordinal)) continue;
-            if (cap.Stacks.Count > 0 && !cap.Stacks.Contains(stack, StringComparer.Ordinal)) continue;
-            matches.Add(cap);
-        }
-        return matches;
+        return Capability.AvailableNames()
+            .Select(TryLoad)
+            .Where(cap => cap is not null
+                && string.Equals(cap.Family, family, StringComparison.Ordinal)
+                && (cap.Stacks.Count == 0 || cap.Stacks.Contains(stack, StringComparer.Ordinal)))
+            .Select(cap => cap!)
+            .ToList();
     }
 
     private static string? ResolveFamily(Selection sel)
@@ -192,34 +191,11 @@ public static class CapabilityResolver
         // optional target/version filters, then pick the best per the
         // documented tie-break rules: explicit `default: true` wins;
         // otherwise the highest framework version.
-        var candidates = new List<Capability>();
-        foreach (var name in Capability.AvailableNames())
-        {
-            Capability cap;
-            try { cap = Capability.LoadEmbedded(name); }
-            catch { continue; }
-
-            if (!string.Equals(cap.Family, sel.Name, StringComparison.Ordinal)) continue;
-            if (cap.Stacks.Count > 0 && !cap.Stacks.Contains(sel.Stack, StringComparer.Ordinal)) continue;
-
-            // Skip TS-prefixed folders when the project is .NET (their
-            // capability.json should already declare `stacks` but be defensive).
-            if (sel.Stack != Planner.StackTypescript && name.StartsWith("ts-", StringComparison.Ordinal))
-                continue;
-            if (sel.Stack == Planner.StackTypescript && cap.Stacks.Count == 0
-                && !name.StartsWith("ts-", StringComparison.Ordinal))
-                continue;
-
-            if (sel.FamilyTarget is not null
-                && !string.Equals(cap.Framework, sel.FamilyTarget, StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            if (sel.FamilyVersion is not null
-                && !string.Equals(cap.FrameworkVersion, sel.FamilyVersion, StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            candidates.Add(cap);
-        }
+        var candidates = Capability.AvailableNames()
+            .Select(name => (name, cap: TryLoad(name)))
+            .Where(t => t.cap is not null && MatchesFamily(t.name, t.cap!, sel))
+            .Select(t => t.cap!)
+            .ToList();
 
         if (candidates.Count == 0) return null;
         if (candidates.Count == 1) return candidates[0].Name;
@@ -232,6 +208,28 @@ public static class CapabilityResolver
         return candidates
             .OrderByDescending(c => c.FrameworkVersion, VersionComparer.Instance)
             .First().Name;
+    }
+
+    private static bool MatchesFamily(string name, Capability cap, Selection sel)
+    {
+        if (!string.Equals(cap.Family, sel.Name, StringComparison.Ordinal)) return false;
+        if (cap.Stacks.Count > 0 && !cap.Stacks.Contains(sel.Stack, StringComparer.Ordinal)) return false;
+
+        // Skip TS-prefixed folders when the project is .NET (their
+        // capability.json should already declare `stacks` but be defensive).
+        var isTsFolder = name.StartsWith("ts-", StringComparison.Ordinal);
+        if (sel.Stack != Planner.StackTypescript && isTsFolder) return false;
+        if (sel.Stack == Planner.StackTypescript && cap.Stacks.Count == 0 && !isTsFolder) return false;
+
+        if (sel.FamilyTarget is not null
+            && !string.Equals(cap.Framework, sel.FamilyTarget, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        if (sel.FamilyVersion is not null
+            && !string.Equals(cap.FrameworkVersion, sel.FamilyVersion, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        return true;
     }
 
     private sealed class VersionComparer : IComparer<string?>
@@ -258,9 +256,5 @@ public static class CapabilityResolver
         _ => null,
     };
 
-    private static bool CapabilityExists(string name)
-    {
-        try { _ = Capability.LoadEmbedded(name); return true; }
-        catch { return false; }
-    }
+    private static bool CapabilityExists(string name) => TryLoad(name) is not null;
 }

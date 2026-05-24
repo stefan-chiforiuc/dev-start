@@ -445,7 +445,8 @@ public sealed class Planner
         var backendCap = Capabilities.FirstOrDefault(c =>
         {
             try { return Capability.LoadEmbedded(c).Family == "backend"; }
-            catch { return false; }
+            catch (InvalidOperationException) { return false; }
+            catch (System.Text.Json.JsonException) { return false; }
         });
         if (backendCap is not null)
         {

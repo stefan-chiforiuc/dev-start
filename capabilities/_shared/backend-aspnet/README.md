@@ -13,7 +13,7 @@ The version-agnostic part of every ASP.NET base variant:
   layered project skeleton, minimal API host, Problem+JSON, health
   checks, OpenAPI.
 - `tests/{{Name}}.IntegrationTests`, `.ArchitectureTests` — Testcontainers
-  + NetArchTest scaffolding.
+  and NetArchTest scaffolding.
 - `.editorconfig`, `.gitignore`, `.env.example`, `justfile`, README.
 - `.github/workflows/*` — CI, CodeQL, Trivy.
 - `.vscode/extensions.json`, `tasks.json`.

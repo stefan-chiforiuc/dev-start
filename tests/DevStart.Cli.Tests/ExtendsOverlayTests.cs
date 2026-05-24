@@ -24,7 +24,9 @@ public sealed class ExtendsOverlayTests : IDisposable
     public void Dispose()
     {
         Directory.SetCurrentDirectory(_priorCwd);
-        try { Directory.Delete(_sandbox, recursive: true); } catch { /* best-effort */ }
+        try { Directory.Delete(_sandbox, recursive: true); }
+        catch (IOException) { /* best-effort */ }
+        catch (UnauthorizedAccessException) { /* best-effort */ }
         GC.SuppressFinalize(this);
     }
 
@@ -43,17 +45,17 @@ public sealed class ExtendsOverlayTests : IDisposable
 
         await planner.RunAsync();
 
-        var root = Path.Combine(_sandbox, "overlay-app");
+        var root = Path.Join(_sandbox, "overlay-app");
 
         // Owned by `base/` (version-pinned).
-        File.Exists(Path.Combine(root, "Directory.Build.props")).Should().BeTrue();
-        File.Exists(Path.Combine(root, "global.json")).Should().BeTrue();
-        File.Exists(Path.Combine(root, "Dockerfile")).Should().BeTrue();
+        File.Exists(Path.Join(root, "Directory.Build.props")).Should().BeTrue();
+        File.Exists(Path.Join(root, "global.json")).Should().BeTrue();
+        File.Exists(Path.Join(root, "Dockerfile")).Should().BeTrue();
 
         // Owned by `_shared/backend-aspnet/` — must appear via the overlay.
-        File.Exists(Path.Combine(root, "src/OverlayApp.Api/Program.cs")).Should().BeTrue();
-        File.Exists(Path.Combine(root, "justfile")).Should().BeTrue();
-        File.Exists(Path.Combine(root, "tests/OverlayApp.IntegrationTests/HealthCheckTests.cs"))
+        File.Exists(Path.Join(root, "src", "OverlayApp.Api", "Program.cs")).Should().BeTrue();
+        File.Exists(Path.Join(root, "justfile")).Should().BeTrue();
+        File.Exists(Path.Join(root, "tests", "OverlayApp.IntegrationTests", "HealthCheckTests.cs"))
             .Should().BeTrue();
     }
 
@@ -73,8 +75,8 @@ public sealed class ExtendsOverlayTests : IDisposable
 
         await planner.RunAsync();
 
-        var root = Path.Combine(_sandbox, "overrider");
-        var buildProps = File.ReadAllText(Path.Combine(root, "Directory.Build.props"));
+        var root = Path.Join(_sandbox, "overrider");
+        var buildProps = File.ReadAllText(Path.Join(root, "Directory.Build.props"));
         buildProps.Should().Contain("net8.0");
     }
 }

@@ -24,7 +24,9 @@ public sealed class CacheVariantTests : IDisposable
     public void Dispose()
     {
         Directory.SetCurrentDirectory(_priorCwd);
-        try { Directory.Delete(_sandbox, recursive: true); } catch { /* best-effort */ }
+        try { Directory.Delete(_sandbox, recursive: true); }
+        catch (IOException) { /* best-effort */ }
+        catch (UnauthorizedAccessException) { /* best-effort */ }
         GC.SuppressFinalize(this);
     }
 
@@ -42,17 +44,17 @@ public sealed class CacheVariantTests : IDisposable
             familyChoices: new Dictionary<string, string> { ["cache"] = "memory" });
 
         await planner.RunAsync();
-        var root = Path.Combine(_sandbox, "mem-app");
+        var root = Path.Join(_sandbox, "mem-app");
 
-        File.Exists(Path.Combine(root, "src/MemApp.Infrastructure/Caching/MemoryTypedCache.cs"))
+        File.Exists(Path.Join(root, "src", "MemApp.Infrastructure", "Caching", "MemoryTypedCache.cs"))
             .Should().BeTrue();
 
-        var module = File.ReadAllText(Path.Combine(root, "src/MemApp.Infrastructure/CacheModule.cs"));
+        var module = File.ReadAllText(Path.Join(root, "src", "MemApp.Infrastructure", "CacheModule.cs"));
         module.Should().Contain("AddMemoryCache");
         module.Should().NotContain("AddStackExchangeRedisCache",
             because: "memory variant must not pull in Redis wiring");
 
-        var infraDi = File.ReadAllText(Path.Combine(root, "src/MemApp.Infrastructure/DependencyInjection.cs"));
+        var infraDi = File.ReadAllText(Path.Join(root, "src", "MemApp.Infrastructure", "DependencyInjection.cs"));
         infraDi.Should().Contain("services.AddCache(config);");
 
         // Manifest records the concrete variant so doctor/add/upgrade see it.

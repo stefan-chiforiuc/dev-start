@@ -69,10 +69,10 @@ public sealed class NewWizard
 
         var deploy = preset.DeployTarget ?? (interactive ? AskDeploy() : "none");
 
-        var includeClaude = preset.IncludeClaude ?? (interactive ? AskIncludeClaude() : true);
+        var includeClaude = preset.IncludeClaude ?? (!interactive || AskIncludeClaude());
 
         // multi-service is rare; only ask in interactive mode.
-        var multi = preset.MultiService ?? (interactive ? AskMultiService() : false);
+        var multi = preset.MultiService ?? (interactive && AskMultiService());
 
         return new Answers(stack, framework, version, extras, deploy, includeClaude, multi, cacheEngine, frontendFramework);
     }

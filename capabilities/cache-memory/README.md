@@ -10,7 +10,7 @@ public surface as the `cache` (Redis) variant, no docker dependency.
 - `src/My.Infrastructure/Caching/MemoryTypedCache.cs` — `IMemoryCache`
   implementation.
 - `src/My.Infrastructure/CacheModule.cs` — `services.AddMemoryCache()`
-  + `ITypedCache → MemoryTypedCache`.
+  with `ITypedCache → MemoryTypedCache`.
 - Injects `services.AddCache(config);` into `DependencyInjection.cs`.
 
 ## Why pick this over `cache`?

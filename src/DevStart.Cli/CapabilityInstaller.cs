@@ -53,7 +53,8 @@ public static class CapabilityInstaller
 
         Capability? cap;
         try { cap = Capability.LoadEmbedded(capability); }
-        catch { cap = null; }
+        catch (InvalidOperationException) { cap = null; }
+        catch (System.Text.Json.JsonException) { cap = null; }
 
         if (cap?.Extends is { Length: > 0 } sharedPath)
         {

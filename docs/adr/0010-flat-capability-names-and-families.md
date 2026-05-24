@@ -98,7 +98,7 @@ the wizard skips any prompt whose value was provided by a flag.
 
 ## Consequences
 
-**Positive**
+### Positive
 
 - Users type stack-neutral names. `dev-start add auth` works in any
   stack. The CLI prints the resolved name (`resolved auth → ts-auth`)
@@ -113,7 +113,7 @@ the wizard skips any prompt whose value was provided by a flag.
   Redis/in-memory) without breaking ADR 0006's "one opinion per
   capability" rule — each variant is still its own folder.
 
-**Negative**
+### Negative
 
 - The resolver is a new layer of indirection. Mitigation: it's small
   (`CapabilityResolver.cs` ~190 LOC), documented, and the rules are
