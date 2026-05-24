@@ -36,6 +36,69 @@ public class ManifestMigrationTests
     }
 
     [Fact]
+    public void V2_manifest_migrates_to_v3_with_inferred_backend()
+    {
+        var dir = Directory.CreateTempSubdirectory("devstart-migration-").FullName;
+        try
+        {
+            var path = Path.Join(dir, ".devstart.json");
+            File.WriteAllText(path, """
+            {
+              "schemaVersion": 2,
+              "stack": "dotnet-api",
+              "templateVersion": "1.0.0",
+              "name": "legacy-v2",
+              "capabilities": ["base", "postgres"],
+              "services": ["api"],
+              "deploy": "none",
+              "policies": []
+            }
+            """);
+
+            var loaded = Manifest.Load(dir);
+            loaded.SchemaVersion.Should().Be(3);
+            loaded.Backend.Should().NotBeNull();
+            loaded.Backend!.Framework.Should().Be("aspnet");
+            loaded.Backend.Version.Should().Be("8");
+        }
+        finally
+        {
+            Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void V2_typescript_manifest_infers_fastify_backend()
+    {
+        var dir = Directory.CreateTempSubdirectory("devstart-migration-").FullName;
+        try
+        {
+            var path = Path.Join(dir, ".devstart.json");
+            File.WriteAllText(path, """
+            {
+              "schemaVersion": 2,
+              "stack": "typescript-fastify",
+              "templateVersion": "1.0.0",
+              "name": "legacy-v2-ts",
+              "capabilities": ["ts-base", "ts-postgres"],
+              "services": ["api"],
+              "deploy": "none",
+              "policies": []
+            }
+            """);
+
+            var loaded = Manifest.Load(dir);
+            loaded.SchemaVersion.Should().Be(3);
+            loaded.Backend!.Framework.Should().Be("fastify");
+            loaded.Backend.Version.Should().Be("5");
+        }
+        finally
+        {
+            Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    [Fact]
     public void V2_manifest_roundtrips_stack_and_policies()
     {
         var dir = Directory.CreateTempSubdirectory("devstart-migration-").FullName;

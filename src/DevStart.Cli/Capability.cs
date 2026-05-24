@@ -55,6 +55,59 @@ public sealed class Capability
     [JsonPropertyName("stacks")]
     public List<string> Stacks { get; set; } = [];
 
+    /// <summary>
+    /// Optional capability "family" — groups variants under one user-facing
+    /// name (e.g. <c>backend</c>, <c>deploy</c>). The resolver picks the right
+    /// concrete folder given a project's selections. See ADR 0010.
+    /// </summary>
+    [JsonPropertyName("family")]
+    public string? Family { get; set; }
+
+    /// <summary>
+    /// Within a family, which framework variant this capability implements
+    /// (e.g. <c>aspnet</c>, <c>fastify</c>, <c>fly</c>, <c>aca</c>). The
+    /// resolver matches on this when picking among siblings.
+    /// </summary>
+    [JsonPropertyName("framework")]
+    public string? Framework { get; set; }
+
+    /// <summary>
+    /// Within a family, which version of the framework this variant ships
+    /// (e.g. <c>8</c>, <c>9</c>, <c>5</c>). Null = unversioned variant.
+    /// </summary>
+    [JsonPropertyName("frameworkVersion")]
+    public string? FrameworkVersion { get; set; }
+
+    /// <summary>
+    /// Logical names this capability provides. Lets dependents say
+    /// <c>dependsOn: ["base"]</c> while the actual installed folder is
+    /// <c>base-aspnet-9</c> or <c>ts-base</c>. The Planner builds an alias
+    /// map at plan time so dependency resolution stays declarative.
+    /// </summary>
+    [JsonPropertyName("provides")]
+    public List<string> Provides { get; set; } = [];
+
+    /// <summary>
+    /// Optional shared file set to overlay before this capability's own
+    /// <c>files/</c> directory. Path is relative to <c>capabilities/</c>
+    /// (e.g. <c>_shared/backend-aspnet</c>). Files in the extends source
+    /// are copied first; the variant's own files override on conflict.
+    /// Used so per-version backend variants don't duplicate the 30+
+    /// version-agnostic template files. <c>_</c>-prefixed folders are
+    /// hidden from <c>list</c> and <c>add</c>.
+    /// </summary>
+    [JsonPropertyName("extends")]
+    public string? Extends { get; set; }
+
+    /// <summary>
+    /// When multiple variants live in the same family, the one flagged
+    /// <c>default: true</c> is picked when the user doesn't specify a
+    /// version. Typically the LTS choice. Falls back to highest version
+    /// if no variant declares itself the default.
+    /// </summary>
+    [JsonPropertyName("default")]
+    public bool Default { get; set; }
+
     public sealed class EnvAddition
     {
         [JsonPropertyName("key")] public string Key { get; set; } = "";

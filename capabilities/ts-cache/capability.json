@@ -3,9 +3,12 @@
   "name": "ts-cache",
   "version": "0.1.0",
   "description": "Redis via ioredis, typed get/set wrapper.",
+  "family": "cache",
+  "framework": "redis",
+  "provides": ["ts-cache", "cache"],
   "dependsOn": ["ts-base"],
   "stacks": ["typescript-fastify"],
-  "conflictsWith": [],
+  "conflictsWith": ["ts-cache-memory"],
   "addsServices": ["redis"],
   "envAdditions": [
     { "key": "REDIS_URL", "example": "redis://localhost:6379" }

@@ -89,8 +89,23 @@ present in the target file, the injector skips. Rerunning
 ## Capabilities
 
 Auto-included by the foundation: `base` (.NET) and `ts-base` (TypeScript).
-Both are selected by `dev-start new` based on `--stack` and are not
-user-installable via `add`.
+Both are selected by `dev-start new` based on `--stack` (or the wizard's
+backend prompt) and are not user-installable via `add`.
+
+### Naming: flat at the surface, prefixed on disk
+
+The CLI accepts the **flat name** (`auth`, `cache`, `s3`, `deploy`). The
+[capability resolver](../src/DevStart.Cli/CapabilityResolver.cs) maps it
+to the right concrete folder based on the project's stack. On-disk
+folders keep the `ts-` prefix per [ADR 0008](../docs/adr/0008-ts-prefix-for-typescript-capabilities.md);
+see [ADR 0010](../docs/adr/0010-flat-capability-names-and-families.md)
+for the rationale and the family/variant model.
+
+```text
+dev-start add cache               → cache or ts-cache (resolved by stack)
+dev-start add deploy --target fly → deploy-fly or ts-deploy-fly
+dev-start add ts-auth             → ts-auth (explicit; escape hatch)
+```
 
 ### .NET stack
 

@@ -21,6 +21,8 @@ public sealed class Planner
     public IReadOnlyList<string> Capabilities { get; }
     public string DeployTarget { get; }
     public bool IncludeClaude { get; }
+    public string? BackendFramework { get; }
+    public string? BackendVersion { get; }
 
     public Planner(
         string name,
@@ -28,7 +30,10 @@ public sealed class Planner
         IEnumerable<string> capabilities,
         string deployTarget,
         bool includeClaude,
-        string stack = StackDotnet)
+        string stack = StackDotnet,
+        string? backendFramework = null,
+        string? backendVersion = null,
+        IReadOnlyDictionary<string, string>? familyChoices = null)
     {
         RawName = name;
         Tokens = new Tokens(name);
@@ -36,21 +41,30 @@ public sealed class Planner
         MultiService = multiService;
         DeployTarget = deployTarget;
         IncludeClaude = includeClaude;
+        BackendFramework = backendFramework;
+        BackendVersion = backendVersion;
 
-        var baseCap = BaseCapabilityFor(Stack);
+        var baseCap = CapabilityResolver.ResolveBackend(Stack, backendFramework, backendVersion);
         var gatewayCap = GatewayCapabilityFor(Stack);
 
         // Collect the user-requested set plus auto-added gateway / deploy caps.
+        // Each user-typed name goes through the resolver so flat names
+        // ("auth", "s3") in a TS project map to "ts-auth" / "ts-s3".
+        // `familyChoices` lets the wizard pick variants — e.g. cache→memory
+        // resolves "cache" to "cache-memory" before the alias map runs.
         var requested = new List<string> { baseCap };
-        foreach (var c in capabilities)
+        foreach (var raw in capabilities)
         {
-            if (!requested.Contains(c, StringComparer.Ordinal)) requested.Add(c);
+            string? familyTarget = null;
+            familyChoices?.TryGetValue(raw, out familyTarget);
+            var resolved = CapabilityResolver.Resolve(new CapabilityResolver.Selection(raw, Stack, familyTarget)) ?? raw;
+            if (!requested.Contains(resolved, StringComparer.Ordinal)) requested.Add(resolved);
         }
         if (multiService && !requested.Contains(gatewayCap, StringComparer.Ordinal))
         {
             requested.Add(gatewayCap);
         }
-        var deployCap = DeployCapabilityName(deployTarget, Stack);
+        var deployCap = CapabilityResolver.ResolveDeploy(Stack, deployTarget);
         if (deployCap is not null && !requested.Contains(deployCap, StringComparer.Ordinal))
         {
             requested.Add(deployCap);
@@ -68,14 +82,20 @@ public sealed class Planner
     internal static IReadOnlyList<string> ResolveTransitively(
         IReadOnlyList<string> requested, string stack)
     {
+        // Build the alias map up front so dependents that declare
+        // `dependsOn: ["base"]` resolve to the concrete backend variant
+        // selected in `requested` (e.g. base-aspnet-9, ts-base).
+        var aliases = CapabilityResolver.BuildAliasMap(requested);
+
         var ordered = new List<string>();
         var seen = new HashSet<string>(StringComparer.Ordinal);
 
         void Visit(string name)
         {
-            if (!seen.Add(name)) return;
+            var concrete = CapabilityResolver.ApplyAliases(name, aliases);
+            if (!seen.Add(concrete)) return;
             Capability? cap = null;
-            try { cap = Capability.LoadEmbedded(name); }
+            try { cap = Capability.LoadEmbedded(concrete); }
             catch { /* unknown capability — install step will diagnose */ }
             if (cap is not null)
             {
@@ -84,7 +104,7 @@ public sealed class Planner
                     Visit(dep);
                 }
             }
-            ordered.Add(name);
+            ordered.Add(concrete);
         }
 
         foreach (var name in requested) Visit(name);
@@ -99,11 +119,8 @@ public sealed class Planner
         _ => stack,
     };
 
-    internal static string BaseCapabilityFor(string stack) => stack switch
-    {
-        StackTypescript => "ts-base",
-        _ => "base",
-    };
+    internal static string BaseCapabilityFor(string stack)
+        => CapabilityResolver.ResolveBackend(stack, framework: null, version: null);
 
     internal static string GatewayCapabilityFor(string stack) => stack switch
     {
@@ -112,16 +129,7 @@ public sealed class Planner
     };
 
     internal static string? DeployCapabilityName(string target, string stack)
-    {
-        var key = target?.ToLowerInvariant() switch
-        {
-            "fly" or "flyio" or "fly.io" => "deploy-fly",
-            "aca" or "azure" or "azurecontainerapps" => "deploy-aca",
-            _ => null,
-        };
-        if (key is null) return null;
-        return stack == StackTypescript ? "ts-" + key : key;
-    }
+        => CapabilityResolver.ResolveDeploy(stack, target);
 
     public Task RunAsync()
     {
@@ -424,8 +432,36 @@ public sealed class Planner
             Services = services,
             Deploy = DeployTarget,
             TemplateVersion = CliVersion.Current,
+            Backend = BuildBackendSelection(),
         };
         manifest.Save(target);
+    }
+
+    private Manifest.BackendSelection BuildBackendSelection()
+    {
+        // Prefer the resolved backend variant's own capability.json metadata
+        // so the manifest matches what was actually installed even when the
+        // wizard accepted defaults.
+        var backendCap = Capabilities.FirstOrDefault(c =>
+        {
+            try { return Capability.LoadEmbedded(c).Family == "backend"; }
+            catch (InvalidOperationException) { return false; }
+            catch (System.Text.Json.JsonException) { return false; }
+        });
+        if (backendCap is not null)
+        {
+            var cap = Capability.LoadEmbedded(backendCap);
+            return new Manifest.BackendSelection
+            {
+                Framework = cap.Framework ?? BackendFramework ?? "",
+                Version = cap.FrameworkVersion ?? BackendVersion ?? "",
+            };
+        }
+        return new Manifest.BackendSelection
+        {
+            Framework = BackendFramework ?? (Stack == StackTypescript ? "fastify" : "aspnet"),
+            Version = BackendVersion ?? "",
+        };
     }
 
     private List<string> BuildServices()

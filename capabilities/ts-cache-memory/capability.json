@@ -1,0 +1,18 @@
+{
+  "$schema": "https://dev-start.dev/schemas/capability/1.json",
+  "name": "ts-cache-memory",
+  "version": "0.1.0",
+  "description": "In-process Map-backed cache with TTL. Same `app.cache` API as ts-cache, no Redis dependency.",
+  "family": "cache",
+  "framework": "memory",
+  "provides": ["ts-cache", "cache"],
+  "dependsOn": ["ts-base"],
+  "stacks": ["typescript-fastify"],
+  "conflictsWith": ["ts-cache"],
+  "addsServices": [],
+  "envAdditions": [],
+  "postInstall": ["pnpm install"],
+  "doctor": [
+    { "check": "file", "path": "apps/api/src/infra/cache.ts" }
+  ]
+}
