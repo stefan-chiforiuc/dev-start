@@ -16,6 +16,16 @@ The first published version will be `1.0.0-alpha`. Earlier `[1.0.0]` and
 GitHub Release, or a NuGet package — they are pre-publication drafts and
 have been folded into the `[Unreleased]` block below.
 
+## [1.0.1-alpha](https://github.com/stefan-chiforiuc/dev-start/compare/DevStart-v1.0.0-alpha...DevStart-v1.0.1-alpha) (2026-05-24)
+
+
+### Bug Fixes
+
+* **ci:** checkout repo in verify and deploy jobs ([cc7619b](https://github.com/stefan-chiforiuc/dev-start/commit/cc7619bc145d60737942c8ad501a6283e1e05215))
+* **ci:** checkout repo in verify and deploy jobs ([5ccc46d](https://github.com/stefan-chiforiuc/dev-start/commit/5ccc46d690ae3bbd8ba1c06b988540b4b2f6bfff))
+* **ci:** remove release-as override so prereleases can advance ([f1dd891](https://github.com/stefan-chiforiuc/dev-start/commit/f1dd89144f81419fd765a93cf93ab1b45aac45a6))
+* **ci:** remove release-as override so prereleases can advance ([3dcc0f0](https://github.com/stefan-chiforiuc/dev-start/commit/3dcc0f0330b29a288f34d799cb7d048f9f676043))
+
 ## [1.0.0-alpha](https://github.com/stefan-chiforiuc/dev-start/compare/DevStart-v1.0.0-alpha...DevStart-v1.0.0-alpha) (2026-05-24)
 
 
