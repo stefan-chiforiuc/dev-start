@@ -3,6 +3,12 @@ name: release-please
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Skip NuGet push (build + verify only)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -134,7 +140,7 @@ jobs:
 
   deploy:
     needs: [release-please, build, verify]
-    if: needs.release-please.outputs.release_created == 'true'
+    if: needs.release-please.outputs.release_created == 'true' && inputs.dry_run != true
     runs-on: ubuntu-latest
     environment:
       name: nuget-production
