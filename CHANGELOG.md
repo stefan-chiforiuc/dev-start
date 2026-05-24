@@ -16,6 +16,14 @@ The first published version will be `1.0.0-alpha`. Earlier `[1.0.0]` and
 GitHub Release, or a NuGet package — they are pre-publication drafts and
 have been folded into the `[Unreleased]` block below.
 
+## [1.0.2-alpha](https://github.com/stefan-chiforiuc/dev-start/compare/DevStart-v1.0.1-alpha...DevStart-v1.0.2-alpha) (2026-05-24)
+
+
+### Bug Fixes
+
+* **cli:** suppress +commitSha suffix on assembly version ([61ffdc3](https://github.com/stefan-chiforiuc/dev-start/commit/61ffdc35b85d4480ef644421554ed1926a39ca46))
+* **cli:** suppress +commitSha suffix on assembly version ([079afdc](https://github.com/stefan-chiforiuc/dev-start/commit/079afdc45dee04d605d81b0c106121bf4a859239))
+
 ## [1.0.1-alpha](https://github.com/stefan-chiforiuc/dev-start/compare/DevStart-v1.0.0-alpha...DevStart-v1.0.1-alpha) (2026-05-24)
 
 
