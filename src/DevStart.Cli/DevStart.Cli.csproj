@@ -13,7 +13,7 @@
          Local `dotnet pack` without that flag produces a 1.0.0 dev build.
          Source of truth: .github/release-please-manifest.json -->
     <!-- Stop MSBuild appending +<commitSha> to InformationalVersion so the
-         value System.CommandLine prints for `dev-start --version` matches the
+         value System.CommandLine prints for `dev-start -version` matches the
          NuGet package version exactly. SourceLink itself does not depend on
          this suffix. -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
