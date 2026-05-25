@@ -87,6 +87,7 @@ public static class NewCommand
 
             AnsiConsole.MarkupLine($"[green]Done.[/] Next:");
             AnsiConsole.MarkupLine($"  cd {name}");
+            AnsiConsole.MarkupLine($"  dev-start install     [grey]# install prerequisites (one-time per machine)[/]");
             AnsiConsole.MarkupLine($"  just bootstrap");
         });
 

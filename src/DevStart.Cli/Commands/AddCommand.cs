@@ -1,4 +1,5 @@
 using System.CommandLine;
+using DevStart.Install;
 using Spectre.Console;
 
 namespace DevStart.Commands;
@@ -23,7 +24,7 @@ public static class AddCommand
             capArg, projectOpt, targetOpt, engineOpt, frameworkOpt, versionOpt,
         };
 
-        cmd.SetHandler(ctx =>
+        cmd.SetHandler(async ctx =>
         {
             var capName = ctx.ParseResult.GetValueForArgument(capArg);
             var projectPath = ctx.ParseResult.GetValueForOption(projectOpt) ?? ".";
@@ -145,6 +146,20 @@ public static class AddCommand
             baselines.Save(root);
 
             AnsiConsole.MarkupLine($"[green]Installed.[/]");
+
+            // Probe just-added capability's prereqs so the user knows whether
+            // a `devstart install` run is needed before `just up`.
+            if (cap.Doctor.Count > 0)
+            {
+                var probe = await CheckRunner.QuickProbe(cap.Doctor, root);
+                var failing = probe.Count(r => r.Outcome == CheckOutcome.Failed);
+                if (failing > 0)
+                {
+                    AnsiConsole.MarkupLine(
+                        $"[yellow]{failing} new prerequisite(s) detected.[/] Run [cyan]dev-start install[/] " +
+                        "to install only what's missing ([cyan]--dry-run[/] to preview first).");
+                }
+            }
 
             if (cap.PostInstall.Count > 0)
             {

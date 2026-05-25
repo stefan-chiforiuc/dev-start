@@ -122,6 +122,11 @@ public sealed class Capability
         [JsonPropertyName("path")] public string? Path { get; set; }
         [JsonPropertyName("min")] public string? Min { get; set; }
         [JsonPropertyName("args")] public string? Args { get; set; }
+
+        /// Default true — opt-out with `"required": false` for tooling that
+        /// shouldn't be auto-installed unless the user passes
+        /// `--include-optional` (e.g. `flyctl`, `az`).
+        [JsonPropertyName("required")] public bool Required { get; set; } = true;
     }
 
     public sealed class McpServerSpec
