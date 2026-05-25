@@ -6,6 +6,7 @@ var root = new RootCommand("dev-start — opinionated .NET scaffolder and day-to
 root.AddCommand(NewCommand.Build());
 root.AddCommand(AddCommand.Build());
 root.AddCommand(DoctorCommand.Build());
+root.AddCommand(InstallCommand.Build());
 root.AddCommand(UpgradeCommand.Build());
 root.AddCommand(ListCommand.Build());
 root.AddCommand(CapabilityCommand.Build());
