@@ -42,9 +42,8 @@ public static class OsProbe
     internal static OsInfo Parse(string osReleaseContent)
     {
         var kv = new Dictionary<string, string>(StringComparer.Ordinal);
-        foreach (var raw in osReleaseContent.Split('\n'))
+        foreach (var line in osReleaseContent.Split('\n').Select(r => r.Trim()))
         {
-            var line = raw.Trim();
             if (line.Length == 0 || line.StartsWith('#')) continue;
             var eq = line.IndexOf('=');
             if (eq < 0) continue;

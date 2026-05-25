@@ -5,10 +5,10 @@ public abstract class PackageManager
     public abstract string Name { get; }
     public abstract bool RequiresElevation { get; }
 
-    /// Returns the catalog field used for this manager (brew/apt/dnf/winget).
+    // Returns the catalog field used for this manager (brew/apt/dnf/winget).
     public abstract string? PackageFor(ToolEntry entry);
 
-    /// Builds a shell-ready command for the user / runner. Null when no mapping.
+    // Builds a shell-ready command for the user / runner. Null when no mapping.
     public virtual string? BuildInstallCommand(ToolEntry entry)
     {
         var pkg = PackageFor(entry);

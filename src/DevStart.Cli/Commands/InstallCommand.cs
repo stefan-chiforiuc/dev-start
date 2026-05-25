@@ -119,9 +119,9 @@ public static class InstallCommand
         return 1;
     }
 
-    /// Build the deduplicated set of checks for this project: baseline + every
-    /// capability's `Doctor[]`. Baseline is conservative — anything the
-    /// generated `just` recipes need to function.
+    // Build the deduplicated set of checks for this project: baseline + every
+    // capability's `Doctor[]`. Baseline is conservative — anything the
+    // generated `just` recipes need to function.
     public static List<Capability.DoctorCheck> BuildCheckList(Manifest manifest, string projectRoot)
     {
         var list = new List<Capability.DoctorCheck>
@@ -142,7 +142,7 @@ public static class InstallCommand
         {
             Capability cap;
             try { cap = Capability.LoadEmbedded(capName); }
-            catch { continue; }
+            catch (InvalidOperationException) { continue; }
 
             foreach (var check in cap.Doctor)
             {
@@ -204,9 +204,8 @@ public static class InstallCommand
         IReadOnlyList<InstallAction> actions, IProcessRunner runner, string projectRoot)
     {
         var services = new List<InstallAction>();
-        foreach (var action in actions)
+        foreach (var action in actions.Where(a => !a.Skipped))
         {
-            if (action.Skipped) continue;
             switch (action.Category)
             {
                 case ActionCategory.Service:

@@ -16,9 +16,9 @@ public static class InstallPlan
     private static readonly HashSet<string> Runtimes =
         new(StringComparer.OrdinalIgnoreCase) { "dotnet", "node", "pnpm" };
 
-    /// Translates failing checks into install actions, using the OS-specific
-    /// package manager + the tool catalog. Already-satisfied checks should be
-    /// filtered out by the caller before this is invoked.
+    // Translates failing checks into install actions, using the OS-specific
+    // package manager + the tool catalog. Already-satisfied checks should be
+    // filtered out by the caller before this is invoked.
     public static List<InstallAction> Build(
         IEnumerable<CheckResult> failingChecks,
         PackageManager pkgManager,
@@ -26,9 +26,8 @@ public static class InstallPlan
     {
         var actions = new List<InstallAction>();
 
-        foreach (var failure in failingChecks)
+        foreach (var check in failingChecks.Select(f => f.Source))
         {
-            var check = failure.Source;
             // Required defaults to true; opt-out per capability.yaml.
             if (!check.Required && !includeOptional)
             {

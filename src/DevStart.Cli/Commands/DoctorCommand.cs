@@ -90,7 +90,7 @@ public static class DoctorCommand
         {
             Policy policy;
             try { policy = Policy.LoadEmbedded(policyName); }
-            catch
+            catch (InvalidOperationException)
             {
                 table.AddRow("policy", policyName, "[yellow]missing bundle[/]");
                 continue;

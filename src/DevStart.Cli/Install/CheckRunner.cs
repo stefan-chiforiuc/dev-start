@@ -10,9 +10,9 @@ public sealed record CheckResult(
     CheckOutcome Outcome,
     string Display);
 
-/// Shared probe logic used by both `doctor` and `install`. Identical behavior
-/// to the previous `DoctorCommand` implementation; only the return shape
-/// changed (markup string + structured outcome instead of raw markup).
+// Shared probe logic used by both `doctor` and `install`. Identical behavior
+// to the previous `DoctorCommand` implementation; only the return shape
+// changed (markup string + structured outcome instead of raw markup).
 public static class CheckRunner
 {
     public static async Task<CheckResult> RunAsync(Capability.DoctorCheck check, string projectRoot)
@@ -30,14 +30,15 @@ public static class CheckRunner
                 _ => new CheckResult(check, CheckOutcome.Unknown, "[grey]unknown check[/]"),
             };
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is IOException or System.ComponentModel.Win32Exception
+            or InvalidOperationException or SocketException)
         {
             return new CheckResult(check, CheckOutcome.Failed, $"[red]error[/] {Escape(ex.Message)}");
         }
     }
 
-    /// Quickly probe a list of checks. Used by `add` to surface "you need to
-    /// run `devstart install`" hints without spinning the full doctor table.
+    // Quickly probe a list of checks. Used by `add` to surface "you need to
+    // run `devstart install`" hints without spinning the full doctor table.
     public static async Task<IReadOnlyList<CheckResult>> QuickProbe(
         IEnumerable<Capability.DoctorCheck> checks, string projectRoot)
     {
