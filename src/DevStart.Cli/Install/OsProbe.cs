@@ -41,16 +41,19 @@ public static class OsProbe
 
     internal static OsInfo Parse(string osReleaseContent)
     {
+        var pairs = osReleaseContent
+            .Split('\n')
+            .Select(r => r.Trim())
+            .Where(line => line.Length > 0 && !line.StartsWith('#') && line.Contains('=', StringComparison.Ordinal))
+            .Select(line =>
+            {
+                var eq = line.IndexOf('=');
+                return (Key: line[..eq].Trim(), Value: line[(eq + 1)..].Trim().Trim('"'));
+            });
+
+        // Last-wins on duplicate keys, matching the prior indexer-assignment semantics.
         var kv = new Dictionary<string, string>(StringComparer.Ordinal);
-        foreach (var line in osReleaseContent.Split('\n').Select(r => r.Trim()))
-        {
-            if (line.Length == 0 || line.StartsWith('#')) continue;
-            var eq = line.IndexOf('=');
-            if (eq < 0) continue;
-            var key = line[..eq].Trim();
-            var value = line[(eq + 1)..].Trim().Trim('"');
-            kv[key] = value;
-        }
+        foreach (var (key, value) in pairs) kv[key] = value;
 
         kv.TryGetValue("ID", out var id);
         kv.TryGetValue("ID_LIKE", out var idLike);
