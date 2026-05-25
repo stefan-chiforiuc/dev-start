@@ -17,7 +17,7 @@ public sealed class Tokens
         var kebab = Normalize(rawName);
         if (!System.Text.RegularExpressions.Regex.IsMatch(kebab, "^[a-z][a-z0-9-]{0,39}$"))
             throw new ArgumentException(
-                $"Project name must be kebab-case, start with a letter, and be 1–40 chars. Got '{rawName}'.",
+                $"Project name must start with a letter and be 1–40 chars (letters, digits, '-'; '.', '_', and spaces are normalized to '-'). Got '{rawName}'.",
                 nameof(rawName));
 
         KebabName = kebab;
@@ -35,7 +35,10 @@ public sealed class Tokens
         .Replace("{{NameScope}}", ScopedName, StringComparison.Ordinal);
 
     private static string Normalize(string input) =>
-        input.Trim().ToLowerInvariant().Replace('_', '-').Replace(' ', '-');
+        input.Trim().ToLowerInvariant()
+            .Replace('_', '-')
+            .Replace(' ', '-')
+            .Replace('.', '-');
 
     private static string ToPascal(string kebab)
     {

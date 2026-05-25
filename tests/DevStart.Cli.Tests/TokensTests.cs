@@ -9,6 +9,10 @@ public class TokensTests
     [InlineData("my-app", "MyApp", "my-app", "myapp")]
     [InlineData("orders", "Orders", "orders", "orders")]
     [InlineData("a-b-c", "ABC", "a-b-c", "abc")]
+    [InlineData("my.app", "MyApp", "my-app", "myapp")]
+    [InlineData("foo.bar.baz", "FooBarBaz", "foo-bar-baz", "foobarbaz")]
+    [InlineData("my_app", "MyApp", "my-app", "myapp")]
+    [InlineData("my app", "MyApp", "my-app", "myapp")]
     public void Derives_casings_from_kebab(string raw, string pascal, string kebab, string lower)
     {
         var t = new Tokens(raw);
