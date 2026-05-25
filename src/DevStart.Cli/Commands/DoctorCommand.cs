@@ -122,8 +122,8 @@ public static class DoctorCommand
         {
             AnsiConsole.MarkupLine("");
             AnsiConsole.MarkupLine(
-                "[yellow]Some checks failed.[/] Run [cyan]devstart install[/] to install missing prerequisites, " +
-                "or [cyan]devstart install --dry-run[/] to preview.");
+                "[yellow]Some checks failed.[/] Run [cyan]dev-start install[/] to install missing prerequisites, " +
+                "or [cyan]dev-start install --dry-run[/] to preview.");
             return 1;
         }
 

@@ -8,7 +8,7 @@ public static class NewCommand
 {
     public static Command Build()
     {
-        var nameArg = new Argument<string>("name", "Project name (kebab-case; '.', '_', and spaces are normalized to '-').");
+        var nameArg = new Argument<string>("name", "Project name (e.g. MyApp, my-app, or My.Cool.App for a dotted .NET namespace). '_' and spaces are normalized to '-'.");
         var multiOpt = new Option<bool?>("--multi-service", "Scaffold a multi-service layout with a gateway.");
         var capsOpt = new Option<string[]>("--with", "Capabilities to include (space-separated).") { AllowMultipleArgumentsPerToken = true };
         var deployOpt = new Option<string?>("--deploy", "Deploy target: none | fly | aca.");
@@ -85,10 +85,11 @@ public static class NewCommand
 
             await planner.RunAsync();
 
-            AnsiConsole.MarkupLine($"[green]Done.[/] Next:");
-            AnsiConsole.MarkupLine($"  cd {name}");
-            AnsiConsole.MarkupLine($"  dev-start install     [grey]# install prerequisites (one-time per machine)[/]");
-            AnsiConsole.MarkupLine($"  just bootstrap");
+            AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine("[green]Done.[/] Next:");
+            AnsiConsole.MarkupLine($"  cd {planner.Tokens.FolderName}");
+            AnsiConsole.MarkupLine("  dev-start install     [grey]# install prerequisites (one-time per machine)[/]");
+            AnsiConsole.MarkupLine("  just bootstrap");
         });
 
         return cmd;

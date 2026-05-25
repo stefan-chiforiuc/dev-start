@@ -46,3 +46,6 @@ Thumbs.db
 
 # dev-start state (never ship local state)
 .devstart.state.json
+
+# Sandbox smoke runs (scripts/sandbox.sh writes here)
+.sandbox/

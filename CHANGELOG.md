@@ -86,6 +86,55 @@ have been folded into the `[Unreleased]` block below.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Project names with dots preserved end-to-end.** `dev-start new My.Cool.App`
+  now produces folder `My.Cool.App/`, solution `My.Cool.App.sln`, and
+  projects `My.Cool.App.Api` / `.Domain` / `.Application` / `.Infrastructure`
+  with namespaces to match. Previously the dot was silently flattened to a
+  dash, losing the .NET-canonical dotted namespace.
+- **Gateway "couldn't auto-register" warning.** Scaffolded `global.json` no
+  longer pins to a specific SDK patch (`8.0.404` / `9.0.100`) with a roll-
+  forward policy that doesn't roll backward — any installed 8.x / 9.x SDK
+  now satisfies it, so `dotnet sln add` from `CapabilityInstaller` succeeds.
+- **`new` wizard no longer appears to hang.** Each scaffold phase (platform
+  bundle, `.claude` bundle, per-capability install, MCP config, manifest,
+  git init) now emits a `[cyan]· {phase}[/]` status line. `git init` /
+  `git commit` get a 30-second timeout and `GIT_TERMINAL_PROMPT=0`, so a
+  global GPG-signing config can never block the wizard indefinitely.
+- **`devstart` typos in user-facing output.** Five sites in `doctor`,
+  `install`, and `add` were telling users to run `devstart <verb>` instead
+  of `dev-start <verb>`; copy-pasting failed. `UserFacingTextTests` now
+  fails the build if any reappear.
+- **Friendly errors on bad input.** Invalid project names (empty, leading
+  dot, double dot, leading digit, too long) now produce
+  `error: <message>` + `hint:` lines instead of a 40-line System.CommandLine
+  stack trace. Set `DEV_START_DEBUG=1` for the trace.
+- **Duplicate "Done. Next:" summary.** `Planner.RunAsync` and `NewCommand`
+  were both printing a closing block; `NewCommand` is the single source now.
+- **Repo `global.json` portability.** Was pinned to `8.0.404` with a
+  policy that doesn't roll backward, so contributors on stock Ubuntu
+  (apt's 8.0.127) couldn't build. Now pins to `8.0.100` with
+  `rollForward: latestFeature`, accepting any installed 8.x SDK.
+
+### Added — guardrails
+
+- **`docs/adr/0011-capability-definition-of-done.md`** codifying what
+  "complete" means for a capability (manifest, README, files, injectors,
+  wizard wiring, test coverage, doctor checks, CHANGELOG entry).
+- **`docs/bug-catalog.md`** — every fixed bug with symptom, root cause,
+  where to look, and the regression guard that proves it can't return.
+  Reviewers and AI assistants pattern-match against it before approving
+  similar-shaped PRs.
+- **`just sandbox`** — builds the CLI from source and runs an
+  end-to-end matrix (`smoke-plain`, `My.Cool.App`, `multi-gateway`,
+  `PascalApp`), then `dotnet build`s each scaffolded project. Catches the
+  class of bug `just test` can't (broken `.sln`, malformed templates,
+  capabilities that scaffold but don't compile).
+- **`.github/workflows/sandbox-smoke.yml`** — same matrix as a PR gate.
+- **`UserFacingTextTests`** — regression guard preventing `devstart <verb>`
+  from creeping back into user-facing strings.
+
 ### Added — CLI
 
 - **CLI verbs:** `dev-start new`, `add`, `doctor`, `upgrade`, `list`,

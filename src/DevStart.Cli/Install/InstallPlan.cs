@@ -81,7 +81,7 @@ public static class InstallPlan
                         ManualUrl: null,
                         Skipped: true,
                         Reason: check.Check == "env"
-                            ? "env var; run `devstart doctor --fix` to seed .env.local"
+                            ? "env var; run `dev-start doctor --fix` to seed .env.local"
                             : "missing project file; re-run scaffolding",
                         SourceCheck: check));
                     break;

@@ -1,0 +1,80 @@
+name: Sandbox smoke
+
+# End-to-end matrix of `dev-start new` invocations + `dotnet build` of each
+# scaffolded project. Catches the class of bug `just test` can't:
+# - dotted .NET names mangled in templates (BUG-001)
+# - capabilities that scaffold but don't compile
+# - gateway / multi-service sln registration regressions (BUG-003)
+#
+# Runs on every PR. See docs/bug-catalog.md.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: scaffold (${{ matrix.name }}${{ matrix.multi && ' --multi-service' || '' }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: smoke-plain
+            multi: false
+          - name: My.Cool.App     # dotted name preservation (BUG-001)
+            multi: false
+            extras: "--with postgres"
+          - name: multi-gateway   # gateway sln registration (BUG-003)
+            multi: true
+          - name: PascalApp
+            multi: false
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Build CLI
+        run: dotnet build src/DevStart.Cli/DevStart.Cli.csproj -c Debug --nologo
+
+      - name: Scaffold
+        env:
+          DEV_START_DEBUG: "1"
+        working-directory: ${{ runner.temp }}
+        run: |
+          dotnet "$GITHUB_WORKSPACE/src/DevStart.Cli/bin/Debug/net8.0/dev-start.dll" \
+            new "${{ matrix.name }}" --no-interactive --no-claude \
+            ${{ matrix.multi && '--multi-service' || '' }} \
+            ${{ matrix.extras }}
+
+      - name: Assert no auto-register warning
+        working-directory: ${{ runner.temp }}
+        run: |
+          # If the gateway sln-registration regression returns, the CLI emits
+          # this line. The smoke matrix should never see it.
+          dotnet "$GITHUB_WORKSPACE/src/DevStart.Cli/bin/Debug/net8.0/dev-start.dll" \
+            new "${{ matrix.name }}-rerun" --no-interactive --no-claude \
+            ${{ matrix.multi && '--multi-service' || '' }} \
+            2>&1 | tee scaffold.log
+          ! grep -i "skipped sln registration\|couldn't auto-register" scaffold.log
+
+      - name: Build the scaffolded project
+        working-directory: ${{ runner.temp }}
+        run: |
+          # The folder name matches the user's typed input (preserves case
+          # and dots) — find whichever directory was created.
+          project_dir="$(find . -mindepth 1 -maxdepth 2 -type d -name '${{ matrix.name }}' | head -n1)"
+          test -n "$project_dir" || { echo "no project directory found"; exit 1; }
+          cd "$project_dir"
+          dotnet build --configuration Debug

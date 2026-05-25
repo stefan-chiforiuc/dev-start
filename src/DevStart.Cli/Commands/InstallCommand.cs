@@ -107,15 +107,15 @@ public static class InstallCommand
         AnsiConsole.WriteLine();
         if (stillFailing == 0)
         {
-            AnsiConsole.MarkupLine("[green]All green.[/] Run [cyan]devstart doctor[/] to verify.");
+            AnsiConsole.MarkupLine("[green]All green.[/] Run [cyan]dev-start doctor[/] to verify.");
             return 0;
         }
 
         AnsiConsole.MarkupLine(
             $"[yellow]{stillFailing} check(s) still failing.[/] " +
             "Some installers need a fresh shell so PATH picks up new binaries — " +
-            "open a new terminal and re-run [cyan]devstart install[/], or run " +
-            "[cyan]devstart doctor[/] to see details.");
+            "open a new terminal and re-run [cyan]dev-start install[/], or run " +
+            "[cyan]dev-start doctor[/] to see details.");
         return 1;
     }
 

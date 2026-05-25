@@ -160,8 +160,9 @@ public static class CapabilityInstaller
             // went wrong (SDK missing, malformed sln); don't fail the install.
             if (p.ExitCode != 0)
             {
+                var rel = Path.GetRelativePath(projectRoot, csprojPath);
                 AnsiConsole.MarkupLine(
-                    $"  [yellow]warn[/] couldn't auto-register {Path.GetFileName(csprojPath)} in the solution; run [cyan]dotnet sln add[/] manually");
+                    $"  [yellow]skipped sln registration[/] for {rel.EscapeMarkup()} — add it manually with: [cyan]dotnet sln add \"{rel.EscapeMarkup()}\"[/]");
             }
         }
         catch (System.ComponentModel.Win32Exception)
