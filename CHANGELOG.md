@@ -16,6 +16,15 @@ The first published version will be `1.0.0-alpha`. Earlier `[1.0.0]` and
 GitHub Release, or a NuGet package — they are pre-publication drafts and
 have been folded into the `[Unreleased]` block below.
 
+## [1.1.0-alpha](https://github.com/stefan-chiforiuc/dev-start/compare/DevStart-v1.0.2-alpha...DevStart-v1.1.0-alpha) (2026-05-25)
+
+
+### Features
+
+* add `devstart install` command with OS-aware package manager support ([afa8f86](https://github.com/stefan-chiforiuc/dev-start/commit/afa8f867376391d45763e63c118a19f068b1ad6e))
+* **cli:** add `devstart install` to auto-provision project prerequisites ([312b08f](https://github.com/stefan-chiforiuc/dev-start/commit/312b08f80a79be792ad199f533470bf559bb2e46))
+* **cli:** normalize '.' to '-' in project names ([9ea8b40](https://github.com/stefan-chiforiuc/dev-start/commit/9ea8b40919aef92f5d1f3ab9f01dac2249b4259a))
+
 ## [1.0.2-alpha](https://github.com/stefan-chiforiuc/dev-start/compare/DevStart-v1.0.1-alpha...DevStart-v1.0.2-alpha) (2026-05-24)
 
 
