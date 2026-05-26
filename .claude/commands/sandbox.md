@@ -8,6 +8,7 @@ Run `just sandbox` (which builds the CLI, scaffolds the smoke matrix —
 `dotnet build`s each scaffolded project under `.sandbox/`).
 
 Output a one-line summary first:
+
 - **Green** — `sandbox smoke OK`. End with that, no extra commentary.
 - **Red** — name the failed cell (e.g. "multi-gateway scaffold failed"
   or "PascalApp dotnet build failed"), then show the last ~20 lines of
