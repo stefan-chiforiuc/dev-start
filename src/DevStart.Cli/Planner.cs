@@ -133,21 +133,24 @@ public sealed class Planner
 
     public Task RunAsync()
     {
-        var target = Path.GetFullPath(Tokens.KebabName);
+        // Folder name = what the user typed (sanitized). Preserves case and
+        // dots so `My.Cool.App` lands in `My.Cool.App/` (matching the sln
+        // name) and `my-app` lands in `my-app/`. The previous behavior
+        // unconditionally kebab'd, which silently rewrote dotted .NET names.
+        var folderName = Tokens.FolderName;
+        var target = Path.GetFullPath(folderName);
         Directory.CreateDirectory(target);
 
         AnsiConsole.MarkupLine($"[grey]target:[/] {target}");
 
         var baselines = Render(target, verbose: true);
 
+        AnsiConsole.MarkupLine("[cyan]· manifest[/]");
         WriteManifest(target);
         baselines.Save(target);
-        TryGitInit(target);
 
-        AnsiConsole.MarkupLine("[green]Done.[/]");
-        AnsiConsole.MarkupLine("Next:");
-        AnsiConsole.MarkupLine($"  cd {Tokens.KebabName}");
-        AnsiConsole.MarkupLine("  just bootstrap");
+        AnsiConsole.MarkupLine("[cyan]· git init[/]");
+        TryGitInit(target);
 
         return Task.CompletedTask;
     }
@@ -165,10 +168,12 @@ public sealed class Planner
 
         // Platform bundles first — capability injectors may target these
         // (e.g. frontend injects a web service into docker-compose.yml).
+        if (verbose) AnsiConsole.MarkupLine("[cyan]· platform[/] compose + devcontainer");
         CopyPlatformBundle("platform/compose/", target, target, baselines);
         CopyPlatformBundle("platform/devcontainer/", Path.Join(target, ".devcontainer"), target, baselines);
         if (IncludeClaude)
         {
+            if (verbose) AnsiConsole.MarkupLine("[cyan]· .claude bundle[/]");
             CopyClaudeBundle(target, baselines);
         }
 
@@ -182,9 +187,11 @@ public sealed class Planner
         // the installed set (delete the templates when done).
         if (IncludeClaude)
         {
+            if (verbose) AnsiConsole.MarkupLine("[cyan]· CLAUDE.md briefing[/]");
             RenderClaudeBriefing(target, baselines);
         }
 
+        if (verbose) AnsiConsole.MarkupLine("[cyan]· .mcp.json[/]");
         WriteMcpConfig(target, baselines);
 
         return baselines;
@@ -499,8 +506,21 @@ public sealed class Planner
             RedirectStandardError = true,
             UseShellExecute = false,
         };
+        // GIT_TERMINAL_PROMPT=0 prevents `git commit` from blocking on a
+        // credential / signing prompt in environments where the user has
+        // commit.gpgsign=true globally — the wizard would otherwise appear
+        // to hang silently.
+        psi.Environment["GIT_TERMINAL_PROMPT"] = "0";
         using var p = Process.Start(psi)!;
-        p.WaitForExit();
+        if (!p.WaitForExit(30_000))
+        {
+            // Best-effort kill; InvalidOperationException means the process
+            // already exited between WaitForExit returning false and Kill
+            // running — nothing to clean up in that case.
+            try { p.Kill(entireProcessTree: true); }
+            catch (InvalidOperationException) { }
+            throw new InvalidOperationException($"{cmd} {args} timed out after 30s");
+        }
         if (p.ExitCode != 0)
         {
             throw new InvalidOperationException($"{cmd} {args} failed: {p.StandardError.ReadToEnd()}");

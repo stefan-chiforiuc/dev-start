@@ -148,7 +148,7 @@ public static class AddCommand
             AnsiConsole.MarkupLine($"[green]Installed.[/]");
 
             // Probe just-added capability's prereqs so the user knows whether
-            // a `devstart install` run is needed before `just up`.
+            // a `dev-start install` run is needed before `just up`.
             if (cap.Doctor.Count > 0)
             {
                 var probe = await CheckRunner.QuickProbe(cap.Doctor, root);

@@ -38,7 +38,7 @@ public static class CheckRunner
     }
 
     // Quickly probe a list of checks. Used by `add` to surface "you need to
-    // run `devstart install`" hints without spinning the full doctor table.
+    // run `dev-start install`" hints without spinning the full doctor table.
     public static async Task<IReadOnlyList<CheckResult>> QuickProbe(
         IEnumerable<Capability.DoctorCheck> checks, string projectRoot)
     {

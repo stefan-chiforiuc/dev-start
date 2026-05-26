@@ -30,6 +30,21 @@ just install-hooks   # copies platform/hooks/pre-commit → .git/hooks/pre-commi
 just build
 just test
 just lint
+just sandbox         # end-to-end: scaffold a matrix into .sandbox/ and dotnet build each
+```
+
+`just sandbox` is the gate that catches the class of bug `just test` can't:
+broken `.sln`, malformed templates, capabilities that scaffold but don't
+compile. It's fast — under a minute on a warm cache — and runs the **real**
+CLI binary against fresh projects in `.sandbox/`. Any time you touch
+`Tokens`, `Planner`, `CapabilityInstaller`, the `_shared/` overlays, or
+anything under `capabilities/`, run it before pushing.
+
+For one-off reproductions:
+
+```sh
+just sandbox-new My.Cool.App --with postgres auth otel
+just sandbox-clean
 ```
 
 The pre-commit hook runs `gitleaks` (secret scan, staged content only),
@@ -38,6 +53,24 @@ optional — missing tools are skipped with a warning so contributors aren't
 blocked by tooling drift. The hook source is checked in at
 [`platform/hooks/pre-commit`](./platform/hooks/pre-commit); edit there and
 re-run `just install-hooks`, never edit the installed copy in `.git/hooks/`.
+
+### Capability "Definition of Done"
+
+A capability is reviewable for merge only when it satisfies the checklist in
+[ADR 0011](./docs/adr/0011-capability-definition-of-done.md): manifest,
+README with escape hatch, files + injectors, wizard wiring, at least one
+`Variations` test row, at least one `doctor` check, CHANGELOG entry. Most
+of these are enforced statically by `CapabilityIntegrityTests` /
+`WizardWiringTests` / `CapabilityCoverageTests` — your PR will fail CI if
+they aren't met.
+
+### Bug catalog — don't re-introduce these
+
+Before merging changes that touch the surfaces listed in
+[`docs/bug-catalog.md`](./docs/bug-catalog.md), re-read the relevant entry.
+Each entry includes the regression guard so you know which test you'd
+break if the same shape of bug came back. Add a new `BUG-NNN` entry when
+you fix one.
 
 ## Commits and releases
 
@@ -57,6 +90,11 @@ re-run `just install-hooks`, never edit the installed copy in `.git/hooks/`.
 - [ ] If a default changed: ADR added under `docs/adr/`.
 - [ ] If a user-visible behaviour changed: entry in the relevant capability's
       `README.md` + `when-to-leave-the-road.md` if it narrows an escape hatch.
+- [ ] `just sandbox` is green (mandatory if you touched `Tokens`, `Planner`,
+      `CapabilityInstaller`, `_shared/`, or anything under `capabilities/`).
+- [ ] If you added a capability: meets ADR-0011 Definition of Done.
+- [ ] If you fixed a bug: appended a `BUG-NNN` entry to `docs/bug-catalog.md`
+      and the regression guard is in the same PR.
 - [ ] Conventional-commit style PR title.
 
 ## What not to send

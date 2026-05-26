@@ -68,3 +68,18 @@ install-hooks:
 
 list-caps:
     dotnet run --project src/DevStart.Cli -- list
+
+# End-to-end sandbox: builds the CLI and scaffolds a representative matrix
+# of projects under .sandbox/, then `dotnet build`s each one. Catches the
+# class of bug `just test` can't: broken .sln, malformed templates,
+# gateway sln-registration regressions, etc.
+sandbox:
+    ./scripts/sandbox.sh smoke
+
+# One-off scaffold into .sandbox/<slug>/, e.g.
+#   just sandbox-new My.Cool.App --with postgres auth otel
+sandbox-new NAME *ARGS:
+    ./scripts/sandbox.sh new {{NAME}} {{ARGS}}
+
+sandbox-clean:
+    ./scripts/sandbox.sh clean
