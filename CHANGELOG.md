@@ -16,6 +16,21 @@ The first published version will be `1.0.0-alpha`. Earlier `[1.0.0]` and
 GitHub Release, or a NuGet package — they are pre-publication drafts and
 have been folded into the `[Unreleased]` block below.
 
+## [1.1.1-alpha](https://github.com/stefan-chiforiuc/dev-start/compare/DevStart-v1.1.0-alpha...DevStart-v1.1.1-alpha) (2026-05-26)
+
+
+### Bug Fixes
+
+* address CodeQL findings on PR [#55](https://github.com/stefan-chiforiuc/dev-start/issues/55) ([42c2abc](https://github.com/stefan-chiforiuc/dev-start/commit/42c2abc6edf43ce24c17f2c94ead716d1b681180))
+* dotted names, gateway warning, friendly errors, sandbox testability ([f77c5fe](https://github.com/stefan-chiforiuc/dev-start/commit/f77c5fe646f9b56fee828e099e4565efc9062b72))
+* dotted names, gateway warning, friendly errors, sandbox testability ([af8c4a6](https://github.com/stefan-chiforiuc/dev-start/commit/af8c4a677c45eb0f65e8d5bbe1ca5d037e7645a0))
+
+
+### Documentation
+
+* add CLAUDE.md with PR-auto-update rule and project quick-start ([c0090d0](https://github.com/stefan-chiforiuc/dev-start/commit/c0090d0397461f4eae3355340e28a5c9118f103c))
+* blank line before list in /sandbox command (markdownlint MD032) ([de54f3e](https://github.com/stefan-chiforiuc/dev-start/commit/de54f3ee1da3d5e20fa8b403acec1df7b093a7b5))
+
 ## [1.1.0-alpha](https://github.com/stefan-chiforiuc/dev-start/compare/DevStart-v1.0.2-alpha...DevStart-v1.1.0-alpha) (2026-05-25)
 
 
