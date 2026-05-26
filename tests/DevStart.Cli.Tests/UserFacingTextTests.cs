@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using Xunit;
@@ -15,7 +14,6 @@ public class UserFacingTextTests
     [Fact]
     public void No_user_facing_string_says_devstart_without_dash()
     {
-        var asm = typeof(Planner).Assembly;
         var sourceDir = FindRepoSourceDir();
 
         // Only flag forms that look like CLI-invocation instructions to the user:
@@ -25,16 +23,12 @@ public class UserFacingTextTests
         var pattern = new Regex(
             @"(?<!-|\.)devstart (new|add|doctor|install|upgrade|list|capability|promote|policy)\b",
             RegexOptions.IgnoreCase);
-        var offenders = new List<string>();
 
-        foreach (var path in Directory.EnumerateFiles(sourceDir, "*.cs", SearchOption.AllDirectories))
-        {
-            foreach (var line in File.ReadLines(path))
-            {
-                if (pattern.IsMatch(line))
-                    offenders.Add($"{Path.GetFileName(path)}: {line.Trim()}");
-            }
-        }
+        var offenders = Directory.EnumerateFiles(sourceDir, "*.cs", SearchOption.AllDirectories)
+            .SelectMany(path => File.ReadLines(path)
+                .Where(line => pattern.IsMatch(line))
+                .Select(line => $"{Path.GetFileName(path)}: {line.Trim()}"))
+            .ToList();
 
         offenders.Should().BeEmpty(
             "user-facing strings must say 'dev-start' (with the dash) to match the CLI binary name");
@@ -43,15 +37,17 @@ public class UserFacingTextTests
     /// <summary>
     /// Walks up from the test-assembly location until it finds the repo root,
     /// then returns the CLI source folder. Works from <c>tests/.../bin/...</c>.
+    /// Uses <c>Path.Join</c> so an absolute child segment can't silently
+    /// discard the parent path (CodeQL CA1085 / CWE-23 family).
     /// </summary>
     private static string FindRepoSourceDir()
     {
         var dir = new DirectoryInfo(Path.GetDirectoryName(typeof(UserFacingTextTests).Assembly.Location)!);
-        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "DevStart.sln")))
+        while (dir is not null && !File.Exists(Path.Join(dir.FullName, "DevStart.sln")))
         {
             dir = dir.Parent;
         }
         if (dir is null) throw new InvalidOperationException("Could not locate repo root.");
-        return Path.Combine(dir.FullName, "src", "DevStart.Cli");
+        return Path.Join(dir.FullName, "src", "DevStart.Cli");
     }
 }

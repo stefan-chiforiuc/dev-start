@@ -514,7 +514,11 @@ public sealed class Planner
         using var p = Process.Start(psi)!;
         if (!p.WaitForExit(30_000))
         {
-            try { p.Kill(entireProcessTree: true); } catch { }
+            // Best-effort kill; InvalidOperationException means the process
+            // already exited between WaitForExit returning false and Kill
+            // running — nothing to clean up in that case.
+            try { p.Kill(entireProcessTree: true); }
+            catch (InvalidOperationException) { }
             throw new InvalidOperationException($"{cmd} {args} timed out after 30s");
         }
         if (p.ExitCode != 0)

@@ -44,13 +44,11 @@ public sealed class Tokens
                 $"Project name '{rawName}' has {segments.Length} dotted segments; keep it ≤ 6.",
                 null);
 
-        foreach (var seg in segments)
-        {
-            if (!SegmentRegex.IsMatch(seg))
-                throw new DevStartUserException(
-                    $"Project name segment '{seg}' is invalid.",
-                    "Each segment must start with a letter and contain only letters, digits, and hyphens (e.g. 'My-App').");
-        }
+        var invalidSegment = segments.FirstOrDefault(s => !SegmentRegex.IsMatch(s));
+        if (invalidSegment is not null)
+            throw new DevStartUserException(
+                $"Project name segment '{invalidSegment}' is invalid.",
+                "Each segment must start with a letter and contain only letters, digits, and hyphens (e.g. 'My-App').");
 
         // Name: PascalCase per segment, rejoined with dots.
         Name = string.Join('.', segments.Select(PascalSegment));
